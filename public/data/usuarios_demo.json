@@ -1,0 +1,37 @@
+[
+  {
+    "id": "USR-CAP-AC",
+    "rol": "captura",
+    "clues": "PROV-AC-01"
+  },
+  {
+    "id": "USR-CAP-SPI",
+    "rol": "captura",
+    "clues": "PROV-SPI-01"
+  },
+  {
+    "id": "USR-CAP-CHA",
+    "rol": "captura",
+    "clues": "PROV-CHA-01"
+  },
+  {
+    "id": "USR-CAM-AC",
+    "rol": "campo",
+    "clues": "PROV-AC-01"
+  },
+  {
+    "id": "USR-CAM-SPI",
+    "rol": "campo",
+    "clues": "PROV-SPI-01"
+  },
+  {
+    "id": "USR-CAM-CHA",
+    "rol": "campo",
+    "clues": "PROV-CHA-01"
+  },
+  {
+    "id": "USR-SUP-JAL",
+    "rol": "supervision",
+    "clues": null
+  }
+]
