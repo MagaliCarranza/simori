@@ -1,29 +1,37 @@
 import { describe, expect, it } from 'vitest'
 import { categoriaA, clasificarTFG, tfgeCKiDU25 } from './ckid.js'
 
+// Casos verificados contra NIDDK, "eGFR Equations for Children, Adolescents,
+// & Young Adults" (Pierce et al., 2021).
 describe('tfgeCKiDU25 (CKiD U25 — solo creatinina)', () => {
-  // TODO: verificar en MDCalc
   it('A — Masculino, 10 años, talla 140 cm, cr 0.5 mg/dL', () => {
     const tfge = tfgeCKiDU25({ sexo: 'M', edadAnios: 10, tallaCm: 140, creatininaMgDl: 0.5 })
     expect(tfge).toBeCloseTo(107.47, 1)
   })
 
-  // TODO: verificar en MDCalc
   it('B — Femenino, 8 años, talla 130 cm, cr 0.4 mg/dL', () => {
     const tfge = tfgeCKiDU25({ sexo: 'F', edadAnios: 8, tallaCm: 130, creatininaMgDl: 0.4 })
     expect(tfge).toBeCloseTo(113.64, 1)
   })
 
-  // TODO: verificar en MDCalc
   it('C — Masculino, 15 años, talla 165 cm, cr 0.8 mg/dL', () => {
     const tfge = tfgeCKiDU25({ sexo: 'M', edadAnios: 15, tallaCm: 165, creatininaMgDl: 0.8 })
     expect(tfge).toBeCloseTo(91.79, 1)
   })
 
-  // TODO: verificar en MDCalc
   it('D — Masculino, 18 años, talla 170 cm, cr 1.0 mg/dL (rama de adulto)', () => {
     const tfge = tfgeCKiDU25({ sexo: 'M', edadAnios: 18, tallaCm: 170, creatininaMgDl: 1.0 })
     expect(tfge).toBeCloseTo(86.36, 1)
+  })
+
+  it('edad < 1 año: null (fuera del rango validado)', () => {
+    const tfge = tfgeCKiDU25({ sexo: 'M', edadAnios: 0.5, tallaCm: 70, creatininaMgDl: 0.3 })
+    expect(tfge).toBe(null)
+  })
+
+  it('edad = 25 años o más: null (CKiD U25 cubre menores de 25)', () => {
+    expect(tfgeCKiDU25({ sexo: 'M', edadAnios: 25, tallaCm: 175, creatininaMgDl: 1.0 })).toBe(null)
+    expect(tfgeCKiDU25({ sexo: 'F', edadAnios: 30, tallaCm: 165, creatininaMgDl: 0.9 })).toBe(null)
   })
 })
 

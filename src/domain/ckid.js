@@ -15,7 +15,9 @@ function coeficienteK(sexo, edadAnios) {
   return base * Math.pow(1.008, edadAnios - 12)
 }
 
+// Fuera del rango validado por NIDDK/Pierce (< 1 año o ≥ 25 años) devolvemos null.
 export function tfgeCKiDU25({ sexo, edadAnios, tallaCm, creatininaMgDl }) {
+  if (edadAnios < 1 || edadAnios >= 25) return null
   const tallaMetros = tallaCm / 100
   const k = coeficienteK(sexo, edadAnios)
   return k * (tallaMetros / creatininaMgDl)
