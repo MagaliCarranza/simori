@@ -87,6 +87,42 @@ public/data/     # JSON generados que consume la app
 
 La lógica clínica vive en `src/domain/` como **funciones puras** (sin React ni Dexie). Es el corazón del proyecto y está cubierto por Vitest.
 
+## Datos
+
+La app consume **JSON preprocesados** en `public/data/` (sí se versionan). Los **datasets originales** van en `data/raw/` y **no** se versionan por tamaño; cada quien los descarga de la fuente oficial.
+
+### Qué archivos esperar en `data/raw/`
+
+| Archivo | Dataset | Fuente |
+|---|---|---|
+| `educacion_basica_2024_2025.csv` | Formato 911, estadísticas de inicio del ciclo 2024-2025 (educación básica) | SEP vía [datos.gob.mx](https://datos.gob.mx/) |
+| `IML_2020.xls` | Índice de marginación por localidad 2020 | [CONAPO — Índice de marginación por localidad](https://www.gob.mx/conapo) |
+| `iter_14_cpv2020/` | ITER del Censo de Población y Vivienda 2020, entidad 14 (Jalisco) | [INEGI — ITER 2020](https://www.inegi.org.mx/programas/ccpv/2020/#datos_abiertos) |
+
+Pendiente: **dataset 13 — CLUES (unidades médicas, DGIS)**. Hasta tenerlo, los centros de salud se marcan como `provisional: true` en `centros_salud.json`.
+
+### JSON procesados en `public/data/`
+
+Todos los generan los scripts de `scripts/`. Son los únicos que la PWA consume en tiempo real.
+
+| Archivo | Origen | Qué contiene |
+|---|---|---|
+| `localidades.json` | ITER + CONAPO | 3 localidades (San Pedro Itzicán, Agua Caliente, Chalpicote) con lat/lng, población 5-14 y grado de marginación. |
+| `escuelas.json` | 911 SEP | 8 CCT públicos primaria/secundaria con matrícula; coordenadas aproximadas (de la localidad). |
+| `centros_salud.json` | Muestra provisional | 3 centros, uno por localidad, mientras llega el dataset CLUES real. |
+| `usuarios_demo.json` | Definición del equipo | 3 captura + 3 campo (uno por centro) + 1 supervisión estatal. |
+| `casos_11.json`, `casos_30.json`, `casos_50.json` | `simular_casos.py` | Casos **simulados** para los tres escenarios de pérdida (11 %, 30 %, 50 %). Determinista por semilla. |
+
+**Casos simulados:** la app no contiene datos reales de niños. Todo lo que se vea en la demo proviene de `simular_casos.py` con semilla fija y se identifica con `simulado: true` en cada registro.
+
+### Regenerar todo desde cero
+
+```bash
+pip install -r requirements.txt                # pandas, openpyxl, xlrd, pytest
+python scripts/preparar_datos.py               # catálogos -> public/data/
+python scripts/simular_casos.py --semilla 2026 # casos_{11,30,50}.json
+```
+
 ## Flujo de trabajo
 
 - Las ramas se nombran con prefijo: `feat/*`, `fix/*`, `doc/*`, `refactor/*`.
