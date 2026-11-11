@@ -1,3 +1,105 @@
-*PROYECTO RUTA RIÑÓN*
+# Ruta Riñón
 
-En Poncitlán, Jalisco, la Secretaría de Salud publica cuántos escolares tamiza para detectar daño renal, pero no cuántos de los positivos completan su evaluación. Las cifras públicas de distintas instituciones no se conectan entre sí, y un estudio de la Universidad de Guadalajara en Agua Caliente mostró que incluso en un estudio controlado se pierde cerca del 11% de los niños entre etapas. Proponemos Ruta Riñón, el prototipo de un registro de seguimiento que acompaña a cada niño con tamizaje positivo hasta su diagnóstico o alta, marca con un semáforo a quien se atrasa y muestra en qué etapa se detiene. La ruta clínica sigue el protocolo aplicado por la UdeG en la zona y se complementa con la guía internacional KDIGO 2024. Usamos cinco datasets del catálogo para describir el problema, priorizar tres localidades (San Pedro Itzicán, Agua Caliente y Chalpicote) y diseñar la solución; los casos individuales son simulados y se presentan en tres escenarios de pérdida. La herramienta es un prototipo, funciona sin internet y podría operar con la Secretaría de Salud Jalisco como responsable.
+Prototipo web (PWA) de **registro de seguimiento** para niñas y niños con **tamizaje renal positivo** en Poncitlán, Jalisco. Acompaña cada caso desde el tamizaje hasta su diagnóstico, alta o referencia, marca con un semáforo a quien se atrasa y muestra en qué etapa se detiene.
+
+Proyecto del **Equipo 17 QUESICODE** (ITO, Ing. en Sistemas) para el **Hackathon Jalisco Internacional 2026**, Reto 02 Salud y Bienestar. 
+
+## El problema
+
+En Poncitlán, Jalisco, la Secretaría de Salud publica cuántos escolares tamiza para detectar daño renal, pero no cuántos de los positivos completan su evaluación. Las cifras públicas de distintas instituciones no se conectan entre sí, y un estudio de la Universidad de Guadalajara en Agua Caliente mostró que incluso en un estudio controlado se pierde cerca del **11 %** de los niños entre etapas.
+
+## La propuesta
+
+Ruta Riñón acompaña a cada niño con tamizaje positivo hasta su diagnóstico, alta o referencia. La ruta clínica sigue el **protocolo aplicado por la UdeG en la zona** y se complementa con la **guía internacional KDIGO 2024**. Usamos cinco datasets del catálogo oficial para describir el problema, priorizar tres localidades (**San Pedro Itzicán, Agua Caliente y Chalpicote**) y diseñar la solución; los casos individuales son **simulados** y se presentan en **tres escenarios de pérdida (11 %, 30 %, 50 %)**.
+
+Es un prototipo, **funciona sin internet** después de la primera carga, y podría operar con la **Secretaría de Salud Jalisco** como responsable.
+
+## Alcance y límites
+
+- **Es un prototipo**, no un sistema en producción.
+- **Datos simulados** en toda la demo. La UI etiqueta cada dato simulado como tal.
+- **No diagnostica.** Registra resultados y organiza el seguimiento; la clasificación la confirma el personal de salud.
+- **Privacidad**: los niños se identifican por **código**, nunca por nombre, CURP, domicilio ni fecha de nacimiento completa. Supervisión solo ve cifras agregadas, con la regla "menos de 5" por escuela.
+- **Accesibilidad**: el semáforo siempre lleva texto además del color; mobile-first desde 360 px.
+
+## Tecnologías
+
+- **React + Vite** empaquetado como **PWA** con `vite-plugin-pwa` (instalable y offline).
+- **IndexedDB** con **Dexie** para capturas locales.
+- **Leaflet + OpenStreetMap** para el mapa (mosaicos cacheables).
+- **Chart.js** con `react-chartjs-2` para el embudo de supervisión.
+- **Vitest** + **Testing Library** para pruebas.
+- **Python + pandas** en `scripts/` para preparar datasets y generar casos simulados con semilla fija.
+- Sin backend. Despliegue en **Vercel**.
+
+## Requisitos
+
+- **Node.js 20+** y **npm 10+**.
+- **Python 3.11+** (solo si vas a correr los scripts de datos).
+
+## Instalación
+
+```bash
+git clone https://github.com/MagaliCarranza/ruta-rinon.git
+cd ruta-rinon
+npm install
+```
+
+Para los scripts de Python (opcional, solo si vas a regenerar los datasets):
+
+```bash
+python -m venv .venv
+# Windows:
+.venv\Scripts\activate
+# macOS/Linux:
+source .venv/bin/activate
+pip install -r requirements.txt
+```
+
+## Comandos
+
+```bash
+npm run dev          # servidor de desarrollo en http://localhost:5173
+npm run test         # Vitest, una pasada
+npm run test:watch   # Vitest en modo watch
+npm run build        # build de producción con PWA en dist/
+npm run preview      # sirve dist/ para probar la PWA instalada
+npm run lint         # oxlint
+
+python scripts/preparar_datos.py                 # lee data/raw/ y escribe public/data/
+python scripts/simular_casos.py --semilla 2026   # genera casos simulados
+```
+
+## Estructura del proyecto
+
+```
+src/
+  domain/        # reglas puras: etapas, semáforo, CKiD U25, KDIGO, validación
+  db/            # Dexie: esquema, seed, bitácora
+  roles/         # contexto de rol (captura | campo | supervisión)
+  features/      # un subdirectorio por módulo (registro, ruta, pendientes,
+                 # campo, avisos, supervisión, mapa, escenarios)
+  components/    # UI compartida
+scripts/         # Python: preparar_datos.py, simular_casos.py
+data/raw/        # datasets originales (no se editan a mano)
+public/data/     # JSON generados que consume la app
+```
+
+La lógica clínica vive en `src/domain/` como **funciones puras** (sin React ni Dexie). Es el corazón del proyecto y está cubierto por Vitest.
+
+## Flujo de trabajo
+
+- Las ramas se nombran con prefijo: `feat/*`, `fix/*`, `doc/*`, `refactor/*`.
+- Todo cambio entra a `dev` por **pull request**.
+- `main` se actualiza únicamente con PR desde `dev` al cierre del hackathon.
+
+## Fuentes y referencias
+
+- Protocolo UdeG en Agua Caliente: Lozano-Kasten et al. (2017).
+- KDIGO 2024 Clinical Practice Guideline on Evaluation and Management of CKD.
+- Ecuación **CKiD U25** (solo creatinina): NIDDK, *eGFR Equations for Children, Adolescents, & Young Adults* (Pierce et al., 2021).
+- Datasets del **catálogo de datos abiertos** del estado de Jalisco.
+
+## Equipo
+
+**Equipo 17 QUESICODE** — Instituto Tecnológico de Oaxaca, Ingeniería en Sistemas Computacionales. Hackathon Jalisco Internacional 2026, Reto 02 Salud y Bienestar.
