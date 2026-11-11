@@ -1,0 +1,26 @@
+[
+  {
+    "claveInegi": "140660002",
+    "nombre": "Agua Caliente",
+    "poblacion5a14": 445,
+    "gradoMarginacion": "Medio",
+    "lat": 20.312568,
+    "lng": -102.928629
+  },
+  {
+    "claveInegi": "140660031",
+    "nombre": "San Pedro Itzicán",
+    "poblacion5a14": 1954,
+    "gradoMarginacion": "Medio",
+    "lat": 20.315556,
+    "lng": -102.951944
+  },
+  {
+    "claveInegi": "140660043",
+    "nombre": "Chalpicote",
+    "poblacion5a14": 276,
+    "gradoMarginacion": "Alto",
+    "lat": 20.310201,
+    "lng": -102.919552
+  }
+]
