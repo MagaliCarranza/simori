@@ -24,8 +24,10 @@ export function tfgeCKiDU25({ sexo, edadAnios, tallaCm, creatininaMgDl }) {
 }
 
 // Devuelve { categoria, baja }. `baja` es texto informativo (no diagnóstico):
-// en edad > 2 años, TFGe < 90 se marca como "baja".
+// en edad > 2 años, TFGe < 90 se marca como "baja". Si tfge no es numérica
+// (p. ej. CKiD U25 fuera de rango), propaga categoria = null.
 export function clasificarTFG(tfge, edadAnios) {
+  if (tfge == null) return { categoria: null, baja: false }
   let categoria
   if (tfge >= 90) categoria = 'G1'
   else if (tfge >= 60) categoria = 'G2'

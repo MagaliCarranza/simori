@@ -86,7 +86,7 @@ describe('calcularSemaforo — sin cita, desde el último evento', () => {
     expect(r.etiqueta).toBe('Sin cita, retraso alto (43 días)')
   })
 
-  it('usa el evento más reciente cuando hay varios', () => {
+  it('usa el resultado más reciente cuando hay varios', () => {
     const eventos = [
       { tipo: 'resultado', fecha: '2026-01-01' },
       { tipo: 'resultado', fecha: '2026-06-10' },
@@ -94,6 +94,23 @@ describe('calcularSemaforo — sin cita, desde el último evento', () => {
     const r = calcularSemaforo(caso, eventos, HOY)
     expect(r.diasRetraso).toBe(5)
     expect(r.color).toBe('verde')
+  })
+
+  it('cuando no hay resultados cae a caso.fechaTamizaje', () => {
+    const r = calcularSemaforo({ estado: 'en_seguimiento', fechaTamizaje: '2026-05-04' }, [], HOY)
+    expect(r.color).toBe('amarillo')
+    expect(r.diasRetraso).toBe(42)
+  })
+
+  it('las visitas nunca reinician el reloj (resultado hace 50 d, visita ayer → sigue en rojo)', () => {
+    const eventos = [
+      { tipo: 'resultado', fecha: '2026-04-26' }, // hace 50 días
+      { tipo: 'visita', fecha: '2026-06-14', visitaResultado: 'no_localizada' },
+      { tipo: 'visita', fecha: '2026-06-10', visitaResultado: 'no_localizada' },
+    ]
+    const r = calcularSemaforo(caso, eventos, HOY)
+    expect(r.color).toBe('rojo')
+    expect(r.diasRetraso).toBe(50)
   })
 })
 

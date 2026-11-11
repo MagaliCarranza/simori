@@ -3,9 +3,13 @@
 import { SEMAFORO_CON_CITA, SEMAFORO_SIN_CITA } from './config.js'
 import { diasEntre } from './fechas.js'
 
-function ultimoEvento(eventos) {
+// Solo los eventos de tipo 'resultado' reinician el reloj "sin cita".
+// Las visitas nunca cuentan: si contaran, una familia no localizada podría
+// mantener el semáforo en verde y nunca pasar a sin_seguimiento.
+function ultimoResultado(eventos) {
   let ultimo = null
   for (const e of eventos) {
+    if (e.tipo !== 'resultado') continue
     if (!ultimo || e.fecha > ultimo.fecha) ultimo = e
   }
   return ultimo
@@ -27,11 +31,12 @@ export function calcularSemaforo(caso, eventos, hoyISO) {
     return { color: 'rojo', etiqueta: `Retraso alto (${dias} días)`, diasRetraso: dias, referencia: 'cita' }
   }
 
-  const ultimo = ultimoEvento(eventos)
-  if (!ultimo) {
+  const ultimo = ultimoResultado(eventos)
+  const fechaBase = ultimo ? ultimo.fecha : caso.fechaTamizaje
+  if (!fechaBase) {
     return { color: 'verde', etiqueta: 'Pendiente de agendar', diasRetraso: 0, referencia: 'ultimo_evento' }
   }
-  const dias = diasEntre(ultimo.fecha, hoyISO)
+  const dias = diasEntre(fechaBase, hoyISO)
   if (dias < SEMAFORO_SIN_CITA.amarilloDesde) {
     return { color: 'verde', etiqueta: 'Pendiente de agendar', diasRetraso: Math.max(dias, 0), referencia: 'ultimo_evento' }
   }

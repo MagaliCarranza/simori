@@ -56,6 +56,11 @@ describe('clasificarTFG', () => {
     expect(clasificarTFG(15, 10).categoria).toBe('G4')
     expect(clasificarTFG(14, 10).categoria).toBe('G5')
   })
+
+  it('tfge null (CKiD U25 fuera de rango) → categoria null y no marca baja', () => {
+    expect(clasificarTFG(null, 10)).toEqual({ categoria: null, baja: false })
+    expect(clasificarTFG(undefined, 10)).toEqual({ categoria: null, baja: false })
+  })
 })
 
 describe('categoriaA', () => {

@@ -41,6 +41,22 @@ describe('sumarMeses', () => {
   it('cruza de año', () => {
     expect(sumarMeses('2026-10-15', 5)).toBe('2027-03-15')
   })
+
+  it('conserva el día cuando sí existe en el mes destino', () => {
+    expect(sumarMeses('2026-05-30', 1)).toBe('2026-06-30')
+  })
+
+  it('clamp al último día del mes destino cuando el día no existe (31-ago + 6 m → 28-feb)', () => {
+    expect(sumarMeses('2026-08-31', 6)).toBe('2027-02-28')
+  })
+
+  it('clamp considera bisiestos (31-ene + 1 m en año bisiesto → 29-feb)', () => {
+    expect(sumarMeses('2024-01-31', 1)).toBe('2024-02-29')
+  })
+
+  it('clamp en año no bisiesto (31-ene + 1 m → 28-feb)', () => {
+    expect(sumarMeses('2026-01-31', 1)).toBe('2026-02-28')
+  })
 })
 
 describe('edadDecimal', () => {

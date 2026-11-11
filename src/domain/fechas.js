@@ -39,7 +39,12 @@ export function sumarMeses(fechaISO, n) {
   const nuevoTotalMeses = (anio * 12 + (mes - 1)) + n
   const nuevoAnio = Math.floor(nuevoTotalMeses / 12)
   const nuevoMes = (nuevoTotalMeses % 12) + 1
-  return `${nuevoAnio}-${pad2(nuevoMes)}-${pad2(dia)}`
+  // Si el día no existe en el mes destino (31 → feb), clamp al último día.
+  // Date.UTC(year, monthIndex0, 0) devuelve el último día del mes anterior,
+  // así que pasar nuevoMes como monthIndex da el último día de ese mes.
+  const diasDelMes = new Date(Date.UTC(nuevoAnio, nuevoMes, 0)).getUTCDate()
+  const nuevoDia = Math.min(dia, diasDelMes)
+  return `${nuevoAnio}-${pad2(nuevoMes)}-${pad2(nuevoDia)}`
 }
 
 export function edadDecimal({ mesNacimiento, anioNacimiento }, hoyISO) {

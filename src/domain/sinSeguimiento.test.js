@@ -39,6 +39,17 @@ describe('debeMarcarseSinSeguimiento', () => {
     expect(debeMarcarseSinSeguimiento({ estado: 'alta' }, [], HOY)).toBe(false)
     expect(debeMarcarseSinSeguimiento({ estado: 'referido' }, [], HOY)).toBe(false)
   })
+
+  it('sin cita: rojo por retraso desde último resultado + 2 visitas no_localizada → true', () => {
+    // Las visitas no reinician el reloj: el resultado fue hace 50 d (rojo).
+    const caso = { estado: 'en_seguimiento' }
+    const eventos = [
+      { tipo: 'resultado', fecha: '2026-04-26' },
+      { tipo: 'visita', fecha: '2026-06-10', visitaResultado: 'no_localizada' },
+      { tipo: 'visita', fecha: '2026-06-14', visitaResultado: 'no_localizada' },
+    ]
+    expect(debeMarcarseSinSeguimiento(caso, eventos, HOY)).toBe(true)
+  })
 })
 
 describe('puedeReactivarse', () => {
