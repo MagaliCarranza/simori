@@ -62,6 +62,16 @@
   height: 100%;
 }
 
+.mapa__etiqueta {
+  font-weight: 600;
+}
+
+.mapa__etiqueta--elegida {
+  border-color: #0b1f4d;
+  color: #0b1f4d;
+  font-weight: 700;
+}
+
 .mapa__vacio {
   margin: 0;
   padding: 16px;

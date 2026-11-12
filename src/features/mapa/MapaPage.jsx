@@ -30,8 +30,9 @@ const MARGEN_GRADOS = 0.05
 // Un mosaico que falla suelto no basta para avisar: solo varios seguidos.
 const FALLOS_PARA_AVISO = 3
 
-const COLOR_PUNTO = '#0b3c7a'
-const COLOR_SELECCION = '#c2410c'
+// Solo azules: naranja o rojo se confundirían con el semáforo.
+const COLOR_PUNTO = '#2563eb'
+const COLOR_SELECCION = '#0b1f4d'
 
 const NOMBRE_COLOR = { verde: 'Verde', amarillo: 'Amarillo', rojo: 'Rojo' }
 
@@ -256,12 +257,20 @@ export function MapaPage({ hoyISO, usuario, db }) {
                       pathOptions={{
                         color: elegido ? COLOR_SELECCION : COLOR_PUNTO,
                         fillColor: elegido ? COLOR_SELECCION : COLOR_PUNTO,
-                        fillOpacity: 0.6,
-                        weight: elegido ? 4 : 2,
+                        fillOpacity: elegido ? 0.85 : 0.5,
+                        weight: elegido ? 5 : 2,
                       }}
                       eventHandlers={{ click: () => setSeleccion(p.claveInegi) }}
                     >
-                      <Tooltip direction="top">{p.nombre}</Tooltip>
+                      {/* Permanente: en celular no hay "pasar el mouse". */}
+                      <Tooltip
+                        permanent
+                        direction="top"
+                        offset={[0, -12]}
+                        className={elegido ? 'mapa__etiqueta mapa__etiqueta--elegida' : 'mapa__etiqueta'}
+                      >
+                        {p.nombre}
+                      </Tooltip>
                     </CircleMarker>
                   )
                 })}

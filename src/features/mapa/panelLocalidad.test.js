@@ -15,7 +15,10 @@ const catalogos = {
     { cct: 'E2', nombre: 'Hidalgo', turno: 'vespertino', claveInegi: 'L2', matricula: 90, ubicacionAproximada: true },
     { cct: 'E3', nombre: 'Juárez', claveInegi: 'L3', matricula: 60 },
   ],
-  centros: [{ clues: 'PROV-1', nombre: 'Centro Agua Caliente', claveInegi: 'L1', provisional: true }],
+  centros: [
+    { clues: 'PROV-1', nombre: 'Centro Agua Caliente (provisional)', claveInegi: 'L1', provisional: true },
+    { clues: 'C-2', nombre: 'Centro San Pedro (provisional)', claveInegi: 'L2', provisional: false },
+  ],
 }
 
 function casos(n, prefijo, cct, extra = {}) {
@@ -65,6 +68,11 @@ describe('panelesPorLocalidad', () => {
       sinSeguimiento: fila.salidas.sin_seguimiento,
     })
     expect(paneles[0].pendientes.semaforo).toEqual({ verde: 5, amarillo: PROTEGIDO, rojo: PROTEGIDO })
+  })
+
+  it('quita "(provisional)" del nombre solo si el centro es provisional', () => {
+    expect(paneles[0].centros[0].nombre).toBe('Centro Agua Caliente')
+    expect(paneles[2].centros[0].nombre).toBe('Centro San Pedro (provisional)')
   })
 
   it('una localidad sin casos muestra todo como "menos de 5"', () => {

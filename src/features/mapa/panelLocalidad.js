@@ -24,6 +24,9 @@ function pendientesDe(grupo) {
   }
 }
 
+// El catálogo trae "(provisional)" en el nombre; el panel ya lo dice con su etiqueta.
+const nombreCentro = (c) => (c.provisional ? c.nombre.replace(/\s*\(provisional\)\s*$/i, '') : c.nombre)
+
 const tieneCoordenadas = (l) => Number.isFinite(l.lat) && Number.isFinite(l.lng)
 
 // Un panel por localidad del catálogo, ordenado por nombre.
@@ -48,7 +51,7 @@ export function panelesPorLocalidad({ localidades, escuelas, centros }, porLocal
         .sort((a, b) => a.nombre.localeCompare(b.nombre, 'es')),
       centros: centros
         .filter((c) => c.claveInegi === l.claveInegi)
-        .map((c) => ({ clues: c.clues, nombre: c.nombre, provisional: Boolean(c.provisional) })),
+        .map((c) => ({ clues: c.clues, nombre: nombreCentro(c), provisional: Boolean(c.provisional) })),
       pendientes: pendientesDe(grupoPorClave.get(l.claveInegi)),
     }))
     .sort((a, b) => a.nombre.localeCompare(b.nombre, 'es'))

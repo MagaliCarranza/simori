@@ -15,12 +15,21 @@ vi.mock('react-leaflet', () => ({
     capturado.tile = props
     return null
   },
-  CircleMarker: ({ children, eventHandlers }) => (
-    <div data-testid="marcador" onClick={eventHandlers?.click}>
+  CircleMarker: ({ children, eventHandlers, pathOptions }) => (
+    <div
+      data-testid="marcador"
+      data-color={pathOptions.color}
+      data-grosor={pathOptions.weight}
+      onClick={eventHandlers?.click}
+    >
       {children}
     </div>
   ),
-  Tooltip: ({ children }) => <span>{children}</span>,
+  Tooltip: ({ children, permanent }) => (
+    <span data-testid="etiqueta-marcador" data-permanente={String(Boolean(permanent))}>
+      {children}
+    </span>
+  ),
 }))
 
 const HOY = '2026-11-14'
@@ -117,6 +126,7 @@ describe('MapaPage (HU09, RF10)', () => {
     expect(panel().getByText('157')).toBeInTheDocument()
     expect(panel().getByText(/Ubicación aproximada/)).toBeInTheDocument()
     expect(panel().getByText('Centro provisional')).toBeInTheDocument()
+    expect(panel().queryByText(/\(provisional\)/)).not.toBeInTheDocument()
 
     expect(panel().getByText('Datos simulados')).toBeInTheDocument()
     expect(valor('Total de positivos')).toBe('8')
@@ -125,6 +135,24 @@ describe('MapaPage (HU09, RF10)', () => {
     expect(valor('Amarillo')).toBe('protegido')
     expect(valor('Rojo')).toBe('protegido')
     expect(valor('Sin seguimiento')).toBe('protegido')
+  })
+
+  it('cada marcador lleva su nombre siempre visible', async () => {
+    await abrir()
+    const etiquetas = screen.getAllByTestId('etiqueta-marcador')
+    expect(etiquetas.map((e) => e.textContent).sort()).toEqual(['Agua Caliente', 'Chalpicote', 'San Pedro Itzicán'])
+    for (const e of etiquetas) expect(e).toHaveAttribute('data-permanente', 'true')
+  })
+
+  it('el marcador elegido se resalta en azul oscuro y borde más grueso, sin naranja ni rojo', async () => {
+    await abrir()
+    fireEvent.click(localidad('Chalpicote'))
+    const marcadores = screen.getAllByTestId('marcador')
+    const elegido = marcadores.find((m) => m.textContent === 'Chalpicote')
+    const otro = marcadores.find((m) => m.textContent === 'Agua Caliente')
+    expect(elegido.dataset.color).toBe('#0b1f4d')
+    expect(Number(elegido.dataset.grosor)).toBeGreaterThan(Number(otro.dataset.grosor))
+    for (const m of marcadores) expect(m.dataset.color).not.toMatch(/^#c2410c$/i)
   })
 
   it('el marcador abre el mismo panel', async () => {
