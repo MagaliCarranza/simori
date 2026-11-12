@@ -1,3 +1,4 @@
+import '../../components/ui.css'
 import { useId, useState } from 'react'
 import { NOTA_MAX, registrarVisita } from './visitas.js'
 import './visitas.css'
