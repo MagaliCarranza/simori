@@ -1,4 +1,4 @@
-import { fireEvent, render, screen, waitFor, within } from '@testing-library/react'
+import { act, fireEvent, render, screen, waitFor, within } from '@testing-library/react'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { crearDb } from '../../db/schema.js'
 import { MapaPage } from './MapaPage.jsx'
@@ -78,6 +78,7 @@ beforeEach(async () => {
 })
 
 afterEach(async () => {
+  vi.restoreAllMocks()
   await db.delete()
 })
 
@@ -166,5 +167,56 @@ describe('MapaPage (HU09, RF10)', () => {
     await waitFor(async () => expect(await db.bitacora.count()).toBe(1))
     const [entrada] = await db.bitacora.toArray()
     expect(entrada).toMatchObject({ rol: 'supervision', accion: 'consultar', entidad: 'supervision', entidadId: 'mapa' })
+  })
+
+  describe('aviso sin conexión', () => {
+    const AVISO = 'Sin conexión: el mapa muestra solo los puntos.'
+    const mosaico = (evento) => act(() => capturado.tile.eventHandlers[evento]())
+
+    it('un solo mosaico que falla no muestra el aviso', async () => {
+      await abrir()
+      mosaico('tileerror')
+      expect(screen.queryByText(AVISO)).not.toBeInTheDocument()
+    })
+
+    it('varios mosaicos seguidos que fallan lo muestran; uno que carga lo quita', async () => {
+      await abrir()
+      mosaico('tileerror')
+      mosaico('tileerror')
+      expect(screen.queryByText(AVISO)).not.toBeInTheDocument()
+      mosaico('tileerror')
+      expect(screen.getByText(AVISO)).toBeInTheDocument()
+      mosaico('tileload')
+      expect(screen.queryByText(AVISO)).not.toBeInTheDocument()
+    })
+
+    it('fallos sueltos entre mosaicos que cargan no lo muestran', async () => {
+      await abrir()
+      mosaico('tileerror')
+      mosaico('tileerror')
+      mosaico('tileload')
+      mosaico('tileerror')
+      expect(screen.queryByText(AVISO)).not.toBeInTheDocument()
+    })
+
+    it('sin red se muestra desde el inicio y el panel sigue funcionando', async () => {
+      vi.spyOn(navigator, 'onLine', 'get').mockReturnValue(false)
+      await abrir()
+      expect(screen.getByText(AVISO)).toBeInTheDocument()
+      fireEvent.click(localidad('Agua Caliente'))
+      expect(valor('Total de positivos')).toBe('8')
+    })
+
+    it('se actualiza con los eventos online y offline', async () => {
+      const enLinea = vi.spyOn(navigator, 'onLine', 'get').mockReturnValue(true)
+      await abrir()
+      expect(screen.queryByText(AVISO)).not.toBeInTheDocument()
+      enLinea.mockReturnValue(false)
+      act(() => window.dispatchEvent(new Event('offline')))
+      expect(screen.getByText(AVISO)).toBeInTheDocument()
+      enLinea.mockReturnValue(true)
+      act(() => window.dispatchEvent(new Event('online')))
+      expect(screen.queryByText(AVISO)).not.toBeInTheDocument()
+    })
   })
 })

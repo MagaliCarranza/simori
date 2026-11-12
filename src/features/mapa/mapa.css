@@ -36,6 +36,16 @@
   outline-offset: 2px;
 }
 
+.mapa__aviso {
+  margin: 0;
+  padding: 8px 12px;
+  border: 1px solid var(--semaforo-amarillo, #6b4a00);
+  border-radius: 8px;
+  background: var(--semaforo-amarillo-fondo, #fff1c2);
+  color: var(--semaforo-amarillo, #6b4a00);
+  font-weight: 600;
+}
+
 /* Crea su propio contexto de apilado: los paneles de Leaflet usan z-index altos. */
 .mapa__lienzo {
   position: relative;
@@ -126,7 +136,8 @@
     align-items: start;
   }
 
-  .mapa__lista {
+  .mapa__lista,
+  .mapa__aviso {
     grid-column: 1 / -1;
   }
 

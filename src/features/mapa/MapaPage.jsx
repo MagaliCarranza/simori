@@ -2,7 +2,7 @@
 // centros comparten la coordenada de su localidad. Solo cifras agregadas.
 
 import 'leaflet/dist/leaflet.css'
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { CircleMarker, MapContainer, TileLayer, Tooltip } from 'react-leaflet'
 import { EtiquetaSimulado } from '../../components/EtiquetaSimulado.jsx'
 import { FILTROS_INICIALES } from '../supervision/filtros.js'
@@ -27,6 +27,9 @@ const ZOOM_MIN = 12
 const ZOOM_MAX = 17
 const MARGEN_GRADOS = 0.05
 
+// Un mosaico que falla suelto no basta para avisar: solo varios seguidos.
+const FALLOS_PARA_AVISO = 3
+
 const COLOR_PUNTO = '#0b3c7a'
 const COLOR_SELECCION = '#c2410c'
 
@@ -46,6 +49,42 @@ function ampliar([[s, o], [n, e]], margen) {
     [s - margen, o - margen],
     [n + margen, e + margen],
   ]
+}
+
+function useEnLinea() {
+  const [enLinea, setEnLinea] = useState(() => (typeof navigator === 'undefined' ? true : navigator.onLine))
+  useEffect(() => {
+    const actualizar = () => setEnLinea(navigator.onLine)
+    window.addEventListener('online', actualizar)
+    window.addEventListener('offline', actualizar)
+    return () => {
+      window.removeEventListener('online', actualizar)
+      window.removeEventListener('offline', actualizar)
+    }
+  }, [])
+  return enLinea
+}
+
+// Avisa si no hay red o si fallan varios mosaicos seguidos; un mosaico que
+// carga reinicia la cuenta.
+function useSinMosaicos() {
+  const enLinea = useEnLinea()
+  const fallos = useRef(0)
+  const [fallan, setFallan] = useState(false)
+  const eventos = useMemo(
+    () => ({
+      tileerror: () => {
+        fallos.current += 1
+        if (fallos.current >= FALLOS_PARA_AVISO) setFallan(true)
+      },
+      tileload: () => {
+        fallos.current = 0
+        setFallan(false)
+      },
+    }),
+    [],
+  )
+  return { sinMosaicos: !enLinea || fallan, eventos }
 }
 
 function Par({ termino, children }) {
@@ -145,6 +184,7 @@ export function MapaPage({ hoyISO, usuario, db }) {
   })
   const paneles = useMemo(() => panelesPorLocalidad(catalogos, porLocalidad), [catalogos, porLocalidad])
   const [seleccion, setSeleccion] = useState(null)
+  const { sinMosaicos, eventos: eventosMosaicos } = useSinMosaicos()
   const panel = paneles.find((p) => p.claveInegi === seleccion) ?? null
 
   const conPunto = paneles.filter((p) => p.coordenadas)
@@ -183,6 +223,12 @@ export function MapaPage({ hoyISO, usuario, db }) {
             </ul>
           </nav>
 
+          {sinMosaicos && caja && (
+            <p className="mapa__aviso" role="status">
+              Sin conexión: el mapa muestra solo los puntos.
+            </p>
+          )}
+
           <div className="mapa__lienzo">
             {caja ? (
               <MapContainer
@@ -194,7 +240,12 @@ export function MapaPage({ hoyISO, usuario, db }) {
                 maxZoom={ZOOM_MAX}
                 className="mapa__leaflet"
               >
-                <TileLayer url={MOSAICOS_OSM.url} attribution={MOSAICOS_OSM.attribution} crossOrigin />
+                <TileLayer
+                  url={MOSAICOS_OSM.url}
+                  attribution={MOSAICOS_OSM.attribution}
+                  crossOrigin
+                  eventHandlers={eventosMosaicos}
+                />
                 {conPunto.map((p) => {
                   const elegido = p.claveInegi === seleccion
                   return (
