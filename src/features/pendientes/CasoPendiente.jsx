@@ -3,7 +3,8 @@ import { formatearFecha } from './formato.js'
 
 // Tarjeta de un caso en las listas de pendientes. Solo código y datos de
 // seguimiento: nunca resultados clínicos (sirve también para el rol campo).
-export function CasoPendiente({ fila, escuela }) {
+// `children` permite agregar acciones al final (p. ej. registrar visita en campo).
+export function CasoPendiente({ fila, escuela, children }) {
   return (
     <li className="caso-pendiente">
       <div className="caso-pendiente__fila">
@@ -41,6 +42,7 @@ export function CasoPendiente({ fila, escuela }) {
           <span className="insignia-sin-seguimiento">Sin seguimiento</span>
         </div>
       )}
+      {children}
     </li>
   )
 }
