@@ -79,21 +79,23 @@ export function resumenSupervision(casos, eventos, hoyISO) {
   }
 }
 
-// Marca de una cifra >= 5 que se oculta solo para proteger a otra (supresión secundaria).
-export const OCULTO_SECUNDARIO = 'oculto'
+// Etiqueta neutral de las tablas por grupo. Se usa igual para la cifra < 5
+// (supresión primaria) y para la que permitiría calcularla (secundaria), para
+// que la etiqueta no revele si la cifra es mayor o menor de 5.
+export const PROTEGIDO = 'protegido'
 
-// Enmascara una columna de una tabla por grupos. Si queda exactamente una cifra
-// menor de 5, se podría recalcular restando del total visible; por eso se oculta
-// también la siguiente más pequeña de la columna.
+// Protege una columna de una tabla por grupos. Las cifras < 5 se protegen; si
+// queda exactamente una, se podría recalcular restando del total visible, así
+// que también se protege la siguiente más pequeña de la columna.
 export function columnaSegura(valores) {
-  const salida = valores.map(enmascararMenorQue5)
-  const ocultas = valores.filter((n) => n < ENMASCARAR_MENOR_QUE).length
-  if (ocultas !== 1) return salida
+  const salida = valores.map((n) => (n < ENMASCARAR_MENOR_QUE ? PROTEGIDO : n))
+  const protegidas = valores.filter((n) => n < ENMASCARAR_MENOR_QUE).length
+  if (protegidas !== 1) return salida
   let menor = -1
   valores.forEach((n, i) => {
     if (n >= ENMASCARAR_MENOR_QUE && (menor === -1 || n < valores[menor])) menor = i
   })
-  if (menor !== -1) salida[menor] = OCULTO_SECUNDARIO
+  if (menor !== -1) salida[menor] = PROTEGIDO
   return salida
 }
 
