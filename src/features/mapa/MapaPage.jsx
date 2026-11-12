@@ -34,6 +34,11 @@ const FALLOS_PARA_AVISO = 3
 const COLOR_PUNTO = '#2563eb'
 const COLOR_SELECCION = '#0b1f4d'
 
+// Dirección de la etiqueta por localidad. Chalpicote está a menos de 1 km de
+// Agua Caliente: a 360 px sus etiquetas se encimaban, así que va abajo.
+const DIRECCION_ETIQUETA = { '140660043': 'bottom' }
+const direccionEtiqueta = (claveInegi) => DIRECCION_ETIQUETA[claveInegi] ?? 'top'
+
 const NOMBRE_COLOR = { verde: 'Verde', amarillo: 'Amarillo', rojo: 'Rojo' }
 
 function limites(puntos) {
@@ -265,8 +270,8 @@ export function MapaPage({ hoyISO, usuario, db }) {
                       {/* Permanente: en celular no hay "pasar el mouse". */}
                       <Tooltip
                         permanent
-                        direction="top"
-                        offset={[0, -12]}
+                        direction={direccionEtiqueta(p.claveInegi)}
+                        offset={direccionEtiqueta(p.claveInegi) === 'bottom' ? [0, 12] : [0, -12]}
                         className={elegido ? 'mapa__etiqueta mapa__etiqueta--elegida' : 'mapa__etiqueta'}
                       >
                         {p.nombre}

@@ -25,8 +25,8 @@ vi.mock('react-leaflet', () => ({
       {children}
     </div>
   ),
-  Tooltip: ({ children, permanent }) => (
-    <span data-testid="etiqueta-marcador" data-permanente={String(Boolean(permanent))}>
+  Tooltip: ({ children, permanent, direction }) => (
+    <span data-testid="etiqueta-marcador" data-permanente={String(Boolean(permanent))} data-direccion={direction}>
       {children}
     </span>
   ),
@@ -142,6 +142,14 @@ describe('MapaPage (HU09, RF10)', () => {
     const etiquetas = screen.getAllByTestId('etiqueta-marcador')
     expect(etiquetas.map((e) => e.textContent).sort()).toEqual(['Agua Caliente', 'Chalpicote', 'San Pedro Itzicán'])
     for (const e of etiquetas) expect(e).toHaveAttribute('data-permanente', 'true')
+  })
+
+  it('la etiqueta de Chalpicote va abajo y las otras arriba (no se enciman a 360 px)', async () => {
+    await abrir()
+    const direccion = Object.fromEntries(
+      screen.getAllByTestId('etiqueta-marcador').map((e) => [e.textContent, e.dataset.direccion]),
+    )
+    expect(direccion).toEqual({ Chalpicote: 'bottom', 'Agua Caliente': 'top', 'San Pedro Itzicán': 'top' })
   })
 
   it('el marcador elegido se resalta en azul oscuro y borde más grueso, sin naranja ni rojo', async () => {
