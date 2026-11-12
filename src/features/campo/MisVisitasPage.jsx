@@ -3,6 +3,7 @@ import { EtiquetaSimulado } from '../../components/EtiquetaSimulado.jsx'
 import { CasoPendiente } from '../pendientes/CasoPendiente.jsx'
 import { filtrarPendientes } from '../pendientes/pendientes.js'
 import { usePendientesDelCentro } from '../pendientes/usePendientesDelCentro.js'
+import { RegistrarVisita } from './RegistrarVisita.jsx'
 import '../pendientes/pendientes.css'
 
 // HU04 · "Mis visitas" (rol campo). Lee de la base local (funciona sin internet),
@@ -46,7 +47,9 @@ export function MisVisitasPage({ usuario, hoyISO, db }) {
             </p>
             <ul className="pendientes__lista">
               {visitas.map((f) => (
-                <CasoPendiente key={f.codigo} fila={f} escuela={escuelas.get(f.cct)} />
+                <CasoPendiente key={f.codigo} fila={f} escuela={escuelas.get(f.cct)}>
+                  <RegistrarVisita codigoCaso={f.codigo} usuario={usuario} hoyISO={hoyISO} db={db} />
+                </CasoPendiente>
               ))}
             </ul>
           </>
