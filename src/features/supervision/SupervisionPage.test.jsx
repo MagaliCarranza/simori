@@ -95,17 +95,29 @@ describe('SupervisionPage (HU07, HU08)', () => {
     expect(container.textContent).not.toMatch(/PON-|NIN-/)
   })
 
-  it('tabla por localidad enmascara cifras menores de 5', async () => {
+  it('tabla por localidad protege cifras menores de 5 y las que permitirían calcularlas', async () => {
     render(<SupervisionPage hoyISO={HOY} usuario={supervisor} db={db} />)
     const tabla = await screen.findByRole('table')
     const filaSpi = within(tabla).getByRole('row', { name: /San Pedro Itzicán/ })
-    expect(within(filaSpi).getAllByRole('cell')[0]).toHaveTextContent('menos de 5')
-    expect(within(filaSpi).getAllByRole('cell')[1]).toHaveTextContent('No disponible')
-    // Supresión secundaria: el total de Agua Caliente (8) dejaría deducir el 3 restando de 11.
     const filaAc = within(tabla).getByRole('row', { name: /Agua Caliente/ })
-    expect(within(filaAc).getAllByRole('cell')[0]).toHaveTextContent('oculto')
-    expect(screen.getByText(/“oculto”: cifra de 5 o más/)).toBeInTheDocument()
-    expect(within(tabla).getAllByRole('cell').map((td) => td.textContent)).not.toContain('8')
+    // San Pedro (3) es la cifra primaria; Agua Caliente (8) la secundaria, porque 11 - 8 = 3.
+    // Ambas llevan la misma etiqueta para no revelar cuál es mayor o menor de 5.
+    expect(within(filaSpi).getAllByRole('cell')[0]).toHaveTextContent('protegido')
+    expect(within(filaAc).getAllByRole('cell')[0]).toHaveTextContent('protegido')
+    expect(within(filaSpi).getAllByRole('cell')[1]).toHaveTextContent('No disponible')
+    const celdas = within(tabla).getAllByRole('cell').map((td) => td.textContent)
+    expect(celdas).not.toContain('8')
+    expect(celdas).not.toContain('menos de 5')
+    expect(screen.getByText('Se protegen las cifras menores de 5 y las que permitirían calcularlas.')).toBeInTheDocument()
+    // Fuera de la tabla se mantiene "menos de 5".
+    expect(within(screen.getByRole('region', { name: 'Desglose de salidas' })).getAllByText('menos de 5').length).toBeGreaterThan(0)
+  })
+
+  it('no muestra la mediana "Clasificación → Salida"', async () => {
+    render(<SupervisionPage hoyISO={HOY} usuario={supervisor} db={db} />)
+    await screen.findByText('Casos por etapa')
+    expect(screen.queryByText('Clasificación → Salida')).not.toBeInTheDocument()
+    expect(screen.getByText('Valoración → Clasificación')).toBeInTheDocument()
   })
 
   it('con menos de 5 casos en el filtro oculta el porcentaje', async () => {

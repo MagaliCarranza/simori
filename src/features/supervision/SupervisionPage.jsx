@@ -17,7 +17,8 @@ const TRANSICIONES = [
   ['t1->t2', 'Tamizaje → Confirmación'],
   ['t2->t3', 'Confirmación → Valoración'],
   ['t3->t4', 'Valoración → Clasificación'],
-  ['t4->t5', 'Clasificación → Salida'],
+  // "Clasificación → Salida" no se muestra: no hay resultado de etapa 5 y en
+  // vigilancia la salida tiene la misma fecha que la clasificación.
 ]
 
 const porcentaje = (c) => (c.visible ? `${Math.round(c.porcentaje)} %` : null)
@@ -162,7 +163,7 @@ export function SupervisionPage({ hoyISO, usuario, db }) {
                   </tbody>
                 </table>
                 <p className="supervision__nota">
-                  “oculto”: cifra de 5 o más que no se muestra para que no se pueda deducir otra menor de 5 restando.
+                  Se protegen las cifras menores de 5 y las que permitirían calcularlas.
                 </p>
               </div>
             )}
