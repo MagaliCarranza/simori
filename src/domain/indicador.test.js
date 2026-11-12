@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { medianaDiasEntreEtapas, porcentajeCompletado } from './indicador.js'
+import { contarCompletados, diasEntreEtapas, medianaDiasEntreEtapas, porcentajeCompletado } from './indicador.js'
 
 describe('porcentajeCompletado', () => {
   it('60 de 100 llegan a clasificación → 60', () => {
@@ -51,5 +51,26 @@ describe('medianaDiasEntreEtapas', () => {
     // t3->t4, t4->t5 vacíos
     expect(r['t3->t4']).toBe(null)
     expect(r['t4->t5']).toBe(null)
+  })
+})
+
+describe('contarCompletados y diasEntreEtapas', () => {
+  it('cuenta etapa 4 o alta como completado', () => {
+    const casos = [{ codigo: 'C1' }, { codigo: 'C2' }, { codigo: 'C3' }]
+    const eventos = [
+      { codigoCaso: 'C1', tipo: 'resultado', etapa: 4, fecha: '2026-05-01' },
+      { codigoCaso: 'C2', tipo: 'alta', fecha: '2026-05-01' },
+    ]
+    expect(contarCompletados(casos, eventos)).toBe(2)
+  })
+
+  it('devuelve los días de cada caso por transición', () => {
+    const casos = [{ codigo: 'C1' }, { codigo: 'C2' }]
+    const eventos = [
+      { codigoCaso: 'C1', tipo: 'resultado', etapa: 1, fecha: '2026-01-01' },
+      { codigoCaso: 'C1', tipo: 'resultado', etapa: 2, fecha: '2026-01-11' },
+      { codigoCaso: 'C2', tipo: 'resultado', etapa: 1, fecha: '2026-01-01' },
+    ]
+    expect(diasEntreEtapas(casos, eventos)).toEqual({ 't1->t2': [10], 't2->t3': [], 't3->t4': [], 't4->t5': [] })
   })
 })

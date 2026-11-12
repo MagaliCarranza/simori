@@ -13,8 +13,9 @@ function agruparEventos(eventos) {
   return m
 }
 
-export function porcentajeCompletado(casos, eventos) {
-  if (casos.length === 0) return 0
+// Cuántos casos completaron su evaluación (etapa 4 o alta). Lo usa también
+// supervisión para decidir si el porcentaje se puede mostrar.
+export function contarCompletados(casos, eventos) {
   const eventosPorCaso = agruparEventos(eventos)
   let completados = 0
   for (const c of casos) {
@@ -23,7 +24,12 @@ export function porcentajeCompletado(casos, eventos) {
     const tieneAlta = ev.some((e) => e.tipo === 'alta')
     if (etapa >= 4 || tieneAlta) completados++
   }
-  return (completados / casos.length) * 100
+  return completados
+}
+
+export function porcentajeCompletado(casos, eventos) {
+  if (casos.length === 0) return 0
+  return (contarCompletados(casos, eventos) / casos.length) * 100
 }
 
 function mediana(numeros) {
@@ -33,9 +39,9 @@ function mediana(numeros) {
   return ord.length % 2 ? ord[m] : (ord[m - 1] + ord[m]) / 2
 }
 
-// Devuelve { 't1->t2', 't2->t3', 't3->t4', 't4->t5' } con la mediana en días.
+// Devuelve { 't1->t2': [días...], ... } con la diferencia de cada caso.
 // Si un caso no tiene ambas fechas, no aporta a esa transición.
-export function medianaDiasEntreEtapas(casos, eventos) {
+export function diasEntreEtapas(casos, eventos) {
   const eventosPorCaso = agruparEventos(eventos)
   const diffs = { 't1->t2': [], 't2->t3': [], 't3->t4': [], 't4->t5': [] }
   for (const c of casos) {
@@ -50,6 +56,12 @@ export function medianaDiasEntreEtapas(casos, eventos) {
     if (primera[3] && primera[4]) diffs['t3->t4'].push(diasEntre(primera[3], primera[4]))
     if (primera[4] && primera[5]) diffs['t4->t5'].push(diasEntre(primera[4], primera[5]))
   }
+  return diffs
+}
+
+// Devuelve { 't1->t2', 't2->t3', 't3->t4', 't4->t5' } con la mediana en días.
+export function medianaDiasEntreEtapas(casos, eventos) {
+  const diffs = diasEntreEtapas(casos, eventos)
   return {
     't1->t2': mediana(diffs['t1->t2']),
     't2->t3': mediana(diffs['t2->t3']),
