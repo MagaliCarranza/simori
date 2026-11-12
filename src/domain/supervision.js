@@ -39,11 +39,17 @@ export function desgloseSalidas(casos, eventos, hoyISO) {
   return conteo
 }
 
-// % completado solo si numerador y total son >= 5; si no, revelaría casos.
+// % completado solo si completados, no completados y total son >= 5;
+// si no, el porcentaje revelaría cuántos casos hay en un grupo pequeño.
 function completadoSeguro(casos, eventos) {
   const total = casos.length
   const completados = contarCompletados(casos, eventos)
-  if (total < ENMASCARAR_MENOR_QUE || completados < ENMASCARAR_MENOR_QUE) {
+  const noCompletados = total - completados
+  if (
+    total < ENMASCARAR_MENOR_QUE ||
+    completados < ENMASCARAR_MENOR_QUE ||
+    noCompletados < ENMASCARAR_MENOR_QUE
+  ) {
     return { porcentaje: null, visible: false }
   }
   return { porcentaje: (completados / total) * 100, visible: true }

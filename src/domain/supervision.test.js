@@ -91,6 +91,17 @@ describe('resumenSupervision: % completado', () => {
     expect(r.completado).toEqual({ porcentaje: null, visible: false })
   })
 
+  it('se oculta si los que no completaron son menos de 5 (80 % de 10 revelaría 2)', () => {
+    const casos = crearCasos(10)
+    const r = resumenSupervision(casos, completar(casos.slice(0, 8)), HOY)
+    expect(r.completado).toEqual({ porcentaje: null, visible: false })
+  })
+
+  it('se oculta si todos completaron (0 sin completar)', () => {
+    const casos = crearCasos(6)
+    expect(resumenSupervision(casos, completar(casos), HOY).completado.visible).toBe(false)
+  })
+
   it('se oculta si el total es menor de 5 aunque todos completen', () => {
     const casos = crearCasos(4)
     expect(resumenSupervision(casos, completar(casos), HOY).completado.visible).toBe(false)
