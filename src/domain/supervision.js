@@ -79,7 +79,26 @@ export function resumenSupervision(casos, eventos, hoyISO) {
   }
 }
 
-// Un resumen enmascarado por grupo (escuela, localidad o centro).
+// Marca de una cifra >= 5 que se oculta solo para proteger a otra (supresión secundaria).
+export const OCULTO_SECUNDARIO = 'oculto'
+
+// Enmascara una columna de una tabla por grupos. Si queda exactamente una cifra
+// menor de 5, se podría recalcular restando del total visible; por eso se oculta
+// también la siguiente más pequeña de la columna.
+export function columnaSegura(valores) {
+  const salida = valores.map(enmascararMenorQue5)
+  const ocultas = valores.filter((n) => n < ENMASCARAR_MENOR_QUE).length
+  if (ocultas !== 1) return salida
+  let menor = -1
+  valores.forEach((n, i) => {
+    if (n >= ENMASCARAR_MENOR_QUE && (menor === -1 || n < valores[menor])) menor = i
+  })
+  if (menor !== -1) salida[menor] = OCULTO_SECUNDARIO
+  return salida
+}
+
+// Un resumen enmascarado por grupo (escuela, localidad o centro), con supresión
+// secundaria por columna en total, embudo y salidas.
 // claveDe(caso) devuelve la clave del grupo; los casos sin clave se omiten.
 export function resumenPorGrupo(casos, eventos, hoyISO, claveDe) {
   const grupos = new Map()
@@ -90,8 +109,27 @@ export function resumenPorGrupo(casos, eventos, hoyISO, claveDe) {
     grupos.get(clave).push(c)
   }
   const eventosPorCaso = agruparEventos(eventos)
-  return [...grupos.entries()].map(([clave, casosGrupo]) => {
+  const lista = [...grupos.entries()].map(([clave, casosGrupo]) => {
     const eventosGrupo = casosGrupo.flatMap((c) => eventosPorCaso.get(c.codigo) || [])
-    return { clave, ...resumenSupervision(casosGrupo, eventosGrupo, hoyISO) }
+    return {
+      clave,
+      casos: casosGrupo,
+      eventos: eventosGrupo,
+      embudo: embudo(casosGrupo, eventosGrupo),
+      salidas: desgloseSalidas(casosGrupo, eventosGrupo, hoyISO),
+    }
   })
+
+  const totales = columnaSegura(lista.map((g) => g.casos.length))
+  const salidasPorColumna = Object.fromEntries(SALIDAS.map((s) => [s, columnaSegura(lista.map((g) => g.salidas[s]))]))
+  const embudoPorColumna = (lista[0]?.embudo ?? []).map((_, j) => columnaSegura(lista.map((g) => g.embudo[j].n)))
+
+  return lista.map((g, i) => ({
+    clave: g.clave,
+    total: totales[i],
+    embudo: g.embudo.map((e, j) => ({ ...e, n: embudoPorColumna[j][i] })),
+    salidas: Object.fromEntries(SALIDAS.map((s) => [s, salidasPorColumna[s][i]])),
+    completado: completadoSeguro(g.casos, g.eventos),
+    medianas: medianasSeguras(g.casos, g.eventos),
+  }))
 }

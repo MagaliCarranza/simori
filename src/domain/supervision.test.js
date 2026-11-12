@@ -1,5 +1,12 @@
 import { describe, expect, it } from 'vitest'
-import { desgloseSalidas, resumenPorGrupo, resumenSupervision, SALIDAS } from './supervision.js'
+import {
+  columnaSegura,
+  desgloseSalidas,
+  OCULTO_SECUNDARIO,
+  resumenPorGrupo,
+  resumenSupervision,
+  SALIDAS,
+} from './supervision.js'
 
 const HOY = '2026-11-14'
 
@@ -140,10 +147,52 @@ describe('resumenPorGrupo', () => {
       ...crearCasos(1, 'X', { cct: null }),
     ]
     const grupos = resumenPorGrupo(casos, [], HOY, (c) => c.cct)
+    // Con dos grupos y uno < 5, el otro se oculta para que no se deduzca restando.
     expect(grupos.map((g) => [g.clave, g.total])).toEqual([
-      ['E1', 6],
+      ['E1', OCULTO_SECUNDARIO],
       ['E2', 'menos de 5'],
     ])
     expect(JSON.stringify(grupos)).not.toMatch(/"codigo"/)
+  })
+})
+
+describe('columnaSegura (supresión secundaria)', () => {
+  it('con una sola cifra < 5 oculta también la siguiente más pequeña', () => {
+    // Referidos 22 = 5 + 17 + 0: el 0 se recalcularía restando.
+    expect(columnaSegura([5, 17, 0])).toEqual([OCULTO_SECUNDARIO, 17, 'menos de 5'])
+  })
+
+  it('con dos o más cifras < 5 no oculta nada más', () => {
+    expect(columnaSegura([21, 2, 3])).toEqual([21, 'menos de 5', 'menos de 5'])
+  })
+
+  it('sin cifras < 5 no cambia nada', () => {
+    expect(columnaSegura([8, 12])).toEqual([8, 12])
+  })
+
+  it('en empate oculta la primera de las más pequeñas', () => {
+    expect(columnaSegura([9, 6, 6, 1])).toEqual([9, OCULTO_SECUNDARIO, 6, 'menos de 5'])
+  })
+
+  it('un solo grupo enmascarado no tiene con qué complementarse', () => {
+    expect(columnaSegura([3])).toEqual(['menos de 5'])
+  })
+})
+
+describe('resumenPorGrupo: supresión secundaria', () => {
+  it('aplica la regla por columna en total, embudo y salidas', () => {
+    const casos = [
+      ...crearCasos(5, 'A', { cct: 'E1' }),
+      ...crearCasos(17, 'B', { cct: 'E2' }),
+      ...crearCasos(2, 'C', { cct: 'E3' }),
+    ]
+    const eventos = casos.map((c) => resultado(c.codigo, 1, '2026-09-01'))
+    const grupos = resumenPorGrupo(casos, eventos, HOY, (c) => c.cct)
+    const col = (f) => grupos.map(f)
+    expect(col((g) => g.total)).toEqual([OCULTO_SECUNDARIO, 17, 'menos de 5'])
+    expect(col((g) => g.embudo[0].n)).toEqual([OCULTO_SECUNDARIO, 17, 'menos de 5'])
+    expect(col((g) => g.salidas.en_seguimiento)).toEqual([OCULTO_SECUNDARIO, 17, 'menos de 5'])
+    // Columnas todas en 0 (tres cifras ocultas): sin supresión secundaria.
+    expect(col((g) => g.salidas.referido)).toEqual(['menos de 5', 'menos de 5', 'menos de 5'])
   })
 })
