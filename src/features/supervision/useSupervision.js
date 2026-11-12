@@ -11,7 +11,8 @@ import { filtrarCasos, localidadDeCaso } from './filtros.js'
 
 const VACIO = { casos: [], eventos: [], localidades: [], escuelas: [], centros: [] }
 
-export function useSupervision({ hoyISO, filtros, usuario, db = dbDefault }) {
+// vista: 'embudo' | 'mapa'; solo identifica la entrada de bitácora.
+export function useSupervision({ hoyISO, filtros, usuario, db = dbDefault, vista = 'embudo' }) {
   const [estado, setEstado] = useState({ cargando: true, error: null, datos: VACIO })
 
   // liveQuery vuelve a emitir al registrar resultados, así el indicador se recalcula (HU08).
@@ -41,10 +42,10 @@ export function useSupervision({ hoyISO, filtros, usuario, db = dbDefault }) {
     if (registrado.current) return
     registrado.current = true
     registrar(
-      { usuarioId, rol: 'supervision', accion: 'consultar', entidad: 'supervision', entidadId: 'embudo' },
+      { usuarioId, rol: 'supervision', accion: 'consultar', entidad: 'supervision', entidadId: vista },
       { db },
     ).catch(() => {})
-  }, [usuarioId, db])
+  }, [usuarioId, db, vista])
 
   const { casos, eventos, localidades, escuelas, centros } = estado.datos
 
