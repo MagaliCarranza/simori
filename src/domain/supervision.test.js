@@ -1,11 +1,13 @@
 import { describe, expect, it } from 'vitest'
 import {
+  COLORES_SEMAFORO,
   columnaSegura,
   desgloseSalidas,
   PROTEGIDO,
   resumenPorGrupo,
   resumenSupervision,
   SALIDAS,
+  semaforoEnSeguimiento,
 } from './supervision.js'
 
 const HOY = '2026-11-14'
@@ -194,5 +196,63 @@ describe('resumenPorGrupo: supresión secundaria', () => {
     expect(col((g) => g.salidas.en_seguimiento)).toEqual([PROTEGIDO, 17, PROTEGIDO])
     // Columnas todas en 0 (tres cifras protegidas): sin supresión secundaria.
     expect(col((g) => g.salidas.referido)).toEqual([PROTEGIDO, PROTEGIDO, PROTEGIDO])
+  })
+})
+
+describe('semaforoEnSeguimiento', () => {
+  // Con HOY = 2026-11-14: cita futura → verde; 10 días de retraso → amarillo;
+  // 44 días → rojo (menos de 84, sin visitas: no pasa a sin seguimiento).
+  const casosMixtos = () => [
+    ...crearCasos(6, 'V'),
+    ...crearCasos(2, 'A', { fechaProximaCita: '2026-11-04' }),
+    ...crearCasos(5, 'R', { fechaProximaCita: '2026-10-01' }),
+    { codigo: 'G1', estado: 'vigilancia', fechaProximaCita: '2027-01-01' },
+    { codigo: 'H1', estado: 'en_seguimiento', fechaProximaCita: '2026-12-01' },
+    { codigo: 'S1', estado: 'en_seguimiento', fechaTamizaje: '2026-01-10' }, // sin cita, > 84 días
+  ]
+  const eventosMixtos = [{ codigoCaso: 'H1', tipo: 'alta', fecha: '2026-10-01' }]
+
+  it('los colores suman los casos en seguimiento (antes de enmascarar)', () => {
+    const conteo = semaforoEnSeguimiento(casosMixtos(), eventosMixtos, HOY)
+    expect(conteo).toEqual({ verde: 6, amarillo: 2, rojo: 5 })
+    const suma = COLORES_SEMAFORO.reduce((a, c) => a + conteo[c], 0)
+    expect(suma).toBe(desgloseSalidas(casosMixtos(), eventosMixtos, HOY).en_seguimiento)
+  })
+
+  it('un alta guardada sin su evento cuenta con color (manda el estado deducido)', () => {
+    const caso = { codigo: 'X1', estado: 'alta', fechaProximaCita: '2026-12-01' }
+    expect(semaforoEnSeguimiento([caso], [], HOY)).toEqual({ verde: 1, amarillo: 0, rojo: 0 })
+    expect(caso.estado).toBe('alta')
+  })
+
+  it('resumenSupervision enmascara los colores menores de 5 (incluido 0)', () => {
+    const r = resumenSupervision(casosMixtos(), eventosMixtos, HOY)
+    expect(r.semaforo).toEqual({ verde: 6, amarillo: 'menos de 5', rojo: 5 })
+    expect(resumenSupervision([], [], HOY).semaforo).toEqual({
+      verde: 'menos de 5',
+      amarillo: 'menos de 5',
+      rojo: 'menos de 5',
+    })
+  })
+
+  it('resumenPorGrupo aplica la supresión secundaria por color', () => {
+    const casos = [
+      ...crearCasos(5, 'A', { cct: 'E1' }),
+      ...crearCasos(17, 'B', { cct: 'E2' }),
+      ...crearCasos(2, 'C', { cct: 'E3' }),
+    ]
+    const grupos = resumenPorGrupo(casos, [], HOY, (c) => c.cct)
+    expect(grupos.map((g) => g.semaforo.verde)).toEqual([PROTEGIDO, 17, PROTEGIDO])
+    expect(grupos.map((g) => g.semaforo.rojo)).toEqual([PROTEGIDO, PROTEGIDO, PROTEGIDO])
+  })
+
+  it('no contiene códigos de caso', () => {
+    const casos = crearCasos(8, 'PON-SPI-', { cct: 'E1' })
+    const texto = JSON.stringify([
+      resumenSupervision(casos, [], HOY),
+      resumenPorGrupo(casos, [], HOY, (c) => c.cct),
+    ])
+    expect(texto).not.toMatch(/PON-/)
+    expect(texto).not.toMatch(/"codigo"/)
   })
 })
