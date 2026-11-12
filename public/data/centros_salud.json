@@ -1,0 +1,29 @@
+[
+  {
+    "clues": "PROV-AC-01",
+    "nombre": "Centro de Salud Agua Caliente (provisional)",
+    "tipo": "primer_nivel",
+    "claveInegi": "140660002",
+    "lat": 20.312568,
+    "lng": -102.928629,
+    "provisional": true
+  },
+  {
+    "clues": "PROV-SPI-01",
+    "nombre": "Centro de Salud San Pedro Itzicán (provisional)",
+    "tipo": "primer_nivel",
+    "claveInegi": "140660031",
+    "lat": 20.315556,
+    "lng": -102.951944,
+    "provisional": true
+  },
+  {
+    "clues": "PROV-CHA-01",
+    "nombre": "Centro de Salud Chalpicote (provisional)",
+    "tipo": "primer_nivel",
+    "claveInegi": "140660043",
+    "lat": 20.310201,
+    "lng": -102.919552,
+    "provisional": true
+  }
+]

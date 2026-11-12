@@ -1,0 +1,98 @@
+[
+  {
+    "cct": "14DPR1710G",
+    "nombre": "Emiliano Zapata",
+    "nivel": "Primaria",
+    "subnivel": "Primaria General",
+    "turno": "matutino",
+    "claveInegi": "140660002",
+    "matricula": 157,
+    "lat": 20.312568,
+    "lng": -102.928629,
+    "ubicacionAproximada": true
+  },
+  {
+    "cct": "14DPR3931E",
+    "nombre": "Emiliano Zapata",
+    "nivel": "Primaria",
+    "subnivel": "Primaria General",
+    "turno": "vespertino",
+    "claveInegi": "140660002",
+    "matricula": 111,
+    "lat": 20.312568,
+    "lng": -102.928629,
+    "ubicacionAproximada": true
+  },
+  {
+    "cct": "14DTV0442U",
+    "nombre": "Adolfo Lopez Mateos",
+    "nivel": "Secundaria",
+    "subnivel": "Telesecundaria",
+    "turno": "matutino",
+    "claveInegi": "140660002",
+    "matricula": 147,
+    "lat": 20.312568,
+    "lng": -102.928629,
+    "ubicacionAproximada": true
+  },
+  {
+    "cct": "14DPR0128E",
+    "nombre": "Ricardo Flores Magon",
+    "nivel": "Primaria",
+    "subnivel": "Primaria General",
+    "turno": "vespertino",
+    "claveInegi": "140660031",
+    "matricula": 483,
+    "lat": 20.315556,
+    "lng": -102.951944,
+    "ubicacionAproximada": true
+  },
+  {
+    "cct": "14DPR1616B",
+    "nombre": "Valentin Gomez Farias",
+    "nivel": "Primaria",
+    "subnivel": "Primaria General",
+    "turno": "matutino",
+    "claveInegi": "140660031",
+    "matricula": 531,
+    "lat": 20.315556,
+    "lng": -102.951944,
+    "ubicacionAproximada": true
+  },
+  {
+    "cct": "14DTV0190G",
+    "nombre": "Esteban Baca Calderon",
+    "nivel": "Secundaria",
+    "subnivel": "Telesecundaria",
+    "turno": "matutino",
+    "claveInegi": "140660031",
+    "matricula": 438,
+    "lat": 20.315556,
+    "lng": -102.951944,
+    "ubicacionAproximada": true
+  },
+  {
+    "cct": "14DPR3594U",
+    "nombre": "Emiliano Zapata",
+    "nivel": "Primaria",
+    "subnivel": "Primaria General",
+    "turno": "matutino",
+    "claveInegi": "140660043",
+    "matricula": 88,
+    "lat": 20.310201,
+    "lng": -102.919552,
+    "ubicacionAproximada": true
+  },
+  {
+    "cct": "14DPR3967T",
+    "nombre": "Gonzalo Chapela y Blanco",
+    "nivel": "Primaria",
+    "subnivel": "Primaria General",
+    "turno": "vespertino",
+    "claveInegi": "140660043",
+    "matricula": 85,
+    "lat": 20.310201,
+    "lng": -102.919552,
+    "ubicacionAproximada": true
+  }
+]

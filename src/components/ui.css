@@ -1,0 +1,69 @@
+/* Tokens y piezas compartidas (guía visual de Stitch). */
+:root {
+  --color-primary: #0b3c7a;
+  --color-secondary: #2f8cff;
+  --color-tertiary: #b6f24a;
+  --color-neutral: #4a5b75;
+  --color-fondo: #f3f7fd;
+  --color-superficie: #ffffff;
+  --color-borde: #d6e0ee;
+
+  /* Semáforo: texto oscuro sobre fondo claro, contraste AA (>= 4.5:1). */
+  --semaforo-verde: #1b5e20;
+  --semaforo-verde-fondo: #e3f4e4;
+  --semaforo-amarillo: #6b4a00;
+  --semaforo-amarillo-fondo: #fff1c2;
+  --semaforo-rojo: #8f1414;
+  --semaforo-rojo-fondo: #fde3e3;
+
+  --radio-tarjeta: 16px;
+  --radio-pildora: 999px;
+}
+
+.semaforo {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4em;
+  padding: 0.2em 0.75em;
+  border-radius: var(--radio-pildora);
+  font-size: 0.875rem;
+  font-weight: 600;
+  line-height: 1.4;
+  border: 1px solid currentColor;
+  white-space: nowrap;
+}
+
+.semaforo__icono {
+  font-size: 0.8em;
+}
+
+.semaforo--verde {
+  color: var(--semaforo-verde);
+  background: var(--semaforo-verde-fondo);
+}
+
+.semaforo--amarillo {
+  color: var(--semaforo-amarillo);
+  background: var(--semaforo-amarillo-fondo);
+}
+
+.semaforo--rojo {
+  color: var(--semaforo-rojo);
+  background: var(--semaforo-rojo-fondo);
+}
+
+.semaforo--cerrado {
+  color: var(--color-neutral);
+  background: var(--color-fondo);
+}
+
+.etiqueta-simulado {
+  display: inline-block;
+  padding: 0.15em 0.7em;
+  border-radius: var(--radio-pildora);
+  background: var(--color-tertiary);
+  color: #1d2b05;
+  font-size: 0.8rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+}
