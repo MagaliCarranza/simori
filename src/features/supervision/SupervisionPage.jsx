@@ -91,7 +91,7 @@ export function SupervisionPage({ hoyISO, usuario, db }) {
             <span className="supervision__kpi-texto">
               {pct
                 ? 'de los positivos completó su evaluación'
-                : 'Menos de 5 casos; no se muestra el porcentaje de evaluación completa'}
+                : 'No se muestra el porcentaje: revelaría grupos de menos de 5 casos'}
             </span>
             <span className="supervision__kpi-total">
               Positivos en la selección: <strong>{resumen.total}</strong>

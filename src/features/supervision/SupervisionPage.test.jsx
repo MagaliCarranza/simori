@@ -128,8 +128,10 @@ describe('SupervisionPage (HU07, HU08)', () => {
     await act(async () => {
       await db.eventos.add({ codigoCaso: 'PON-AC-0007', tipo: 'resultado', etapa: 4, fecha: '2026-11-01' })
     })
-    // 7 de 11 → 64 %
-    await waitFor(() => expect(kpi()).toHaveTextContent('64 %'))
+    // 7 de 11 completados: solo 4 sin completar, así que el % se oculta.
+    await waitFor(() => expect(kpi()).toHaveTextContent('No disponible'))
+    const embudo = valorDe('Casos por etapa')
+    expect(embudo.getByText('4. Clasificación').nextSibling).toHaveTextContent('7 casos')
   })
 
   it('registra una sola consulta en bitácora, sin códigos', async () => {
