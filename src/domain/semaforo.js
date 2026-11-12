@@ -1,6 +1,7 @@
 // Semáforo del caso (RF04). Siempre devuelve etiqueta con texto (no solo color).
 
 import { SEMAFORO_CON_CITA, SEMAFORO_SIN_CITA } from './config.js'
+import { estadoDerivado } from './etapas.js'
 import { diasEntre } from './fechas.js'
 
 // Solo los eventos de tipo 'resultado' reinician el reloj "sin cita".
@@ -16,7 +17,10 @@ function ultimoResultado(eventos) {
 }
 
 export function calcularSemaforo(caso, eventos, hoyISO) {
-  if (caso.estado === 'alta' || caso.estado === 'referido') {
+  // Cerrado según el estado deducido: manda el evento 'alta' o 'referencia',
+  // igual que en el resto del dominio, no el estado guardado.
+  const estado = estadoDerivado(caso, eventos)
+  if (estado === 'alta' || estado === 'referido') {
     return { color: null, etiqueta: 'Cerrado', diasRetraso: 0, referencia: 'cerrado' }
   }
 
