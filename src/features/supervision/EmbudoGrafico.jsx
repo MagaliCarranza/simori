@@ -9,7 +9,8 @@ const texto = (n) => (typeof n === 'number' ? `${n} casos` : n)
 // para no sugerir su tamaño; el texto de cada etapa está en la lista accesible.
 export function EmbudoGrafico({ embudo }) {
   const data = {
-    labels: embudo.map((e) => `${e.titulo}: ${texto(e.n)}`),
+    // En el eje solo el nombre corto de la etapa; los números están en la lista.
+    labels: embudo.map((e) => e.titulo),
     datasets: [
       {
         data: embudo.map((e) => (typeof e.n === 'number' ? e.n : null)),
@@ -25,7 +26,10 @@ export function EmbudoGrafico({ embudo }) {
     maintainAspectRatio: false,
     animation: false,
     plugins: { legend: { display: false }, tooltip: { enabled: false } },
-    scales: { x: { beginAtZero: true, ticks: { precision: 0 } } },
+    scales: {
+      x: { beginAtZero: true, ticks: { precision: 0 } },
+      y: { ticks: { autoSkip: false } },
+    },
   }
 
   return (

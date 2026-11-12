@@ -161,6 +161,9 @@ export function SupervisionPage({ hoyISO, usuario, db }) {
                     ))}
                   </tbody>
                 </table>
+                <p className="supervision__nota">
+                  “oculto”: cifra de 5 o más que no se muestra para que no se pueda deducir otra menor de 5 restando.
+                </p>
               </div>
             )}
           </section>
