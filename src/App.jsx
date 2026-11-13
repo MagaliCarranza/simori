@@ -4,7 +4,7 @@ import { db } from './db/index.js'
 import { inicializar } from './db/seed.js'
 import { MisVisitasPage } from './features/campo/MisVisitasPage.jsx'
 import { PendientesPage } from './features/pendientes/PendientesPage.jsx'
-import { SupervisionPage } from './features/supervision/SupervisionPage.jsx'
+import { SupervisionVistas } from './features/supervision/SupervisionVistas.jsx'
 import './App.css'
 
 // Fecha "hoy" fija de la demo; coincide con --hoy del generador de casos.
@@ -62,7 +62,7 @@ function App() {
 
       {usuario?.rol === 'captura' && <PendientesPage key={usuario.id} usuario={usuario} hoyISO={HOY_DEMO} />}
       {usuario?.rol === 'campo' && <MisVisitasPage key={usuario.id} usuario={usuario} hoyISO={HOY_DEMO} />}
-      {usuario?.rol === 'supervision' && <SupervisionPage key={usuario.id} usuario={usuario} hoyISO={HOY_DEMO} />}
+      {usuario?.rol === 'supervision' && <SupervisionVistas key={usuario.id} usuario={usuario} hoyISO={HOY_DEMO} />}
 
       <p className="app__pie">Prototipo con datos simulados. No es un sistema oficial y no diagnostica.</p>
     </main>
