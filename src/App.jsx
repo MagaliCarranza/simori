@@ -4,13 +4,16 @@ import { db } from './db/index.js'
 import { inicializar } from './db/seed.js'
 import { MisVisitasPage } from './features/campo/MisVisitasPage.jsx'
 import { PendientesPage } from './features/pendientes/PendientesPage.jsx'
+import { SupervisionPage } from './features/supervision/SupervisionPage.jsx'
 import './App.css'
 
 // Fecha "hoy" fija de la demo; coincide con --hoy del generador de casos.
 const HOY_DEMO = '2026-11-14'
 
+const ETIQUETA_ROL = { captura: 'Captura', campo: 'Campo', supervision: 'Supervisión' }
+
 // PROVISIONAL: selector de usuario demo mientras llega M2 (roles y navegación).
-// Solo muestra las pantallas de captura y campo que ya existen.
+// Muestra las pantallas de captura, campo y supervisión que ya existen.
 function App() {
   const [usuarios, setUsuarios] = useState([])
   const [usuarioId, setUsuarioId] = useState('')
@@ -22,7 +25,7 @@ function App() {
       .then(() => db.usuarios.toArray())
       .then((lista) => {
         if (!vigente) return
-        const conPantalla = lista.filter((u) => u.rol === 'captura' || u.rol === 'campo')
+        const conPantalla = lista.filter((u) => ETIQUETA_ROL[u.rol])
         setUsuarios(conPantalla)
         if (conPantalla.length) setUsuarioId(conPantalla[0].id)
       })
@@ -50,7 +53,7 @@ function App() {
           <select value={usuarioId} onChange={(e) => setUsuarioId(e.target.value)}>
             {usuarios.map((u) => (
               <option key={u.id} value={u.id}>
-                {u.rol === 'captura' ? 'Captura' : 'Campo'} · {u.clues}
+                {ETIQUETA_ROL[u.rol]}{u.clues ? ` · ${u.clues}` : ''}
               </option>
             ))}
           </select>
@@ -59,6 +62,7 @@ function App() {
 
       {usuario?.rol === 'captura' && <PendientesPage key={usuario.id} usuario={usuario} hoyISO={HOY_DEMO} />}
       {usuario?.rol === 'campo' && <MisVisitasPage key={usuario.id} usuario={usuario} hoyISO={HOY_DEMO} />}
+      {usuario?.rol === 'supervision' && <SupervisionPage key={usuario.id} usuario={usuario} hoyISO={HOY_DEMO} />}
 
       <p className="app__pie">Prototipo con datos simulados. No es un sistema oficial y no diagnostica.</p>
     </main>
