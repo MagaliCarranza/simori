@@ -1,0 +1,68 @@
+.nav-rol {
+  padding: 12px 16px 8px;
+  background: var(--color-superficie, #ffffff);
+  border-bottom: 1px solid var(--color-borde, #d6e0ee);
+  display: grid;
+  gap: 10px;
+}
+
+.nav-rol__cabecera {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 12px;
+}
+
+.nav-rol__titulo {
+  margin: 0;
+  color: var(--color-primary, #0b3c7a);
+  font-size: 1.4rem;
+  letter-spacing: 0.02em;
+}
+
+.nav-rol__usuario {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.9rem;
+}
+
+.nav-rol__usuario select {
+  min-height: 40px;
+  padding: 0 10px;
+  border: 1px solid var(--color-borde, #d6e0ee);
+  border-radius: 10px;
+  background: #ffffff;
+  font: inherit;
+}
+
+.nav-rol__menu {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.nav-rol__link {
+  min-height: 40px;
+  padding: 8px 14px;
+  border-radius: 999px;
+  border: 1px solid var(--color-borde, #d6e0ee);
+  background: var(--color-superficie, #ffffff);
+  color: var(--color-primary, #0b3c7a);
+  font-weight: 600;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+}
+
+.nav-rol__link:focus-visible {
+  outline: 3px solid var(--color-secondary, #2f8cff);
+  outline-offset: 2px;
+}
+
+.nav-rol__link--activo {
+  background: var(--color-primary, #0b3c7a);
+  color: #ffffff;
+  border-color: var(--color-primary, #0b3c7a);
+}

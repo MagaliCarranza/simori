@@ -4,6 +4,7 @@ import { EnConstruccion } from './components/EnConstruccion.jsx'
 import { HOME_POR_ROL, NavegacionRol, RUTAS_POR_ROL } from './components/NavegacionRol.jsx'
 import { db } from './db/index.js'
 import { inicializar } from './db/seed.js'
+import { ListaAvisosPage } from './features/avisos/ListaAvisosPage.jsx'
 import { MisVisitasPage } from './features/campo/MisVisitasPage.jsx'
 import { PendientesPage } from './features/pendientes/PendientesPage.jsx'
 import { SupervisionPage } from './features/supervision/SupervisionPage.jsx'
@@ -123,15 +124,7 @@ function AplicacionInterna() {
 
           {/* Campo */}
           <Route path="/visitas" element={usuario ? <MisVisitasPage usuario={usuario} hoyISO={HOY_DEMO} /> : null} />
-          <Route
-            path="/avisos"
-            element={
-              <EnConstruccion
-                titulo="Avisos"
-                descripcion="Los avisos ya se registran dentro de cada caso en Mis visitas. Esta vista consolidada queda pendiente."
-              />
-            }
-          />
+          <Route path="/avisos" element={usuario ? <ListaAvisosPage usuario={usuario} hoyISO={HOY_DEMO} /> : null} />
 
           {/* Supervisión */}
           <Route path="/supervision/embudo" element={usuario ? <SupervisionPage usuario={usuario} hoyISO={HOY_DEMO} /> : null} />
