@@ -181,12 +181,12 @@ describe('MapaPage (HU09, RF10)', () => {
     for (const e of etiquetas) expect(e).toHaveAttribute('data-permanente', 'true')
   })
 
-  it('la etiqueta de Chalpicote va abajo y las otras arriba (no se enciman a 360 px)', async () => {
+  it('Chalpicote y San Pedro Itzicán llevan la etiqueta abajo y Agua Caliente arriba (no tapan ni se enciman)', async () => {
     await abrir()
     const direccion = Object.fromEntries(
       etiquetasLocalidad().map((e) => [e.textContent, e.dataset.direccion]),
     )
-    expect(direccion).toEqual({ Chalpicote: 'bottom', 'Agua Caliente': 'top', 'San Pedro Itzicán': 'top' })
+    expect(direccion).toEqual({ Chalpicote: 'bottom', 'Agua Caliente': 'top', 'San Pedro Itzicán': 'bottom' })
   })
 
   it('el marcador elegido se resalta en azul oscuro y borde más grueso, sin naranja ni rojo', async () => {

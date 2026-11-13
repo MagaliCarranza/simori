@@ -39,7 +39,9 @@ const COLOR_SELECCION = '#0b1f4d'
 
 // Dirección de la etiqueta por localidad. Chalpicote está a menos de 1 km de
 // Agua Caliente: a 360 px sus etiquetas se encimaban, así que va abajo.
-const DIRECCION_ETIQUETA = { '140660043': 'bottom' }
+// San Pedro Itzicán también va abajo: arriba tapaba el cuadrado de su centro
+// de salud (a ~300 m al noroeste).
+const DIRECCION_ETIQUETA = { '140660043': 'bottom', '140660031': 'bottom' }
 const direccionEtiqueta = (claveInegi) => DIRECCION_ETIQUETA[claveInegi] ?? 'top'
 
 // Centro de salud: cuadrado morado (ni rojo, ni amarillo, ni verde, ni el azul
