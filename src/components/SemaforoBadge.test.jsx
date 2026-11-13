@@ -12,7 +12,7 @@ describe('SemaforoBadge', () => {
   })
 
   it('un caso cerrado se muestra como "Cerrado"', () => {
-    const sem = calcularSemaforo({ estado: 'alta' }, [], '2026-06-15')
+    const sem = calcularSemaforo({ estado: 'alta' }, [{ tipo: 'alta', fecha: '2026-06-01' }], '2026-06-15')
     render(<SemaforoBadge semaforo={sem} />)
     expect(screen.getByText('Cerrado')).toHaveClass('semaforo--cerrado')
   })
