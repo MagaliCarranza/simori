@@ -67,3 +67,65 @@
   font-weight: 700;
   letter-spacing: 0.02em;
 }
+
+/* Botones compartidos (píldora). */
+.boton {
+  min-height: 44px;
+  padding: 0 18px;
+  border-radius: var(--radio-pildora);
+  border: 2px solid transparent;
+  font: inherit;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.boton:focus-visible {
+  outline: 3px solid var(--color-secondary);
+  outline-offset: 2px;
+}
+
+.boton:disabled {
+  opacity: 0.6;
+  cursor: default;
+}
+
+.boton--primario {
+  background: var(--color-primary);
+  color: #ffffff;
+}
+
+.boton--secundario {
+  justify-self: start;
+  background: var(--color-superficie);
+  border-color: var(--color-primary);
+  color: var(--color-primary);
+}
+
+.boton--texto {
+  background: transparent;
+  color: var(--color-neutral);
+}
+
+.boton--opcion {
+  background: var(--color-superficie);
+  border-color: var(--color-borde);
+  color: #0f172a;
+}
+
+.boton--chico {
+  min-height: 36px;
+  padding: 0 12px;
+  font-size: 0.85rem;
+  background: var(--color-primary);
+  color: #ffffff;
+}
+
+.boton--opcion[aria-pressed='true'] {
+  background: #e6efff;
+  border-color: var(--color-primary);
+  color: var(--color-primary);
+}
+
+.boton--opcion[aria-pressed='true']::before {
+  content: '✓ ';
+}

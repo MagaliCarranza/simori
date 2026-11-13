@@ -3,6 +3,7 @@ import { EtiquetaSimulado } from '../../components/EtiquetaSimulado.jsx'
 import { CasoPendiente } from '../pendientes/CasoPendiente.jsx'
 import { filtrarPendientes } from '../pendientes/pendientes.js'
 import { usePendientesDelCentro } from '../pendientes/usePendientesDelCentro.js'
+import { AvisoFamilia } from '../avisos/AvisoFamilia.jsx'
 import { RegistrarVisita } from './RegistrarVisita.jsx'
 import '../pendientes/pendientes.css'
 
@@ -49,6 +50,7 @@ export function MisVisitasPage({ usuario, hoyISO, db }) {
               {visitas.map((f) => (
                 <CasoPendiente key={f.codigo} fila={f} escuela={escuelas.get(f.cct)}>
                   <RegistrarVisita codigoCaso={f.codigo} usuario={usuario} hoyISO={hoyISO} db={db} />
+                  <AvisoFamilia fila={f} centro={centro} usuario={usuario} hoyISO={hoyISO} db={db} />
                 </CasoPendiente>
               ))}
             </ul>
