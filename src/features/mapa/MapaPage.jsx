@@ -1,13 +1,15 @@
-// Mapa de la zona (M9: HU09, RF10, RNF03). Un punto por localidad: escuelas y
-// centros comparten la coordenada de su localidad. Solo cifras agregadas.
+// Mapa de la zona (M9: HU09, RF10, RNF03). Un punto por localidad en alcance
+// (las escuelas usan la coordenada de su localidad) y un cuadrado por centro de
+// salud que las atiende, en su coordenada CLUES. Solo cifras agregadas.
 
+import { divIcon } from 'leaflet'
 import 'leaflet/dist/leaflet.css'
 import { useEffect, useMemo, useRef, useState } from 'react'
-import { CircleMarker, MapContainer, TileLayer, Tooltip } from 'react-leaflet'
+import { CircleMarker, MapContainer, Marker, TileLayer, Tooltip } from 'react-leaflet'
 import { EtiquetaSimulado } from '../../components/EtiquetaSimulado.jsx'
 import { FILTROS_INICIALES } from '../supervision/filtros.js'
 import { useSupervision } from '../supervision/useSupervision.js'
-import { panelesPorLocalidad } from './panelLocalidad.js'
+import { centrosEnMapa, panelesPorLocalidad } from './panelLocalidad.js'
 import '../supervision/supervision.css'
 import './mapa.css'
 
@@ -16,6 +18,7 @@ const FUENTES = {
   marginacion: 'CONAPO, Índice de marginación por localidad 2020',
   poblacion: 'Censo 2020 ITER por localidad',
   matricula: 'SEJ / SEP, Estadísticas educativas',
+  centros: 'Secretaría de Salud, catálogo CLUES',
 }
 
 const MOSAICOS_OSM = {
@@ -38,6 +41,21 @@ const COLOR_SELECCION = '#0b1f4d'
 // Agua Caliente: a 360 px sus etiquetas se encimaban, así que va abajo.
 const DIRECCION_ETIQUETA = { '140660043': 'bottom' }
 const direccionEtiqueta = (claveInegi) => DIRECCION_ETIQUETA[claveInegi] ?? 'top'
+
+// Centro de salud: cuadrado morado (ni rojo, ni amarillo, ni verde, ni el azul
+// de las localidades). Solo CSS, sin imágenes, para que funcione sin internet.
+const ICONO_CENTRO = divIcon({
+  className: 'mapa__icono-centro',
+  iconSize: [18, 18],
+  iconAnchor: [9, 9],
+})
+
+// Distancia de la localidad a su centro, con un decimal.
+function textoDistancia(km) {
+  if (km === null) return null
+  if (km < 0.05) return 'En la misma localidad'
+  return `A ${km.toFixed(1)} km`
+}
 
 const NOMBRE_COLOR = { verde: 'Verde', amarillo: 'Amarillo', rojo: 'Rojo' }
 
@@ -103,7 +121,7 @@ function Par({ termino, children }) {
 }
 
 function PanelLocalidad({ panel }) {
-  const { pendientes } = panel
+  const { pendientes, centro } = panel
   const aproximada = panel.escuelas.some((e) => e.ubicacionAproximada)
   return (
     <>
@@ -140,19 +158,21 @@ function PanelLocalidad({ panel }) {
         {aproximada && ' Ubicación aproximada: las escuelas se muestran en el punto de su localidad.'}
       </p>
 
-      <h4 className="mapa__subtitulo">Centro de salud</h4>
-      {panel.centros.length === 0 ? (
-        <p>Sin centro de salud registrado.</p>
+      <h4 className="mapa__subtitulo">Centro de salud que la atiende</h4>
+      {centro ? (
+        <div className="mapa__centro">
+          <p className="mapa__centro-nombre">{centro.nombre}</p>
+          <dl className="supervision__pares">
+            <Par termino="CLUES">{centro.clues}</Par>
+            <Par termino="Institución">{centro.institucion ?? 'Sin dato'}</Par>
+            <Par termino="Distancia">{textoDistancia(centro.distanciaKm) ?? 'Sin dato'}</Par>
+          </dl>
+          {centro.ubicacionAproximada && <span className="mapa__marca">Ubicación aproximada</span>}
+        </div>
       ) : (
-        <ul className="mapa__centros">
-          {panel.centros.map((c) => (
-            <li key={c.clues}>
-              {c.nombre}
-              {c.provisional && <span className="mapa__marca">Centro provisional</span>}
-            </li>
-          ))}
-        </ul>
+        <p>Sin centro de salud asignado.</p>
       )}
+      <p className="supervision__nota">Fuente: {FUENTES.centros}.</p>
 
       <div className="mapa__pendientes-encabezado">
         <h4 className="mapa__subtitulo">Pendientes</h4>
@@ -191,10 +211,13 @@ export function MapaPage({ hoyISO, usuario, db }) {
   const paneles = useMemo(() => panelesPorLocalidad(catalogos, porLocalidad), [catalogos, porLocalidad])
   const [seleccion, setSeleccion] = useState(null)
   const { sinMosaicos, eventos: eventosMosaicos } = useSinMosaicos()
+  const centros = useMemo(() => centrosEnMapa(catalogos.localidades, catalogos.centros), [catalogos])
   const panel = paneles.find((p) => p.claveInegi === seleccion) ?? null
 
   const conPunto = paneles.filter((p) => p.coordenadas)
-  const caja = conPunto.length > 0 ? limites(conPunto.map((p) => p.coordenadas)) : null
+  // Los centros entran en el encuadre solo si hay localidades que mostrar.
+  const caja =
+    conPunto.length > 0 ? limites([...conPunto.map((p) => p.coordenadas), ...centros.map((c) => c.coordenadas)]) : null
 
   return (
     <section className="supervision mapa" aria-labelledby="titulo-mapa">
@@ -279,11 +302,36 @@ export function MapaPage({ hoyISO, usuario, db }) {
                     </CircleMarker>
                   )
                 })}
+                {centros.map((c) => (
+                  <Marker
+                    key={c.clues}
+                    position={c.coordenadas}
+                    icon={ICONO_CENTRO}
+                    title={`Centro de salud: ${c.nombre}`}
+                    alt={`Centro de salud: ${c.nombre}`}
+                  >
+                    <Tooltip direction="right" offset={[10, 0]} className="mapa__etiqueta-centro">
+                      {c.nombre} · CLUES {c.clues}
+                    </Tooltip>
+                  </Marker>
+                ))}
               </MapContainer>
             ) : (
               <p className="mapa__vacio">No hay localidades con coordenadas para mostrar.</p>
             )}
           </div>
+          {caja && (
+            <ul className="mapa__leyenda" aria-label="Símbolos del mapa">
+              <li>
+                <span className="mapa__simbolo mapa__simbolo--localidad" aria-hidden="true" /> Localidad
+              </li>
+              {centros.length > 0 && (
+                <li>
+                  <span className="mapa__simbolo mapa__simbolo--centro" aria-hidden="true" /> Centro de salud
+                </li>
+              )}
+            </ul>
+          )}
 
           <section
             className="supervision__tarjeta mapa__panel"

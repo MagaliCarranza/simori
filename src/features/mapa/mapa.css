@@ -87,15 +87,13 @@
   color: var(--color-primary);
 }
 
-.mapa__escuelas,
-.mapa__centros {
+.mapa__escuelas {
   margin: 0;
   padding: 0;
   list-style: none;
 }
 
-.mapa__escuelas li,
-.mapa__centros li {
+.mapa__escuelas li {
   display: flex;
   flex-wrap: wrap;
   justify-content: space-between;
@@ -105,8 +103,7 @@
   border-bottom: 1px solid var(--color-borde);
 }
 
-.mapa__escuelas li:last-child,
-.mapa__centros li:last-child {
+.mapa__escuelas li:last-child {
   border-bottom: 0;
 }
 
@@ -154,4 +151,66 @@
   .mapa__lienzo {
     height: 460px;
   }
+}
+
+/* Centro de salud: cuadrado morado, distinto del círculo azul de localidad y
+   de los colores del semáforo. */
+.mapa__icono-centro {
+  box-sizing: border-box;
+  border: 2px solid #ffffff;
+  border-radius: 2px;
+  background: #6b21a8;
+  box-shadow: 0 0 0 1px #3b0764;
+}
+
+.mapa__etiqueta-centro {
+  font-weight: 600;
+  color: #3b0764;
+}
+
+.mapa__leyenda {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 16px;
+  margin: -8px 0 0;
+  padding: 0;
+  list-style: none;
+  font-size: 0.875rem;
+}
+
+.mapa__leyenda li {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.mapa__simbolo {
+  display: inline-block;
+  width: 14px;
+  height: 14px;
+}
+
+.mapa__simbolo--localidad {
+  border: 2px solid #2563eb;
+  border-radius: 50%;
+  background: rgb(37 99 235 / 50%);
+}
+
+.mapa__simbolo--centro {
+  border: 2px solid #ffffff;
+  border-radius: 2px;
+  background: #6b21a8;
+  box-shadow: 0 0 0 1px #3b0764;
+}
+
+.mapa__centro {
+  display: grid;
+  gap: 8px;
+  justify-items: start;
+}
+
+.mapa__centro-nombre {
+  margin: 0;
+  font-weight: 600;
+  overflow-wrap: anywhere;
 }

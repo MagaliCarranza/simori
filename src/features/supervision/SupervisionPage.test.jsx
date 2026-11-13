@@ -29,17 +29,22 @@ function caso(codigo, cct, clues) {
 // 8 casos en Agua Caliente (6 en una escuela, 2 en otra) y 3 en San Pedro.
 async function sembrar() {
   await db.localidades.bulkAdd([
-    { claveInegi: '140660002', nombre: 'Agua Caliente' },
-    { claveInegi: '140660031', nombre: 'San Pedro Itzicán' },
+    // Como el catálogo real: fila de total y una localidad fuera de alcance.
+    { claveInegi: '140660000', nombre: 'Total del Municipio', enAlcance: false, cluesOperativo: null },
+    { claveInegi: '140660001', nombre: 'Poncitlán', enAlcance: false, cluesOperativo: 'JCSSA004143' },
+    { claveInegi: '140660002', nombre: 'Agua Caliente', enAlcance: true, cluesOperativo: 'PROV-AC-01' },
+    { claveInegi: '140660031', nombre: 'San Pedro Itzicán', enAlcance: true, cluesOperativo: 'PROV-SPI-01' },
   ])
   await db.escuelas.bulkAdd([
     { cct: '14DPR1710G', nombre: 'Emiliano Zapata', claveInegi: '140660002' },
     { cct: '14DTV0442U', nombre: 'Adolfo Lopez Mateos', claveInegi: '140660002' },
     { cct: '14DPR0001A', nombre: 'Miguel Hidalgo', claveInegi: '140660031' },
+    { cct: '14DPR9999Z', nombre: 'Escuela de Poncitlán', claveInegi: '140660001' },
   ])
   await db.centrosSalud.bulkAdd([
     { clues: 'PROV-AC-01', nombre: 'Centro de Salud Agua Caliente', claveInegi: '140660002' },
     { clues: 'PROV-SPI-01', nombre: 'Centro de Salud San Pedro', claveInegi: '140660031' },
+    { clues: 'JCSSA004143', nombre: 'CENTRO DE SALUD PONCITLAN', claveInegi: '140660001' },
   ])
   const casos = [
     ...Array.from({ length: 6 }, (_, i) => caso(`PON-AC-000${i + 1}`, '14DPR1710G', 'PROV-AC-01')),
@@ -134,6 +139,19 @@ describe('SupervisionPage (HU07, HU08)', () => {
     fireEvent.change(screen.getByLabelText('Localidad'), { target: { value: '140660031' } })
     const opciones = within(screen.getByLabelText('Escuela')).getAllByRole('option')
     expect(opciones.map((o) => o.textContent)).toEqual(['Todas', 'Miguel Hidalgo (14DPR0001A)'])
+  })
+
+  it('los filtros solo ofrecen localidades en alcance, sus escuelas y sus centros', async () => {
+    render(<SupervisionPage hoyISO={HOY} usuario={supervisor} db={db} />)
+    await screen.findByText('Casos por etapa')
+    const textos = (etiqueta) =>
+      within(screen.getByLabelText(etiqueta))
+        .getAllByRole('option')
+        .map((o) => o.textContent)
+    expect(textos('Localidad')).not.toEqual(expect.arrayContaining([expect.stringMatching(/Total del Municipio|Poncitlán/)]))
+    expect(textos('Localidad')).toHaveLength(3)
+    expect(textos('Escuela').join()).not.toMatch(/Poncitlán/)
+    expect(textos('Centro de salud').join()).not.toMatch(/PONCITLAN/)
   })
 
   it('recalcula al registrar un resultado nuevo', async () => {

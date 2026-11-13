@@ -25,6 +25,11 @@ vi.mock('react-leaflet', () => ({
       {children}
     </div>
   ),
+  Marker: ({ children, position, title }) => (
+    <div data-testid="marcador-centro" data-lat={position[0]} title={title}>
+      {children}
+    </div>
+  ),
   Tooltip: ({ children, permanent, direction }) => (
     <span data-testid="etiqueta-marcador" data-permanente={String(Boolean(permanent))} data-direccion={direction}>
       {children}
@@ -43,7 +48,7 @@ function caso(codigo, cct, extra = {}) {
     codigo,
     codigoNino: codigo.replace('PON', 'NIN'),
     cct,
-    clues: 'PROV-AC-01',
+    clues: 'JCSSA004213',
     fechaTamizaje: '2026-09-01',
     etapaActual: 1,
     estado: 'en_seguimiento',
@@ -53,19 +58,27 @@ function caso(codigo, cct, extra = {}) {
   }
 }
 
-// Agua Caliente: 5 verdes y 3 rojos. San Pedro: 6 verdes. Chalpicote: sin casos.
+// Imita el catálogo real (PR #19): fila "Total del Municipio" sin coordenadas,
+// localidades fuera de alcance con coordenadas y un centro que atiende a una
+// localidad desde otra. Agua Caliente: 5 verdes y 3 rojos. San Pedro: 6 verdes.
+// Chalpicote: sin casos, atendida por un centro con ubicación aproximada.
 async function sembrar() {
   await db.localidades.bulkAdd([
-    { claveInegi: '140660002', nombre: 'Agua Caliente', gradoMarginacion: 'Medio', poblacion5a14: 445, lat: 20.312568, lng: -102.928629 },
-    { claveInegi: '140660031', nombre: 'San Pedro Itzicán', gradoMarginacion: 'Medio', poblacion5a14: 1954, lat: 20.315556, lng: -102.951944 },
-    { claveInegi: '140660043', nombre: 'Chalpicote', gradoMarginacion: 'Alto', poblacion5a14: 276, lat: 20.310201, lng: -102.919552 },
+    { claveInegi: '140660000', nombre: 'Total del Municipio', poblacion5a14: 11635, lat: null, lng: null, enAlcance: false, cluesOperativo: null, distanciaKm: null },
+    { claveInegi: '140669998', nombre: 'Localidades de una vivienda', lat: null, lng: null, enAlcance: false, cluesOperativo: null },
+    { claveInegi: '140660001', nombre: 'Poncitlán', gradoMarginacion: 'Bajo', lat: 20.379, lng: -102.927, enAlcance: false, cluesOperativo: 'JCSSA004143', distanciaKm: 0 },
+    { claveInegi: '140660002', nombre: 'Agua Caliente', gradoMarginacion: 'Medio', poblacion5a14: 445, lat: 20.312568, lng: -102.928629, enAlcance: true, cluesOperativo: 'JCSSA004213', distanciaKm: 2.723 },
+    { claveInegi: '140660031', nombre: 'San Pedro Itzicán', gradoMarginacion: 'Medio', poblacion5a14: 1954, lat: 20.315556, lng: -102.951944, enAlcance: true, cluesOperativo: 'JCSSA004213', distanciaKm: 0 },
+    { claveInegi: '140660043', nombre: 'Chalpicote', gradoMarginacion: 'Alto', poblacion5a14: 276, lat: 20.310201, lng: -102.919552, enAlcance: true, cluesOperativo: 'JCSSA004184', distanciaKm: 3.703 },
   ])
   await db.escuelas.bulkAdd([
     { cct: '14DPR1710G', nombre: 'Emiliano Zapata', turno: 'matutino', claveInegi: '140660002', matricula: 157, ubicacionAproximada: true },
     { cct: '14DPR0001A', nombre: 'Miguel Hidalgo', turno: 'matutino', claveInegi: '140660031', matricula: 90, ubicacionAproximada: true },
   ])
   await db.centrosSalud.bulkAdd([
-    { clues: 'PROV-AC-01', nombre: 'Centro de Salud Agua Caliente (provisional)', claveInegi: '140660002', provisional: true },
+    { clues: 'JCSSA004213', nombre: 'CENTRO DE SALUD SAN PEDRO ITZICAN', institucion: 'SSA', claveInegi: '140660031', lat: 20.31693929, lng: -102.95432655, ubicacionAproximada: false },
+    { clues: 'JCSSA004184', nombre: 'CENTRO DE SALUD SANTA CRUZ', institucion: 'SSA', claveInegi: '140660025', lat: 20.33, lng: -102.9, ubicacionAproximada: true },
+    { clues: 'JCSSA004143', nombre: 'CENTRO DE SALUD PONCITLAN', institucion: 'SSA', claveInegi: '140660001', lat: 20.37910216, lng: -102.92780975, ubicacionAproximada: false },
   ])
   await db.casos.bulkAdd([
     ...Array.from({ length: 5 }, (_, i) => caso(`PON-AC-000${i + 1}`, '14DPR1710G')),
@@ -77,6 +90,9 @@ async function sembrar() {
 const localidad = (nombre) =>
   within(screen.getByRole('navigation', { name: 'Localidades' })).getByRole('button', { name: nombre })
 const panel = () => within(document.querySelector('.mapa__panel'))
+// Etiquetas de los marcadores de localidad (los centros tienen las suyas).
+const etiquetasLocalidad = () =>
+  screen.getAllByTestId('marcador').map((m) => within(m).getByTestId('etiqueta-marcador'))
 const valor = (termino) => panel().getByText(termino).closest('div').querySelector('dd').textContent
 
 beforeEach(async () => {
@@ -97,6 +113,24 @@ async function abrir() {
 }
 
 describe('MapaPage (HU09, RF10)', () => {
+  it('solo localidades en alcance: sin "Total del Municipio" ni localidades fuera de la zona', async () => {
+    await abrir()
+    for (const nombre of ['Total del Municipio', 'Localidades de una vivienda', 'Poncitlán']) {
+      expect(screen.queryByText(nombre)).not.toBeInTheDocument()
+    }
+  })
+
+  it('marca con otro símbolo solo los centros que atienden a las localidades en alcance', async () => {
+    await abrir()
+    const centros = screen.getAllByTestId('marcador-centro')
+    expect(centros.map((c) => c.textContent)).toEqual([
+      'CENTRO DE SALUD SAN PEDRO ITZICAN · CLUES JCSSA004213',
+      'CENTRO DE SALUD SANTA CRUZ · CLUES JCSSA004184',
+    ])
+    expect(centros[0]).toHaveAttribute('title', 'Centro de salud: CENTRO DE SALUD SAN PEDRO ITZICAN')
+    expect(screen.getByRole('list', { name: 'Símbolos del mapa' })).toHaveTextContent('Centro de salud')
+  })
+
   it('lista de localidades con botones y un marcador por localidad', async () => {
     await abrir()
     const lista = within(screen.getByRole('navigation', { name: 'Localidades' }))
@@ -125,8 +159,11 @@ describe('MapaPage (HU09, RF10)', () => {
     expect(panel().getByText(/Emiliano Zapata/)).toBeInTheDocument()
     expect(panel().getByText('157')).toBeInTheDocument()
     expect(panel().getByText(/Ubicación aproximada/)).toBeInTheDocument()
-    expect(panel().getByText('Centro provisional')).toBeInTheDocument()
-    expect(panel().queryByText(/\(provisional\)/)).not.toBeInTheDocument()
+    expect(panel().getByText('CENTRO DE SALUD SAN PEDRO ITZICAN')).toBeInTheDocument()
+    expect(valor('CLUES')).toBe('JCSSA004213')
+    expect(valor('Institución')).toBe('SSA')
+    expect(valor('Distancia')).toBe('A 2.7 km')
+    expect(panel().queryByText(/provisional/i)).not.toBeInTheDocument()
 
     expect(panel().getByText('Datos simulados')).toBeInTheDocument()
     expect(valor('Total de positivos')).toBe('8')
@@ -139,7 +176,7 @@ describe('MapaPage (HU09, RF10)', () => {
 
   it('cada marcador lleva su nombre siempre visible', async () => {
     await abrir()
-    const etiquetas = screen.getAllByTestId('etiqueta-marcador')
+    const etiquetas = etiquetasLocalidad()
     expect(etiquetas.map((e) => e.textContent).sort()).toEqual(['Agua Caliente', 'Chalpicote', 'San Pedro Itzicán'])
     for (const e of etiquetas) expect(e).toHaveAttribute('data-permanente', 'true')
   })
@@ -147,7 +184,7 @@ describe('MapaPage (HU09, RF10)', () => {
   it('la etiqueta de Chalpicote va abajo y las otras arriba (no se enciman a 360 px)', async () => {
     await abrir()
     const direccion = Object.fromEntries(
-      screen.getAllByTestId('etiqueta-marcador').map((e) => [e.textContent, e.dataset.direccion]),
+      etiquetasLocalidad().map((e) => [e.textContent, e.dataset.direccion]),
     )
     expect(direccion).toEqual({ Chalpicote: 'bottom', 'Agua Caliente': 'top', 'San Pedro Itzicán': 'top' })
   })
@@ -169,6 +206,7 @@ describe('MapaPage (HU09, RF10)', () => {
     fireEvent.click(marcador)
     expect(panel().getByRole('heading', { name: 'San Pedro Itzicán' })).toBeInTheDocument()
     expect(valor('Verde')).toBe('6')
+    expect(valor('Distancia')).toBe('En la misma localidad')
     expect(localidad('San Pedro Itzicán')).toHaveAttribute('aria-pressed', 'true')
   })
 
@@ -177,7 +215,9 @@ describe('MapaPage (HU09, RF10)', () => {
     fireEvent.click(localidad('Chalpicote'))
     expect(valor('Total de positivos')).toBe('menos de 5')
     expect(valor('Rojo')).toBe('menos de 5')
-    expect(panel().getByText('Sin centro de salud registrado.')).toBeInTheDocument()
+    expect(panel().getByText('CENTRO DE SALUD SANTA CRUZ')).toBeInTheDocument()
+    expect(valor('Distancia')).toBe('A 3.7 km')
+    expect(panel().getByText('Ubicación aproximada')).toBeInTheDocument()
   })
 
   it('no muestra códigos de caso ni de niño', async () => {

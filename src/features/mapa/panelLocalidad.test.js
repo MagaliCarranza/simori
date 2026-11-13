@@ -1,23 +1,24 @@
 import { describe, expect, it } from 'vitest'
 import { PROTEGIDO, resumenPorGrupo } from '../../domain/index.js'
-import { panelesPorLocalidad } from './panelLocalidad.js'
+import { centrosEnMapa, panelesPorLocalidad } from './panelLocalidad.js'
 
 const HOY = '2026-11-14'
 
 const catalogos = {
   localidades: [
-    { claveInegi: 'L2', nombre: 'San Pedro', gradoMarginacion: 'Medio', poblacion5a14: 1954, lat: 20.31, lng: -102.95 },
-    { claveInegi: 'L1', nombre: 'Agua Caliente', gradoMarginacion: 'Medio', poblacion5a14: 445, lat: 20.31, lng: -102.92 },
-    { claveInegi: 'L3', nombre: 'Chalpicote', gradoMarginacion: 'Alto', poblacion5a14: 276 },
+    { claveInegi: 'L2', nombre: 'San Pedro', gradoMarginacion: 'Medio', poblacion5a14: 1954, lat: 20.31, lng: -102.95, cluesOperativo: 'C-SP', distanciaKm: 0 },
+    { claveInegi: 'L1', nombre: 'Agua Caliente', gradoMarginacion: 'Medio', poblacion5a14: 445, lat: 20.31, lng: -102.92, cluesOperativo: 'C-SP', distanciaKm: 2.723 },
+    { claveInegi: 'L3', nombre: 'Chalpicote', gradoMarginacion: 'Alto', poblacion5a14: 276, cluesOperativo: null, distanciaKm: null },
   ],
   escuelas: [
     { cct: 'E1', nombre: 'Zapata', turno: 'matutino', claveInegi: 'L1', matricula: 157, ubicacionAproximada: true },
     { cct: 'E2', nombre: 'Hidalgo', turno: 'vespertino', claveInegi: 'L2', matricula: 90, ubicacionAproximada: true },
     { cct: 'E3', nombre: 'Juárez', claveInegi: 'L3', matricula: 60 },
   ],
+  // C-SP está en L2 y atiende también a L1. C-AP no atiende a nadie.
   centros: [
-    { clues: 'PROV-1', nombre: 'Centro Agua Caliente (provisional)', claveInegi: 'L1', provisional: true },
-    { clues: 'C-2', nombre: 'Centro San Pedro (provisional)', claveInegi: 'L2', provisional: false },
+    { clues: 'C-SP', nombre: 'CENTRO DE SALUD SAN PEDRO', institucion: 'SSA', claveInegi: 'L2', lat: 20.32, lng: -102.96, ubicacionAproximada: false },
+    { clues: 'C-AP', nombre: 'CENTRO APARTE', institucion: 'IMSS', claveInegi: 'L9', lat: 20.4, lng: -102.9, ubicacionAproximada: true },
   ],
 }
 
@@ -48,7 +49,7 @@ describe('panelesPorLocalidad', () => {
     expect(paneles.map((p) => p.nombre)).toEqual(['Agua Caliente', 'Chalpicote', 'San Pedro'])
   })
 
-  it('une escuelas y centro de su localidad con ubicación aproximada y provisional', () => {
+  it('une escuelas y el centro que atiende a la localidad aunque esté en otra', () => {
     const ac = paneles[0]
     expect(ac.gradoMarginacion).toBe('Medio')
     expect(ac.poblacion5a14).toBe(445)
@@ -56,7 +57,13 @@ describe('panelesPorLocalidad', () => {
     expect(ac.escuelas).toEqual([
       { cct: 'E1', nombre: 'Zapata', turno: 'matutino', matricula: 157, ubicacionAproximada: true },
     ])
-    expect(ac.centros).toEqual([{ clues: 'PROV-1', nombre: 'Centro Agua Caliente', provisional: true }])
+    expect(ac.centro).toEqual({
+      clues: 'C-SP',
+      nombre: 'CENTRO DE SALUD SAN PEDRO',
+      institucion: 'SSA',
+      distanciaKm: 2.723,
+      ubicacionAproximada: false,
+    })
   })
 
   it('los pendientes son la fila de resumenPorGrupo (con "protegido")', () => {
@@ -70,15 +77,15 @@ describe('panelesPorLocalidad', () => {
     expect(paneles[0].pendientes.semaforo).toEqual({ verde: 5, amarillo: PROTEGIDO, rojo: PROTEGIDO })
   })
 
-  it('quita "(provisional)" del nombre solo si el centro es provisional', () => {
-    expect(paneles[0].centros[0].nombre).toBe('Centro Agua Caliente')
-    expect(paneles[2].centros[0].nombre).toBe('Centro San Pedro (provisional)')
+  it('el nombre del centro se deja tal como viene en CLUES y la distancia 0 se conserva', () => {
+    expect(paneles[2].centro.nombre).toBe('CENTRO DE SALUD SAN PEDRO')
+    expect(paneles[2].centro.distanciaKm).toBe(0)
   })
 
   it('una localidad sin casos muestra todo como "menos de 5"', () => {
     const chalpicote = paneles[1]
     expect(chalpicote.coordenadas).toBeNull()
-    expect(chalpicote.centros).toEqual([])
+    expect(chalpicote.centro).toBeNull()
     expect(chalpicote.pendientes).toEqual({
       total: 'menos de 5',
       enSeguimiento: 'menos de 5',
@@ -89,5 +96,18 @@ describe('panelesPorLocalidad', () => {
 
   it('no contiene códigos de caso', () => {
     expect(JSON.stringify(paneles)).not.toMatch(/PON-/)
+  })
+})
+
+describe('centrosEnMapa', () => {
+  it('solo centros con coordenadas que atienden a alguna localidad', () => {
+    expect(centrosEnMapa(catalogos.localidades, catalogos.centros)).toEqual([
+      { clues: 'C-SP', nombre: 'CENTRO DE SALUD SAN PEDRO', coordenadas: [20.32, -102.96], ubicacionAproximada: false },
+    ])
+  })
+
+  it('omite un centro sin coordenadas', () => {
+    const sinCoordenadas = [{ ...catalogos.centros[0], lat: null, lng: null }]
+    expect(centrosEnMapa(catalogos.localidades, sinCoordenadas)).toEqual([])
   })
 })
