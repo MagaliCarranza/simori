@@ -8,6 +8,21 @@ export default defineConfig({
     VitePWA({
       registerType: 'autoUpdate',
       includeAssets: ['favicon.svg'],
+      // Mosaicos de OpenStreetMap: se guardan solo los que se ven (sin descarga
+      // previa, por la política de uso de OSM) y con límite, para el mapa offline.
+      workbox: {
+        runtimeCaching: [
+          {
+            urlPattern: ({ url }) => url.hostname === 'tile.openstreetmap.org',
+            handler: 'CacheFirst',
+            options: {
+              cacheName: 'mosaicos-osm',
+              expiration: { maxEntries: 200, maxAgeSeconds: 60 * 60 * 24 * 30 },
+              cacheableResponse: { statuses: [200] },
+            },
+          },
+        ],
+      },
       manifest: {
         name: 'Ruta Riñón',
         short_name: 'Ruta Riñón',
