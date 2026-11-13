@@ -1,0 +1,12 @@
+{
+  "entidad": 14,
+  "municipio": 66,
+  "enAlcance": ["0002", "0031", "0043"],
+  "normalizarContra": "municipio",
+  "notas": {
+    "entidad": "14 = Jalisco (clave INEGI).",
+    "municipio": "066 = Poncitlan (clave INEGI).",
+    "enAlcance": "Localidades donde opera el prototipo: 0002 Agua Caliente, 0031 San Pedro Itzican, 0043 Chalpicote.",
+    "normalizarContra": "Las variables continuas del indice de prioridad se normalizan contra 'municipio' (todas las localidades de Poncitlan) para que los valores relativos tengan sentido."
+  }
+}

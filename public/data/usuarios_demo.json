@@ -1,36 +1,16 @@
 [
   {
-    "id": "USR-CAP-AC",
+    "id": "USR-CAP-01",
     "rol": "captura",
-    "clues": "PROV-AC-01"
+    "clues": "JCSSA004213"
   },
   {
-    "id": "USR-CAP-SPI",
-    "rol": "captura",
-    "clues": "PROV-SPI-01"
-  },
-  {
-    "id": "USR-CAP-CHA",
-    "rol": "captura",
-    "clues": "PROV-CHA-01"
-  },
-  {
-    "id": "USR-CAM-AC",
+    "id": "USR-CAM-01",
     "rol": "campo",
-    "clues": "PROV-AC-01"
+    "clues": "JCSSA004213"
   },
   {
-    "id": "USR-CAM-SPI",
-    "rol": "campo",
-    "clues": "PROV-SPI-01"
-  },
-  {
-    "id": "USR-CAM-CHA",
-    "rol": "campo",
-    "clues": "PROV-CHA-01"
-  },
-  {
-    "id": "USR-SUP-JAL",
+    "id": "USR-SUP-01",
     "rol": "supervision",
     "clues": null
   }
