@@ -24,9 +24,9 @@ export default defineConfig({
         ],
       },
       manifest: {
-        name: 'Ruta Riñón',
-        short_name: 'Ruta Riñón',
-        description: 'Registro de seguimiento de tamizaje renal en Poncitlán, Jalisco.',
+        name: 'SIMORI',
+        short_name: 'SIMORI',
+        description: 'SIMORI: registro de seguimiento de tamizaje renal en Poncitlán, Jalisco.',
         lang: 'es-MX',
         theme_color: '#0f766e',
         background_color: '#ffffff',
