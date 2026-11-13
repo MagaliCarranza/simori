@@ -140,6 +140,45 @@
   padding-left: 12px;
 }
 
+/* Prioridad por localidad. Paleta propia (rosa/violeta/pizarra) para no
+   confundirla con el semáforo (verde/amarillo/rojo) ni con los puntos del
+   mapa (azul). Siempre lleva texto además del color. */
+.mapa__prioridad {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin: 8px 0 12px;
+  padding: 8px 12px;
+  border-left: 4px solid currentColor;
+  border-radius: 6px;
+}
+
+.mapa__prioridad-etiqueta {
+  font-weight: 700;
+  text-transform: capitalize;
+}
+
+.mapa__prioridad-razon {
+  color: var(--color-texto, #111827);
+  font-size: 0.9375rem;
+  font-weight: 500;
+}
+
+.mapa__prioridad--alta {
+  background: #fdf2f8;
+  color: #9d174d;
+}
+
+.mapa__prioridad--media {
+  background: #f3e8ff;
+  color: #5b21b6;
+}
+
+.mapa__prioridad--baja {
+  background: #f1f5f9;
+  color: #334155;
+}
+
 @media (min-width: 768px) {
   .mapa__cuerpo {
     grid-template-columns: minmax(0, 1fr) 320px;

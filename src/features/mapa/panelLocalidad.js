@@ -1,7 +1,7 @@
 // Datos del panel del mapa (M9). Solo une catálogos con la fila de
 // resumenPorGrupo; las cifras ya vienen enmascaradas del dominio.
 
-import { COLORES_SEMAFORO, enmascararMenorQue5 } from '../../domain/index.js'
+import { calcularPrioridad, COLORES_SEMAFORO, enmascararMenorQue5 } from '../../domain/index.js'
 
 // Una localidad sin casos no aparece en resumenPorGrupo: su 0 se muestra como
 // "menos de 5" (limitación conocida: no entra en la supresión por columna).
@@ -32,27 +32,32 @@ const tieneCoordenadas = (l) => Number.isFinite(l.lat) && Number.isFinite(l.lng)
 // Un panel por localidad del catálogo, ordenado por nombre.
 export function panelesPorLocalidad({ localidades, escuelas, centros }, porLocalidad) {
   const grupoPorClave = new Map(porLocalidad.map((g) => [g.clave, g]))
+  const prioridadPorClave = new Map(calcularPrioridad(localidades).map((p) => [p.claveInegi, p]))
   return localidades
-    .map((l) => ({
-      claveInegi: l.claveInegi,
-      nombre: l.nombre,
-      gradoMarginacion: l.gradoMarginacion ?? null,
-      poblacion5a14: l.poblacion5a14 ?? null,
-      coordenadas: tieneCoordenadas(l) ? [l.lat, l.lng] : null,
-      escuelas: escuelas
-        .filter((e) => e.claveInegi === l.claveInegi)
-        .map((e) => ({
-          cct: e.cct,
-          nombre: e.nombre,
-          turno: e.turno ?? null,
-          matricula: e.matricula ?? null,
-          ubicacionAproximada: Boolean(e.ubicacionAproximada),
-        }))
-        .sort((a, b) => a.nombre.localeCompare(b.nombre, 'es')),
-      centros: centros
-        .filter((c) => c.claveInegi === l.claveInegi)
-        .map((c) => ({ clues: c.clues, nombre: nombreCentro(c), provisional: Boolean(c.provisional) })),
-      pendientes: pendientesDe(grupoPorClave.get(l.claveInegi)),
-    }))
+    .map((l) => {
+      const p = prioridadPorClave.get(l.claveInegi)
+      return {
+        claveInegi: l.claveInegi,
+        nombre: l.nombre,
+        gradoMarginacion: l.gradoMarginacion ?? null,
+        poblacion5a14: l.poblacion5a14 ?? null,
+        coordenadas: tieneCoordenadas(l) ? [l.lat, l.lng] : null,
+        prioridad: p ? { nivel: p.nivel, puntaje: p.puntaje, razon: p.razon } : null,
+        escuelas: escuelas
+          .filter((e) => e.claveInegi === l.claveInegi)
+          .map((e) => ({
+            cct: e.cct,
+            nombre: e.nombre,
+            turno: e.turno ?? null,
+            matricula: e.matricula ?? null,
+            ubicacionAproximada: Boolean(e.ubicacionAproximada),
+          }))
+          .sort((a, b) => a.nombre.localeCompare(b.nombre, 'es')),
+        centros: centros
+          .filter((c) => c.claveInegi === l.claveInegi)
+          .map((c) => ({ clues: c.clues, nombre: nombreCentro(c), provisional: Boolean(c.provisional) })),
+        pendientes: pendientesDe(grupoPorClave.get(l.claveInegi)),
+      }
+    })
     .sort((a, b) => a.nombre.localeCompare(b.nombre, 'es'))
 }

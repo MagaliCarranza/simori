@@ -4,6 +4,7 @@
 import 'leaflet/dist/leaflet.css'
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { CircleMarker, MapContainer, TileLayer, Tooltip } from 'react-leaflet'
+import { etiquetaPrioridad } from '../../domain/index.js'
 import { EtiquetaSimulado } from '../../components/EtiquetaSimulado.jsx'
 import { FILTROS_INICIALES } from '../supervision/filtros.js'
 import { useSupervision } from '../supervision/useSupervision.js'
@@ -103,11 +104,18 @@ function Par({ termino, children }) {
 }
 
 function PanelLocalidad({ panel }) {
-  const { pendientes } = panel
+  const { pendientes, prioridad } = panel
   const aproximada = panel.escuelas.some((e) => e.ubicacionAproximada)
   return (
     <>
       <h3 id="titulo-panel">{panel.nombre}</h3>
+
+      {prioridad && (
+        <p className={`mapa__prioridad mapa__prioridad--${prioridad.nivel}`}>
+          <span className="mapa__prioridad-etiqueta">{etiquetaPrioridad(prioridad)}</span>
+          <span className="mapa__prioridad-razon">{prioridad.razon}</span>
+        </p>
+      )}
 
       <dl className="supervision__pares">
         <Par termino="Grado de marginación">{panel.gradoMarginacion ?? 'Sin dato'}</Par>

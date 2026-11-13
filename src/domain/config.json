@@ -8,5 +8,10 @@
   "VISITAS_NO_LOCALIZADAS": 2,
   "ENMASCARAR_MENOR_QUE": 5,
   "PASOS_ENTRE_ETAPAS": 3,
-  "DIA_SUPUESTO_NACIMIENTO": 15
+  "DIA_SUPUESTO_NACIMIENTO": 15,
+  "PRIORIDAD": {
+    "PESOS": { "marginacion": 0.4, "distancia": 0.3, "matricula": 0.2, "hli": 0.1 },
+    "UMBRALES": { "alta": 0.66, "media": 0.33 },
+    "HLI_MIN_PARA_RAZON": 0.05
+  }
 }
