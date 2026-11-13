@@ -6,6 +6,7 @@ import { ENMASCARAR_MENOR_QUE } from './config.js'
 import { embudo, enmascararMenorQue5 } from './embudo.js'
 import { estadoDerivado } from './etapas.js'
 import { contarCompletados, diasEntreEtapas, medianaDiasEntreEtapas } from './indicador.js'
+import { calcularSemaforo } from './semaforo.js'
 import { debeMarcarseSinSeguimiento } from './sinSeguimiento.js'
 
 export const SALIDAS = ['alta', 'vigilancia', 'referido', 'sin_seguimiento', 'en_seguimiento']
@@ -35,6 +36,23 @@ export function desgloseSalidas(casos, eventos, hoyISO) {
   const conteo = Object.fromEntries(SALIDAS.map((s) => [s, 0]))
   for (const c of casos) {
     conteo[estadoParaDesglose(c, eventosPorCaso.get(c.codigo) || [], hoyISO)]++
+  }
+  return conteo
+}
+
+export const COLORES_SEMAFORO = ['verde', 'amarillo', 'rojo']
+
+// Cuenta por color del semáforo los casos que el desglose deja en seguimiento
+// (sin enmascarar). Suma igual que desgloseSalidas(...).en_seguimiento.
+// Se pasa el estado ya deducido ('en_seguimiento'): calcularSemaforo mira el
+// estado guardado y daría "Cerrado" a un alta/referido guardado sin su evento.
+export function semaforoEnSeguimiento(casos, eventos, hoyISO) {
+  const eventosPorCaso = agruparEventos(eventos)
+  const conteo = Object.fromEntries(COLORES_SEMAFORO.map((c) => [c, 0]))
+  for (const c of casos) {
+    const eventosCaso = eventosPorCaso.get(c.codigo) || []
+    if (estadoParaDesglose(c, eventosCaso, hoyISO) !== 'en_seguimiento') continue
+    conteo[calcularSemaforo({ ...c, estado: 'en_seguimiento' }, eventosCaso, hoyISO).color]++
   }
   return conteo
 }
@@ -70,10 +88,12 @@ function medianasSeguras(casos, eventos) {
 // Resumen listo para mostrar: todas las cifras ya enmascaradas, sin códigos.
 export function resumenSupervision(casos, eventos, hoyISO) {
   const salidas = desgloseSalidas(casos, eventos, hoyISO)
+  const semaforo = semaforoEnSeguimiento(casos, eventos, hoyISO)
   return {
     total: enmascararMenorQue5(casos.length),
     embudo: embudo(casos, eventos).map((e) => ({ ...e, n: enmascararMenorQue5(e.n) })),
     salidas: Object.fromEntries(SALIDAS.map((s) => [s, enmascararMenorQue5(salidas[s])])),
+    semaforo: Object.fromEntries(COLORES_SEMAFORO.map((c) => [c, enmascararMenorQue5(semaforo[c])])),
     completado: completadoSeguro(casos, eventos),
     medianas: medianasSeguras(casos, eventos),
   }
@@ -100,7 +120,7 @@ export function columnaSegura(valores) {
 }
 
 // Un resumen enmascarado por grupo (escuela, localidad o centro), con supresión
-// secundaria por columna en total, embudo y salidas.
+// secundaria por columna en total, embudo, salidas y semáforo.
 // claveDe(caso) devuelve la clave del grupo; los casos sin clave se omiten.
 export function resumenPorGrupo(casos, eventos, hoyISO, claveDe) {
   const grupos = new Map()
@@ -119,11 +139,15 @@ export function resumenPorGrupo(casos, eventos, hoyISO, claveDe) {
       eventos: eventosGrupo,
       embudo: embudo(casosGrupo, eventosGrupo),
       salidas: desgloseSalidas(casosGrupo, eventosGrupo, hoyISO),
+      semaforo: semaforoEnSeguimiento(casosGrupo, eventosGrupo, hoyISO),
     }
   })
 
   const totales = columnaSegura(lista.map((g) => g.casos.length))
   const salidasPorColumna = Object.fromEntries(SALIDAS.map((s) => [s, columnaSegura(lista.map((g) => g.salidas[s]))]))
+  const semaforoPorColumna = Object.fromEntries(
+    COLORES_SEMAFORO.map((c) => [c, columnaSegura(lista.map((g) => g.semaforo[c]))]),
+  )
   const embudoPorColumna = (lista[0]?.embudo ?? []).map((_, j) => columnaSegura(lista.map((g) => g.embudo[j].n)))
 
   return lista.map((g, i) => ({
@@ -131,6 +155,7 @@ export function resumenPorGrupo(casos, eventos, hoyISO, claveDe) {
     total: totales[i],
     embudo: g.embudo.map((e, j) => ({ ...e, n: embudoPorColumna[j][i] })),
     salidas: Object.fromEntries(SALIDAS.map((s) => [s, salidasPorColumna[s][i]])),
+    semaforo: Object.fromEntries(COLORES_SEMAFORO.map((c) => [c, semaforoPorColumna[c][i]])),
     completado: completadoSeguro(g.casos, g.eventos),
     medianas: medianasSeguras(g.casos, g.eventos),
   }))
