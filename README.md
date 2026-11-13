@@ -1,4 +1,4 @@
-# Ruta Riñón
+# SIMORI
 
 Prototipo web (PWA) de **registro de seguimiento** para niñas y niños con **tamizaje renal positivo** en Poncitlán, Jalisco. Acompaña cada caso desde el tamizaje hasta su diagnóstico, alta o referencia, marca con un semáforo a quien se atrasa y muestra en qué etapa se detiene.
 
@@ -10,7 +10,7 @@ En Poncitlán, Jalisco, la Secretaría de Salud publica cuántos escolares tamiz
 
 ## La propuesta
 
-Ruta Riñón acompaña a cada niño con tamizaje positivo hasta su diagnóstico, alta o referencia. La ruta clínica sigue el **protocolo aplicado por la UdeG en la zona** y se complementa con la **guía internacional KDIGO 2024**. Usamos cinco datasets del catálogo oficial para describir el problema, priorizar tres localidades (**San Pedro Itzicán, Agua Caliente y Chalpicote**) y diseñar la solución; los casos individuales son **simulados** y se presentan en **tres escenarios de pérdida (11 %, 30 %, 50 %)**.
+SIMORI acompaña a cada niño con tamizaje positivo hasta su diagnóstico, alta o referencia. La ruta clínica sigue el **protocolo aplicado por la UdeG en la zona** y se complementa con la **guía internacional KDIGO 2024**. Usamos cinco datasets del catálogo oficial para describir el problema, priorizar tres localidades (**San Pedro Itzicán, Agua Caliente y Chalpicote**) y diseñar la solución; los casos individuales son **simulados** y se presentan en **tres escenarios de pérdida (11 %, 30 %, 50 %)**.
 
 Es un prototipo, **funciona sin internet** después de la primera carga, y podría operar con la **Secretaría de Salud Jalisco** como responsable.
 

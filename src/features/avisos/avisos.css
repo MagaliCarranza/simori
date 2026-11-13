@@ -103,6 +103,30 @@
   color: var(--color-neutral);
 }
 
+/* Lista consolidada de avisos (/avisos). */
+.lista-avisos__meta {
+  margin: 4px 0 0;
+  color: var(--color-neutral);
+  font-size: 0.9rem;
+}
+
+.insignia-aviso {
+  padding: 2px 10px;
+  border-radius: 999px;
+  font-size: 0.8rem;
+  font-weight: 700;
+}
+
+.insignia-aviso--pendiente {
+  background: #fff4cf;
+  color: #7a4c00;
+}
+
+.insignia-aviso--entregado {
+  background: #d7f0d0;
+  color: #1b5e20;
+}
+
 /* Recado escolar: al imprimir solo sale la vista previa del caso elegido. */
 @media print {
   body * {
