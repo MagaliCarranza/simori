@@ -11,6 +11,11 @@ export default defineConfig({
       // Mosaicos de OpenStreetMap: se guardan solo los que se ven (sin descarga
       // previa, por la política de uso de OSM) y con límite, para el mapa offline.
       workbox: {
+        // Patrón por omisión de Workbox más los dos JSON que el mapa pide en
+        // cada visita (marco del índice y grupos k-means). Los demás JSON de
+        // public/data se guardan en IndexedDB al arrancar (src/db/seed.js), y
+        // los casos_*.json pesan ~0.7 MB cada uno, así que no se precargan.
+        globPatterns: ['**/*.{js,css,html}', 'data/localidades_marco.json', 'data/grupos_localidades.json'],
         runtimeCaching: [
           {
             urlPattern: ({ url }) => url.hostname === 'tile.openstreetmap.org',
