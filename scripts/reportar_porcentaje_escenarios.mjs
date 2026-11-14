@@ -1,7 +1,15 @@
 // Reporte "titular" por escenario (RF11): % que completa su evaluación y
-// los tres grupos que el equipo usa en la demo, calculados sobre los JSON
+// los cuatro grupos que el equipo usa en la demo, calculados sobre los JSON
 // generados por scripts/simular_casos.py. Se corre con Node directo:
 //   node scripts/reportar_porcentaje_escenarios.mjs
+//
+// Importante: este archivo REPLICA lógica del dominio porque Node no puede
+// importar `src/domain/*.js` directo (config.js hace `import config from
+// './config.json'` sin la cláusula `with { type: 'json' }`). Si tocas la
+// regla de `porcentajeCompletado` (src/domain/indicador.js), la de
+// `calcularSemaforo` (src/domain/semaforo.js) o la clasificación de los
+// cuatro grupos (resumen_escenario en scripts/simular_casos.py), actualiza
+// este archivo en paralelo o el reporte diverge silenciosamente.
 
 import { readFile } from 'node:fs/promises'
 import { dirname, join } from 'node:path'

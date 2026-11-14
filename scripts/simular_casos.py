@@ -272,6 +272,17 @@ def expandir_escenario(escenario_pct, casos_base, args, rng_visitas):
       - Un caso solo puede perderse en pasos cuya fecha programada ya paso.
       - Si la fecha programada del siguiente paso es futura, el caso queda en
         su etapa actual, en_seguimiento, con esa fecha en fechaProximaCita.
+
+    Convencion sobre fechaProximaCita para casos perdidos (heredada del
+    baseline; util para quien extienda M4/M5):
+      - Paso 1 -> 2: el caso guarda fechaProximaCita = fecha_confirm (la
+        cita formal que la familia no honro). El semaforo la trata como
+        cita vencida y pasa a rojo rapido.
+      - Pasos 2 -> 3 y 3 -> 4: fechaProximaCita queda None. En la ruta
+        clinica la valoracion y la clasificacion son pasos internos del
+        centro de salud, no citas formales; se asume que nunca llego a
+        agendarse la siguiente cita. El semaforo cae en la rama "sin cita"
+        y calcula el retraso contra el ultimo resultado.
     """
     p = escenario_pct / 100.0
     hoy = date.fromisoformat(args.hoy)
