@@ -1,7 +1,47 @@
 .app {
   min-height: 100dvh;
-  padding: 0 0 32px;
   background: var(--color-fondo, #f3f7fd);
+}
+
+/* Marco: encabezado arriba; contenido; navegación abajo (celular) o a la
+   izquierda (escritorio). */
+.marco {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  min-height: 100dvh;
+}
+
+.marco__contenido {
+  min-width: 0;
+  padding-bottom: 32px;
+}
+
+/* Espacio para que la barra inferior no tape el final del contenido. */
+.marco--con-menu .marco__contenido {
+  padding-bottom: calc(96px + env(safe-area-inset-bottom, 0px));
+}
+
+@media (min-width: 768px) {
+  .marco--con-menu {
+    grid-template-columns: 220px minmax(0, 1fr);
+    grid-template-rows: auto 1fr;
+  }
+
+  .marco--con-menu > .nav-rol {
+    grid-column: 1 / -1;
+  }
+
+  .marco--con-menu .marco__contenido {
+    padding-bottom: 32px;
+  }
+}
+
+/* "Datos simulados" ya está en el encabezado del marco, visible en todas las
+   pantallas: se oculta solo la copia del encabezado de cada pantalla. Las
+   etiquetas que marcan algo concreto (vista previa del aviso, pendientes del
+   mapa) no están en ese encabezado y se quedan. */
+.marco__contenido > section > header .etiqueta-simulado {
+  display: none;
 }
 
 .app__pie {

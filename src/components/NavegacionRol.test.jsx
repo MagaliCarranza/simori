@@ -1,6 +1,6 @@
-import { fireEvent, render, screen } from '@testing-library/react'
+import { render, screen } from '@testing-library/react'
 import { MemoryRouter } from 'react-router-dom'
-import { describe, expect, it, vi } from 'vitest'
+import { describe, expect, it } from 'vitest'
 import { HOME_POR_ROL, NavegacionRol, RUTAS_POR_ROL } from './NavegacionRol.jsx'
 
 const usuarios = [
@@ -10,18 +10,11 @@ const usuarios = [
 ]
 
 function montar(usuario) {
-  const onCambioUsuario = vi.fn()
   render(
     <MemoryRouter>
-      <NavegacionRol
-        usuarios={usuarios}
-        usuarioId={usuario.id}
-        onCambioUsuario={onCambioUsuario}
-        usuario={usuario}
-      />
+      <NavegacionRol usuario={usuario} />
     </MemoryRouter>,
   )
-  return { onCambioUsuario }
 }
 
 describe('NavegacionRol', () => {
@@ -55,10 +48,28 @@ describe('NavegacionRol', () => {
     expect(screen.queryByRole('link', { name: /Ficha/ })).not.toBeInTheDocument()
   })
 
-  it('cambiar de rol en el selector dispara onCambioUsuario', () => {
-    const { onCambioUsuario } = montar(usuarios[0])
-    fireEvent.change(screen.getByLabelText('Usuario demo'), { target: { value: 'USR-SUP-JAL' } })
-    expect(onCambioUsuario).toHaveBeenCalledWith('USR-SUP-JAL')
+  it('el chip del rol lleva al inicio para cambiarlo, con texto accesible', () => {
+    montar(usuarios[1])
+    const chip = screen.getByRole('link', { name: 'Cambiar de rol (actual: Visitas de campo)' })
+    expect(chip).toHaveAttribute('href', '/')
+    expect(chip).toHaveTextContent('Visitas de campo')
+    expect(screen.queryByLabelText('Usuario demo')).not.toBeInTheDocument()
+  })
+
+  it('sin rol elegido no hay chip ni menú, pero sí "Datos simulados"', () => {
+    montar(undefined)
+    expect(screen.queryByRole('link', { name: /Cambiar de rol/ })).not.toBeInTheDocument()
+    expect(screen.queryByRole('navigation')).not.toBeInTheDocument()
+    expect(screen.getByText('Datos simulados')).toBeInTheDocument()
+  })
+
+  it('el menú lleva el nombre del rol y cada sección ícono más texto', () => {
+    montar(usuarios[2])
+    const menu = screen.getByRole('navigation', { name: 'Menú de Supervisión' })
+    for (const link of menu.querySelectorAll('a')) {
+      expect(link.querySelector('svg[aria-hidden="true"]')).not.toBeNull()
+      expect(link.textContent.trim()).not.toBe('')
+    }
   })
 
   it('HOME_POR_ROL es la primera ruta no pendiente de cada rol', () => {

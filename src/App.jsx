@@ -52,18 +52,16 @@ function GuardaPorRol({ usuario, cargado }) {
   return <Outlet />
 }
 
-function Shell({ usuarios, usuario, cargado, elegirRol }) {
+// Marco: encabezado y navegación (NavegacionRol) + contenido de la pantalla.
+function Shell({ usuario, cargado }) {
   return (
-    <>
-      <NavegacionRol
-        usuarios={usuarios}
-        usuarioId={usuario?.id ?? ''}
-        onCambioUsuario={(id) => elegirRol(usuarios.find((u) => u.id === id)?.rol)}
-        usuario={usuario}
-      />
-      <GuardaPorRol usuario={usuario} cargado={cargado} />
-      <p className="app__pie">Prototipo con datos simulados. No es un sistema oficial y no diagnostica.</p>
-    </>
+    <div className={`marco${usuario ? ' marco--con-menu' : ''}`}>
+      <NavegacionRol usuario={usuario} />
+      <main className="marco__contenido">
+        <GuardaPorRol usuario={usuario} cargado={cargado} />
+        <p className="app__pie">Prototipo con datos simulados. No es un sistema oficial y no diagnostica.</p>
+      </main>
+    </div>
   )
 }
 
@@ -109,9 +107,9 @@ function AplicacionInterna() {
   }
 
   return (
-    <main className="app">
+    <div className="app">
       <Routes>
-        <Route element={<Shell usuarios={usuarios} usuario={usuario} cargado={cargado} elegirRol={elegirRol} />}>
+        <Route element={<Shell usuario={usuario} cargado={cargado} />}>
           <Route path="/" element={<InicioPage rolActual={rol} onElegir={elegirRol} />} />
 
           {/* Captura */}
@@ -164,7 +162,7 @@ function AplicacionInterna() {
           <Route path="*" element={<Navigate to="/" replace />} />
         </Route>
       </Routes>
-    </main>
+    </div>
   )
 }
 
