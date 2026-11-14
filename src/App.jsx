@@ -7,6 +7,7 @@ import { inicializar } from './db/seed.js'
 import { ListaAvisosPage } from './features/avisos/ListaAvisosPage.jsx'
 import { MisVisitasPage } from './features/campo/MisVisitasPage.jsx'
 import { PendientesPage } from './features/pendientes/PendientesPage.jsx'
+import { RegistrarCasoPage } from './features/registro/RegistrarCasoPage.jsx'
 import { SupervisionPage } from './features/supervision/SupervisionPage.jsx'
 import './App.css'
 
@@ -102,15 +103,7 @@ function AplicacionInterna() {
           <Route path="/" element={null} />
 
           {/* Captura */}
-          <Route
-            path="/registrar"
-            element={
-              <EnConstruccion
-                titulo="Registrar caso"
-                descripcion="Pantalla pendiente (M3)."
-              />
-            }
-          />
+          <Route path="/registrar" element={usuario ? <RegistrarCasoPage usuario={usuario} hoyISO={HOY_DEMO} /> : null} />
           <Route path="/pendientes" element={usuario ? <PendientesPage usuario={usuario} hoyISO={HOY_DEMO} /> : null} />
           <Route
             path="/caso/:codigo"
