@@ -11,14 +11,18 @@ Alcance: scripts/alcance.json (entidad, municipio, enAlcance). Sin claves
 escritas en el codigo.
 
 Salidas (public/data/):
-    localidades.json          Todas las localidades del municipio con
-                              IM_2020, poblacion5a14, pctHLI, phogInd,
-                              matricula, distanciaKm, lat, lng, enAlcance,
-                              cluesOperativo.
+    localidades.json          Solo las localidades enAlcance (las unicas
+                              que se muestran en la app).
+    localidades_marco.json    Todas las localidades reales del municipio
+                              (sin filas de totales del ITER). La app solo
+                              las usa para normalizar el indice de
+                              prioridad; no se muestran en ninguna pantalla.
     escuelas.json             Escuelas publicas primaria/secundaria con
                               matricula de las localidades enAlcance.
-    centros_salud.json        Unidades CLUES reales del municipio con
-                              coordenadas (DENUE o fallback a localidad).
+    centros_salud.json        Solo el CLUES visible (JCSSA004213) que
+                              atiende a las 3 localidades. Las demas
+                              unidades quedan en el preparado para calcular
+                              distancias y no se muestran.
     usuarios_demo.json        1 captura y 1 campo del centro operativo +
                               1 supervision estatal.
 
@@ -53,6 +57,20 @@ RUTA_CLUES = RAW / "catclues.csv"
 RUTA_DENUE = RAW / "denue_00_62_csv" / "conjunto_de_datos" / "denue_inegi_62_.csv"
 RUTA_MANUAL = MANUAL / "georreferencia_manual.csv"
 RUTA_UNION = PROCESADO / "union_clues_denue.csv"
+
+# ITER agrega 3 filas de resumen por municipio que NO son localidades:
+#   0000 "Total del Municipio"
+#   9998 "Localidades de una vivienda"
+#   9999 "Localidades de dos viviendas"
+# Hay que excluirlas antes de calcular cualquier cosa: mezclan promedios
+# ponderados con valores locales (ej: pctHLI del total municipal = 7.4 %)
+# y ensucian el marco de normalizacion.
+TOTALES_ITER = {0, 9998, 9999}
+
+# Unico CLUES visible en el mapa: atiende a las 3 localidades enAlcance.
+# Las demas unidades del municipio se quedan en el preparado para calcular
+# distancias, pero no se publican a la app.
+CLUES_VISIBLE = "JCSSA004213"
 
 
 # ------------------------------- utilidades -------------------------------
@@ -113,6 +131,11 @@ def haversine_km(lat1, lng1, lat2, lng2):
 
 # --------------------------------- ITER ---------------------------------
 
+def filtrar_totales_iter(df):
+    """Excluye las filas agregadas del ITER (LOC 0000, 9998, 9999)."""
+    return df[~df["LOC"].astype(int).isin(TOTALES_ITER)].copy()
+
+
 def leer_iter(entidad, municipio):
     cols = [
         "ENTIDAD", "MUN", "LOC", "NOM_LOC",
@@ -121,7 +144,8 @@ def leer_iter(entidad, municipio):
         "P_3YMAS", "P3YM_HLI", "PHOG_IND",
     ]
     df = pd.read_csv(RUTA_ITER, usecols=cols, low_memory=False, encoding="utf-8")
-    return df[(df["ENTIDAD"] == entidad) & (df["MUN"] == municipio)].copy()
+    df = df[(df["ENTIDAD"] == entidad) & (df["MUN"] == municipio)]
+    return filtrar_totales_iter(df)
 
 
 # --------------------------------- CONAPO ---------------------------------
@@ -358,19 +382,27 @@ def main():
     escuelas = construir_escuelas(sep_df, set(alcance["enAlcance"]), localidades_por_clave)
     usuarios_demo = construir_usuarios_demo(clues_operativo="JCSSA004213")
 
+    # localidades.json es lo que la app muestra: solo las que estan en alcance.
+    # localidades_marco.json incluye todas las del municipio para que
+    # calcularPrioridad tenga un marco de normalizacion amplio; no se muestra.
+    localidades_alcance = [l for l in localidades if l["enAlcance"]]
+    centros_visibles = [c for c in centros if c["clues"] == CLUES_VISIBLE]
+
     PUBLIC.mkdir(parents=True, exist_ok=True)
-    escribir_json(PUBLIC / "localidades.json", localidades)
+    escribir_json(PUBLIC / "localidades.json", localidades_alcance)
+    escribir_json(PUBLIC / "localidades_marco.json", localidades)
     escribir_json(PUBLIC / "escuelas.json", escuelas)
-    escribir_json(PUBLIC / "centros_salud.json", centros)
+    escribir_json(PUBLIC / "centros_salud.json", centros_visibles)
     escribir_json(PUBLIC / "usuarios_demo.json", usuarios_demo)
     escribir_uniones(uniones)
 
     # Resumen.
     print(f"Escritos en {PUBLIC.relative_to(RAIZ)}:")
-    print(f"  localidades.json   -> {len(localidades)} (todas las del municipio)")
-    print(f"  escuelas.json      -> {len(escuelas)} CCT publicos primaria/secundaria en enAlcance")
-    print(f"  centros_salud.json -> {len(centros)} unidades CLUES del municipio")
-    print(f"  usuarios_demo.json -> {len(usuarios_demo)} usuarios (1 captura, 1 campo, 1 supervision)")
+    print(f"  localidades.json        -> {len(localidades_alcance)} en alcance (lo que muestra la app)")
+    print(f"  localidades_marco.json  -> {len(localidades)} del municipio (marco para prioridad; no se muestra)")
+    print(f"  escuelas.json           -> {len(escuelas)} CCT publicos primaria/secundaria en enAlcance")
+    print(f"  centros_salud.json      -> {len(centros_visibles)} visible/s; preparadas internamente {len(centros)}")
+    print(f"  usuarios_demo.json      -> {len(usuarios_demo)} usuarios (1 captura, 1 campo, 1 supervision)")
     print(f"  {RUTA_UNION.relative_to(RAIZ)} con {len(uniones)} uniones")
     print()
     print("Uniones por metodo:")
@@ -382,17 +414,16 @@ def main():
             print(f"  {m:12s} {por_metodo[m]}")
     print()
     print("Localidades enAlcance:")
-    for l in localidades:
-        if l["enAlcance"]:
-            print(
-                f"  [{l['claveInegi']}] {l['nombre']:22s} "
-                f"lat={l['lat']:.4f} lng={l['lng']:.4f} "
-                f"pob5a14={l['poblacion5a14']} "
-                f"IM={l['im2020']:.4f} GM={l['gradoMarginacion']} "
-                f"%HLI={l['pctHLI']:.3f} PHOG_IND={l['phogInd']} "
-                f"matric={l['matricula']} distKm={l['distanciaKm']} "
-                f"cluesOp={l['cluesOperativo']}"
-            )
+    for l in localidades_alcance:
+        print(
+            f"  [{l['claveInegi']}] {l['nombre']:22s} "
+            f"lat={l['lat']:.4f} lng={l['lng']:.4f} "
+            f"pob5a14={l['poblacion5a14']} "
+            f"IM={l['im2020']:.4f} GM={l['gradoMarginacion']} "
+            f"%HLI={l['pctHLI']:.3f} PHOG_IND={l['phogInd']} "
+            f"matric={l['matricula']} distKm={l['distanciaKm']} "
+            f"cluesOp={l['cluesOperativo']}"
+        )
 
 
 if __name__ == "__main__":
