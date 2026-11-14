@@ -117,6 +117,23 @@ def test_casos_esperando_siguiente_etapa_estan_en_seguimiento(salidas_default, e
         )
 
 
+@pytest.mark.parametrize("escenario", [11, 30, 50])
+def test_grupos_al_hoy_suman_total(salidas_default, escenario):
+    """Los cuatro grupos titular son disjuntos y cubren todos los casos."""
+    datos = salidas_default[escenario]
+    total = datos["resumen"]["casos"]
+    g = datos["resumen"]["grupos_al_hoy"]
+    suma = (
+        g["completo_evaluacion"]["n"]
+        + g["en_proceso_a_tiempo"]["n"]
+        + g["retraso_moderado"]["n"]
+        + g["perdido_o_retraso_alto"]["n"]
+    )
+    assert suma == total, (
+        f"Escenario {escenario} %: suma de grupos {suma} != total {total}"
+    )
+
+
 def test_citas_futuras_no_aumentan_con_la_perdida(salidas_default):
     """Mas perdida -> menos (o igual) casos con cita futura; ninguno gana cita."""
     hoy = date.fromisoformat(_args_default().hoy)

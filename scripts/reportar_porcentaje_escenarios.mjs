@@ -60,6 +60,7 @@ for (const n of [11, 30, 50]) {
   let completados = 0
   let completoEval = 0
   let enProcesoATiempo = 0
+  let retrasoModerado = 0
   let perdidoORojo = 0
 
   for (const c of datos.casos) {
@@ -75,7 +76,15 @@ for (const n of [11, 30, 50]) {
       perdidoORojo++
     } else if (c.estado === 'en_seguimiento' && (citaFutura || color === 'verde')) {
       enProcesoATiempo++
+    } else {
+      // Resto: en_seguimiento con semáforo amarillo.
+      retrasoModerado++
     }
+  }
+
+  const sumGrupos = completoEval + enProcesoATiempo + retrasoModerado + perdidoORojo
+  if (sumGrupos !== total) {
+    throw new Error(`Los grupos no suman el total en el escenario ${n} %: ${sumGrupos} != ${total}`)
   }
 
   const fmt = (x) => ((x / total) * 100).toFixed(1).padStart(4, ' ')
@@ -84,5 +93,7 @@ for (const n of [11, 30, 50]) {
   console.log(`  % completa evaluación      : ${pctCompl.padStart(4, ' ')} %  (${completados})`)
   console.log(`  Completó su evaluación     : ${String(completoEval).padStart(4, ' ')}  (${fmt(completoEval)} %)`)
   console.log(`  En proceso a tiempo        : ${String(enProcesoATiempo).padStart(4, ' ')}  (${fmt(enProcesoATiempo)} %)`)
+  console.log(`  Con retraso moderado       : ${String(retrasoModerado).padStart(4, ' ')}  (${fmt(retrasoModerado)} %)`)
   console.log(`  Perdido o con retraso alto : ${String(perdidoORojo).padStart(4, ' ')}  (${fmt(perdidoORojo)} %)`)
+  console.log(`  Suma de los 4 grupos       : ${String(sumGrupos).padStart(4, ' ')}`)
 }

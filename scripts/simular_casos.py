@@ -487,13 +487,16 @@ def resumen_escenario(casos, eventos, hoy_iso):
 
     hoy = date.fromisoformat(hoy_iso)
 
-    # Para el panel ejecutivo: completo evaluacion / en proceso a tiempo /
-    # perdido o con retraso alto. Se calculan con el mismo color que ya
-    # obtiene cada caso; "en proceso a tiempo" no incluye amarillos (retraso
-    # con oportunidad de recuperarse), "perdido" cubre sin_seguimiento + rojos.
+    # Panel ejecutivo: cuatro grupos que suman el total de casos.
+    # Precedencia (primero que aplique):
+    #   1) completo_evaluacion: alta + vigilancia + referido.
+    #   2) perdido_o_retraso_alto: sin_seguimiento o semaforo rojo.
+    #   3) en_proceso_a_tiempo: en_seguimiento con cita futura o semaforo verde.
+    #   4) retraso_moderado: en_seguimiento con semaforo amarillo.
     completo_eval = 0
     en_proceso_a_tiempo = 0
     perdido_o_rojo = 0
+    retraso_moderado = 0
 
     for c in casos:
         por_etapa[c["etapaActual"]] = por_etapa.get(c["etapaActual"], 0) + 1
@@ -514,8 +517,10 @@ def resumen_escenario(casos, eventos, hoy_iso):
             perdido_o_rojo += 1
         elif c["estado"] == "en_seguimiento" and (cita_futura or color == "verde"):
             en_proceso_a_tiempo += 1
-        # Los amarillos en_seguimiento sin cita futura quedan fuera de los
-        # tres grupos "titular"; el detalle lo da la tabla de semaforo.
+        else:
+            # Resto: en_seguimiento con semaforo amarillo (sin cita futura;
+            # cita futura => verde). Cubre los casos restantes.
+            retraso_moderado += 1
 
     completados = sum(1 for c in casos if c["etapaActual"] >= 4 or c["estado"] == "alta")
     pct_completado = (completados / len(casos) * 100) if casos else 0.0
@@ -553,12 +558,17 @@ def resumen_escenario(casos, eventos, hoy_iso):
                 "porcentaje": round(en_proceso_a_tiempo / total * 100, 2),
                 "_definicion": "en_seguimiento con cita futura o semaforo verde",
             },
+            "retraso_moderado": {
+                "n": retraso_moderado,
+                "porcentaje": round(retraso_moderado / total * 100, 2),
+                "_definicion": "en_seguimiento con semaforo amarillo",
+            },
             "perdido_o_retraso_alto": {
                 "n": perdido_o_rojo,
                 "porcentaje": round(perdido_o_rojo / total * 100, 2),
                 "_definicion": "sin_seguimiento o semaforo rojo",
             },
-            "_nota": "Los amarillos en_seguimiento sin cita futura quedan fuera de los tres grupos titular.",
+            "_nota": "Los cuatro grupos son disjuntos y suman el total de casos.",
         },
         "confirmados": confirmados,
         "llegaron_a_clasificacion": llegaron_clasif,
@@ -642,15 +652,19 @@ def imprimir_resumen(salidas):
         print(f"  {e:<10}{s['verde']:>7}{s['amarillo']:>10}{s['rojo']:>7}{s['sin_semaforo']:>10}")
 
     print()
-    print(f"Grupos titular al {next(iter(salidas.values()))['hoy']} (n y % de 639):")
-    print(f"  {'Escenario':<10}{'completo':>13}{'en proc tpo':>15}{'perdido/rojo':>15}")
+    print(f"Grupos titular al {next(iter(salidas.values()))['hoy']} (n y % del total):")
+    print(f"  {'Escenario':<10}{'completo':>13}{'en proc tpo':>15}{'retr. mod.':>14}{'perdido/rojo':>15}")
     for e, datos in salidas.items():
         g = datos["resumen"]["grupos_al_hoy"]
-        ce = g["completo_evaluacion"]; ep = g["en_proceso_a_tiempo"]; pr = g["perdido_o_retraso_alto"]
+        ce = g["completo_evaluacion"]
+        ep = g["en_proceso_a_tiempo"]
+        rm = g["retraso_moderado"]
+        pr = g["perdido_o_retraso_alto"]
         print(
             f"  {e:<10}"
             f"{ce['n']:>6}  {ce['porcentaje']:>4.1f}%"
             f"{ep['n']:>6}  {ep['porcentaje']:>4.1f}%"
+            f"{rm['n']:>5}  {rm['porcentaje']:>4.1f}%"
             f"{pr['n']:>6}  {pr['porcentaje']:>4.1f}%"
         )
 

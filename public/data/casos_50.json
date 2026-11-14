@@ -50,12 +50,17 @@
         "porcentaje": 30.2,
         "_definicion": "en_seguimiento con cita futura o semaforo verde"
       },
+      "retraso_moderado": {
+        "n": 13,
+        "porcentaje": 2.03,
+        "_definicion": "en_seguimiento con semaforo amarillo"
+      },
       "perdido_o_retraso_alto": {
         "n": 282,
         "porcentaje": 44.13,
         "_definicion": "sin_seguimiento o semaforo rojo"
       },
-      "_nota": "Los amarillos en_seguimiento sin cita futura quedan fuera de los tres grupos titular."
+      "_nota": "Los cuatro grupos son disjuntos y suman el total de casos."
     },
     "confirmados": 114,
     "llegaron_a_clasificacion": 25,
