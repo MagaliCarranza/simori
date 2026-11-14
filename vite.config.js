@@ -7,7 +7,7 @@ export default defineConfig({
     react(),
     VitePWA({
       registerType: 'autoUpdate',
-      includeAssets: ['favicon.svg'],
+      includeAssets: ['favicon.png', 'apple-touch-icon.png'],
       // Mosaicos de OpenStreetMap: se guardan solo los que se ven (sin descarga
       // previa, por la política de uso de OSM) y con límite, para el mapa offline.
       workbox: {
@@ -37,13 +37,13 @@ export default defineConfig({
         background_color: '#ffffff',
         display: 'standalone',
         start_url: '/',
+        // Símbolo del logo (sin el texto). PNG de 192 y 512 para instalar; el
+        // maskable va aparte, con el símbolo dentro del 80 % central para que
+        // Android pueda recortarlo.
         icons: [
-          {
-            src: 'favicon.svg',
-            sizes: 'any',
-            type: 'image/svg+xml',
-            purpose: 'any maskable',
-          },
+          { src: 'icon-192.png', sizes: '192x192', type: 'image/png', purpose: 'any' },
+          { src: 'icon-512.png', sizes: '512x512', type: 'image/png', purpose: 'any' },
+          { src: 'icon-maskable-512.png', sizes: '512x512', type: 'image/png', purpose: 'maskable' },
         ],
       },
     }),

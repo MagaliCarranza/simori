@@ -40,8 +40,8 @@ Es un prototipo, **funciona sin internet** después de la primera carga, y podr�
 ## Instalación
 
 ```bash
-git clone https://github.com/MagaliCarranza/ruta-rinon.git
-cd ruta-rinon
+git clone https://github.com/MagaliCarranza/simori.git
+cd simori
 npm install
 ```
 
