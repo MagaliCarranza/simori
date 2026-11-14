@@ -11,14 +11,11 @@ export default defineConfig({
       // Mosaicos de OpenStreetMap: se guardan solo los que se ven (sin descarga
       // previa, por la política de uso de OSM) y con límite, para el mapa offline.
       workbox: {
-        // Por defecto workbox precachea js/css/html/ico/png/svg/webp. La app
-        // también necesita los JSON de public/data/* (catálogos, marco de
-        // prioridad, grupos k-means, escenarios) para funcionar offline; sin
-        // esto el panel caería a "Prioridad no disponible sin conexión".
-        globPatterns: ['**/*.{js,css,html,ico,png,svg,webp,json}'],
-        // El JSON del escenario de 50 % casos pesa ~1.3 MiB; subimos el tope
-        // para que entre al precache.
-        maximumFileSizeToCacheInBytes: 3 * 1024 * 1024,
+        // Patrón por omisión de Workbox más los dos JSON que el mapa pide en
+        // cada visita (marco del índice y grupos k-means). Los demás JSON de
+        // public/data se guardan en IndexedDB al arrancar (src/db/seed.js), y
+        // los casos_*.json pesan ~0.7 MB cada uno, así que no se precargan.
+        globPatterns: ['**/*.{js,css,html}', 'data/localidades_marco.json', 'data/grupos_localidades.json'],
         runtimeCaching: [
           {
             urlPattern: ({ url }) => url.hostname === 'tile.openstreetmap.org',
