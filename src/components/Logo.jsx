@@ -1,7 +1,7 @@
 // Logo de SIMORI: el archivo oficial del equipo (docs/recursos/LogoSIMORI.jpg),
-// reducido a 256 px para la app (~13 KB). Va en el precaché del service
-// worker, así que se ve sin internet.
-import logoSimori from '../assets/logo-simori.jpg'
+// reducido a 256 px y sin el fondo blanco (PNG transparente, ~48 KB). Va en el
+// precaché del service worker, así que se ve sin internet.
+import logoSimori from '../assets/logo-simori.png'
 
 const PROPORCION = 256 / 213
 
