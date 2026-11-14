@@ -9,7 +9,7 @@
   margin-bottom: 12px;
   border-radius: var(--radio-tarjeta);
   background: var(--color-primary);
-  color: #ffffff;
+  color: var(--color-superficie);
 }
 
 .pronostico__escenario-texto {

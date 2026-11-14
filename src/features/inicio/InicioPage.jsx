@@ -1,78 +1,96 @@
-// Pantalla de inicio: qué es SIMORI y elección del rol (tarjetas en lenguaje
-// sencillo). Al elegir, App fija el usuario de ese rol y abre su primera pantalla.
+// Pantalla de inicio (vista "Bienvenida" de UI-SIMORI): qué es SIMORI y elección
+// del rol. Al elegir, App fija el usuario de ese rol y abre su primera pantalla.
+// Todo es local (logo, portada, fuentes y estilos van en el precaché de la PWA).
 
+import { IconoBarras, IconoEscudo, IconoFlecha, IconoPortapapeles, IconoSinConexion, IconoUbicacion } from '../../components/iconos.jsx'
+import { LogoSimbolo } from '../../components/Logo.jsx'
+import imagenInicio from '../../assets/inicio-simori.jpg'
 import { ROLES } from '../../roles/roles.js'
 import './inicio.css'
 
-// Ilustración original: centro de salud rural, una enfermera, una madre y su
-// hija. Formas simples en SVG, sin imágenes externas (funciona sin internet).
-function Ilustracion() {
-  return (
-    <svg className="inicio__ilustracion" viewBox="0 0 320 170" aria-hidden="true" focusable="false">
-      {/* Cielo y sol */}
-      <rect width="320" height="170" rx="20" fill="#e6f0ff" />
-      <circle cx="268" cy="36" r="18" fill="#fff4c7" />
-      {/* Lomas */}
-      <path d="M0 128c40-22 86-26 132-12s92 12 132-4 44-10 56-6v64H0z" fill="#cfe2ff" />
-      <path d="M0 146c56-14 112-10 168 0s104 8 152-4v28H0z" fill="#b9d4fb" />
-      {/* Centro de salud */}
-      <rect x="34" y="70" width="104" height="66" rx="6" fill="#ffffff" />
-      <path d="M26 74l60-34 60 34z" fill="#0b3c7a" />
-      <rect x="74" y="98" width="24" height="38" rx="4" fill="#2f8cff" />
-      <rect x="44" y="88" width="20" height="18" rx="3" fill="#cfe2ff" />
-      <rect x="108" y="88" width="20" height="18" rx="3" fill="#cfe2ff" />
-      <circle cx="86" cy="60" r="9" fill="#ffffff" />
-      <path d="M86 54.5v11M80.5 60h11" stroke="#2f8cff" strokeWidth="3" strokeLinecap="round" />
-      {/* Árbol */}
-      <rect x="152" y="104" width="6" height="32" rx="3" fill="#7a5a3a" />
-      <circle cx="155" cy="96" r="16" fill="#9fd36b" />
-      {/* Enfermera */}
-      <circle cx="196" cy="86" r="10" fill="#8a5a3c" />
-      <path d="M186 82c2-9 18-9 20 0z" fill="#ffffff" />
-      <path d="M182 136v-26c0-8 6-13 14-13s14 5 14 13v26z" fill="#ffffff" stroke="#0b3c7a" strokeWidth="2" />
-      <path d="M196 106v12M190 112h12" stroke="#2f8cff" strokeWidth="2.5" strokeLinecap="round" />
-      {/* Madre */}
-      <circle cx="244" cy="84" r="10" fill="#b57a50" />
-      <path d="M233 84c0-12 22-12 22 0v10h-22z" fill="#3b2a20" />
-      <path d="M230 136l4-30c1-7 5-10 10-10s9 3 10 10l4 30z" fill="#b6f24a" />
-      {/* Hija */}
-      <circle cx="276" cy="104" r="8" fill="#b57a50" />
-      <path d="M268 102c0-10 16-10 16 0v4h-16z" fill="#3b2a20" />
-      <path d="M266 136l3-20c1-5 4-7 7-7s6 2 7 7l3 20z" fill="#2f8cff" />
-      {/* Manos unidas */}
-      <path d="M254 114c6 4 9 4 13 2" stroke="#b57a50" strokeWidth="3" strokeLinecap="round" fill="none" />
-    </svg>
-  )
-}
+const ICONO_ROL = { captura: IconoPortapapeles, campo: IconoUbicacion, supervision: IconoBarras }
 
 export function InicioPage({ rolActual, onElegir }) {
   return (
     <section className="inicio" aria-labelledby="titulo-inicio">
-      <Ilustracion />
-      <h2 id="titulo-inicio" className="inicio__titulo">
-        Te damos la bienvenida a SIMORI
-      </h2>
-      <p className="inicio__texto">
-        SIMORI acompaña a niñas y niños con tamizaje renal positivo en Poncitlán, desde el tamizaje hasta su
-        diagnóstico, alta o referencia, y muestra en qué etapa se detiene cada caso. Organiza el seguimiento; no
-        diagnostica.
-      </p>
+      <div className="inicio__marca">
+        <LogoSimbolo tamano={56} />
+        <div>
+          <p className="inicio__nombre">SIMORI</p>
+          <p className="inicio__lema">Tamizaje y seguimiento infantil · Poncitlán, Jalisco</p>
+        </div>
+      </div>
 
-      <h3 className="inicio__pregunta">¿Con qué rol vas a entrar?</h3>
+      <article className="inicio__portada">
+        {/* Portada: personal de salud usando SIMORI frente a una clínica, con una familia. */}
+        <figure className="inicio__figura">
+          <img className="inicio__ilustracion" src={imagenInicio} width="1280" height="714" alt="" />
+          <figcaption className="inicio__pie-imagen">
+            <span>
+              <span className="inicio__punto" aria-hidden="true" /> Comunidad y centro de salud
+            </span>
+            <span className="inicio__pie-lugar">Poncitlán, Jal.</span>
+          </figcaption>
+        </figure>
+
+        <div className="inicio__presentacion">
+          <p className="inicio__antetitulo">
+            <span className="inicio__punto" aria-hidden="true" /> Tamizaje y seguimiento renal
+          </p>
+          <h2 id="titulo-inicio" className="inicio__titulo">
+            Que ninguna niña ni niño se quede <span className="inicio__resaltado">a medio camino</span>
+          </h2>
+          <p className="inicio__texto">
+            Registro de seguimiento desde el tamizaje hasta el diagnóstico, alta o referencia. Organiza el seguimiento;
+            no diagnostica.
+          </p>
+          <ul className="inicio__pildoras">
+            <li>
+              <IconoEscudo /> Identificación anónima con código
+            </li>
+            <li>
+              <IconoSinConexion /> Funciona sin conexión
+            </li>
+          </ul>
+        </div>
+      </article>
+
+      <div className="inicio__roles-encabezado">
+        <h3 className="inicio__pregunta">Elige tu rol para comenzar</h3>
+        <span className="inicio__conteo">{ROLES.length} roles</span>
+      </div>
+
       <ul className="inicio__roles">
         {ROLES.map((r) => {
           const actual = r.rol === rolActual
+          const Icono = ICONO_ROL[r.rol]
           return (
             <li key={r.rol}>
-              <button
-                type="button"
-                className={`inicio__rol${actual ? ' inicio__rol--actual' : ''}`}
-                onClick={() => onElegir(r.rol)}
-              >
-                <span className="inicio__rol-nombre">{r.nombre}</span>
-                <span className="inicio__rol-texto">{r.descripcion}</span>
+              <article className={`inicio__rol inicio__rol--${r.rol}${actual ? ' inicio__rol--actual' : ''}`}>
+                <div className="inicio__rol-cabeza">
+                  <span className="inicio__rol-icono" aria-hidden="true">
+                    {Icono && <Icono />}
+                  </span>
+                  <span className="inicio__rol-etiqueta">{r.etiqueta}</span>
+                </div>
+                <h4 className="inicio__rol-nombre">{r.nombre}</h4>
+                <p className="inicio__rol-texto">{r.descripcion}</p>
                 {actual && <span className="inicio__rol-marca">Rol actual</span>}
-              </button>
+                <div className="inicio__rol-pie">
+                  <span className="inicio__rol-detalle">{r.pie}</span>
+                  <button
+                    type="button"
+                    className="inicio__entrar"
+                    aria-label={`Entrar como ${r.nombre}`}
+                    onClick={() => onElegir(r.rol)}
+                  >
+                    Entrar
+                    <span className="inicio__entrar-flecha" aria-hidden="true">
+                      <IconoFlecha />
+                    </span>
+                  </button>
+                </div>
+              </article>
             </li>
           )
         })}

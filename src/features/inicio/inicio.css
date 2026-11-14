@@ -1,39 +1,203 @@
-/* Pantalla de inicio. Mobile-first desde 360 px. */
+/* Pantalla de inicio (vista "Bienvenida" de UI-SIMORI). Mobile-first desde
+   360 px; desde 900 px la portada va en dos columnas y los roles en tres. */
 
 .inicio {
   display: grid;
-  gap: 12px;
-  max-width: 720px;
+  gap: 20px;
+  max-width: 1120px;
   margin: 0 auto;
   padding: 16px;
 }
 
+/* Marca: logo oficial + nombre. */
+.inicio__marca {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.inicio__marca .logo__simbolo {
+  flex: none;
+  height: 56px;
+  width: auto;
+}
+
+.inicio__nombre {
+  margin: 0;
+  font-family: var(--fuente-titulo, inherit);
+  font-size: 1.6rem;
+  font-weight: 800;
+  line-height: 1.1;
+  letter-spacing: 0.02em;
+  color: var(--color-primary);
+}
+
+.inicio__lema {
+  margin: 2px 0 0;
+  font-family: var(--fuente-titulo, inherit);
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--color-secondary);
+}
+
+/* Portada: tarjeta blanca con imagen y presentación. */
+.inicio__portada {
+  display: grid;
+  gap: 20px;
+  padding: 16px;
+  border: 1px solid var(--color-borde);
+  border-radius: 24px;
+  background: var(--color-superficie);
+  box-shadow: var(--sombra-tarjeta);
+}
+
+.inicio__figura {
+  margin: 0;
+}
+
 .inicio__ilustracion {
+  display: block;
+  border-radius: 18px;
   width: 100%;
   height: auto;
-  max-height: 220px;
+  aspect-ratio: 16 / 10;
+  object-fit: cover;
+  object-position: center 70%;
+}
+
+/* Debajo de la imagen (no encima): a 360 px no cabía en un renglón y
+   tapaba a las personas. */
+.inicio__pie-imagen {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 2px 12px;
+  padding: 10px 4px 0;
+  color: var(--color-primary);
+  font-family: var(--fuente-titulo, inherit);
+  font-size: 0.8125rem;
+  font-weight: 600;
+}
+
+.inicio__pie-lugar {
+  color: var(--color-neutral);
+  font-weight: 600;
+}
+
+.inicio__punto {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  margin-right: 4px;
+  border-radius: 50%;
+  background: var(--color-detalle);
+  vertical-align: middle;
+}
+
+.inicio__presentacion {
+  display: grid;
+  align-content: center;
+  gap: 12px;
+}
+
+.inicio__antetitulo {
+  justify-self: start;
+  margin: 0;
+  padding: 4px 12px;
+  border-radius: var(--radio-pildora);
+  background: var(--color-secondary-suave);
+  color: var(--color-secondary);
+  font-family: var(--fuente-titulo, inherit);
+  font-size: 0.75rem;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
 }
 
 .inicio__titulo {
-  margin: 4px 0 0;
-  font-size: 1.5rem;
+  margin: 0;
+  font-size: 1.625rem;
+  font-weight: 800;
+  line-height: 1.2;
+  letter-spacing: -0.015em;
   color: var(--color-primary);
+}
+
+/* "a medio camino" en coral oscuro con subrayado dorado. */
+.inicio__resaltado {
+  color: var(--color-secondary);
+  text-decoration: underline;
+  text-decoration-color: var(--color-dorado);
+  text-decoration-thickness: 4px;
+  text-underline-offset: 6px;
 }
 
 .inicio__texto {
   margin: 0;
+  font-size: 1.0625rem;
+  line-height: 1.6;
   color: var(--color-neutral);
 }
 
+.inicio__pildoras {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.inicio__pildoras li {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 14px;
+  border: 1px solid var(--color-borde);
+  border-radius: var(--radio-pildora);
+  background: var(--color-superficie);
+  color: var(--color-texto);
+  font-size: 0.875rem;
+  font-weight: 600;
+}
+
+.inicio__pildoras .icono {
+  width: 18px;
+  height: 18px;
+  color: var(--color-detalle);
+}
+
+/* Roles. */
+.inicio__roles-encabezado {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-top: 8px;
+}
+
 .inicio__pregunta {
-  margin: 8px 0 0;
-  font-size: 1.05rem;
+  margin: 0;
+  font-size: 1.3rem;
+  font-weight: 800;
   color: var(--color-primary);
+}
+
+.inicio__conteo {
+  padding: 2px 12px;
+  border-radius: var(--radio-pildora);
+  background: var(--color-secondary-suave);
+  color: var(--color-secondary);
+  font-size: 0.8125rem;
+  font-weight: 700;
 }
 
 .inicio__roles {
   display: grid;
-  gap: 12px;
+  gap: 16px;
   margin: 0;
   padding: 0;
   list-style: none;
@@ -41,41 +205,58 @@
 
 .inicio__rol {
   display: grid;
-  gap: 4px;
-  width: 100%;
-  min-height: 44px;
-  padding: 16px;
-  border: 2px solid var(--color-borde);
-  border-radius: var(--radio-tarjeta);
+  gap: 8px;
+  height: 100%;
+  padding: 20px;
+  border: 1px solid var(--color-borde);
+  border-radius: 24px;
   background: var(--color-superficie);
-  color: inherit;
-  text-align: left;
-  font: inherit;
-  cursor: pointer;
-  box-shadow: 0 1px 2px rgb(11 60 122 / 8%);
-}
-
-.inicio__rol:hover {
-  border-color: var(--color-secondary);
-}
-
-.inicio__rol:focus-visible {
-  outline: 3px solid var(--color-secondary);
-  outline-offset: 2px;
+  box-shadow: var(--sombra-tarjeta);
 }
 
 .inicio__rol--actual {
-  border-color: var(--color-primary);
+  border: 2px solid var(--color-primary);
+}
+
+.inicio__rol-cabeza {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.inicio__rol-icono {
+  display: grid;
+  place-items: center;
+  width: 52px;
+  height: 52px;
+  border-radius: 16px;
+  background: var(--color-primary-suave);
+  color: var(--color-primary);
+}
+
+/* Etiqueta pequeña de apoyo: Clínica, Brigada, Gestión. */
+.inicio__rol-etiqueta {
+  padding: 2px 10px;
+  border-radius: var(--radio-pildora);
+  background: var(--color-secondary-suave);
+  color: var(--color-secondary);
+  font-family: var(--fuente-titulo, inherit);
+  font-size: 0.75rem;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
 }
 
 .inicio__rol-nombre {
-  font-family: var(--fuente-titulo, inherit);
+  margin: 4px 0 0;
+  font-size: 1.2rem;
   font-weight: 800;
-  font-size: 1.05rem;
   color: var(--color-primary);
 }
 
 .inicio__rol-texto {
+  margin: 0;
   color: var(--color-neutral);
 }
 
@@ -84,12 +265,89 @@
   padding: 0.1em 0.7em;
   border-radius: var(--radio-pildora);
   background: var(--color-primary);
-  color: #ffffff;
+  color: var(--color-superficie);
   font-size: 0.8125rem;
   font-weight: 700;
 }
 
-@media (min-width: 768px) {
+.inicio__rol-pie {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  align-self: end;
+  margin-top: 8px;
+  padding-top: 14px;
+  border-top: 1px solid var(--color-borde);
+}
+
+.inicio__rol-detalle {
+  font-size: 0.875rem;
+  color: var(--color-neutral);
+}
+
+/* Botón píldora con círculo y flecha diagonal (DESIGN.md). */
+.inicio__entrar {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 48px;
+  padding: 6px 6px 6px 20px;
+  border: 0;
+  border-radius: var(--radio-pildora);
+  background: var(--color-primary);
+  color: var(--color-superficie);
+  font-family: var(--fuente-titulo, inherit);
+  font-size: 1rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.inicio__entrar:hover {
+  background: var(--color-primary-hover);
+  box-shadow: var(--hover-anillo);
+}
+
+/* Después del hover: con teclado, el anillo coral gana. */
+.inicio__entrar:focus-visible {
+  outline: 3px solid transparent;
+  box-shadow: var(--foco-anillo);
+}
+
+.inicio__entrar-flecha {
+  display: grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: var(--color-flecha);
+}
+
+.inicio__entrar-flecha .icono {
+  width: 18px;
+  height: 18px;
+}
+
+@media (min-width: 900px) {
+  .inicio {
+    padding: 24px 32px;
+  }
+
+  .inicio__portada {
+    grid-template-columns: 1.1fr 1fr;
+    align-items: center;
+    padding: 32px;
+  }
+
+  .inicio__presentacion {
+    order: -1;
+  }
+
+  .inicio__titulo {
+    font-size: 2.5rem;
+  }
+
   .inicio__roles {
     grid-template-columns: repeat(3, 1fr);
   }

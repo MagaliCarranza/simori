@@ -9,9 +9,9 @@ const usuarios = [
   { id: 'USR-SUP-JAL', rol: 'supervision', clues: null },
 ]
 
-function montar(usuario) {
+function montar(usuario, ruta = '/pendientes') {
   render(
-    <MemoryRouter>
+    <MemoryRouter initialEntries={[ruta]}>
       <NavegacionRol usuario={usuario} />
     </MemoryRouter>,
   )
@@ -82,5 +82,16 @@ describe('NavegacionRol', () => {
       expect(rutas.filter((r) => r.pendiente)).toEqual([])
     }
     expect(HOME_POR_ROL.captura).toBe('/registrar')
+  })
+
+  it('en una pantalla de rol el encabezado es compacto, pero "SIMORI" sigue para el lector de pantalla', () => {
+    montar(usuarios[0], '/pendientes')
+    expect(document.querySelector('header.nav-rol')).toHaveClass('nav-rol--en-rol')
+    expect(screen.getByRole('heading', { level: 1, name: 'SIMORI' })).toBeInTheDocument()
+  })
+
+  it('en el inicio el encabezado no se compacta', () => {
+    montar(usuarios[0], '/')
+    expect(document.querySelector('header.nav-rol')).not.toHaveClass('nav-rol--en-rol')
   })
 })

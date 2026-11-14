@@ -35,7 +35,7 @@ describe('App', () => {
 
   it('"/" muestra el inicio y al elegir un rol abre su primera pantalla y lo recuerda', async () => {
     abrirEn('/')
-    fireEvent.click(await screen.findByRole('button', { name: /Visitas de campo/ }))
+    fireEvent.click(await screen.findByRole('button', { name: 'Entrar como Visitas de campo' }))
     await waitFor(() => expect(window.location.pathname).toBe('/visitas'))
     expect(await screen.findByRole('link', { name: 'Mis visitas' })).toBeInTheDocument()
     expect(window.localStorage.getItem('simori.rol')).toBe('campo')
@@ -51,7 +51,7 @@ describe('App', () => {
   it('sin rol elegido, otra ruta vuelve al inicio', async () => {
     abrirEn('/avisos')
     await waitFor(() => expect(window.location.pathname).toBe('/'))
-    expect(await screen.findByRole('heading', { name: 'Te damos la bienvenida a SIMORI' })).toBeInTheDocument()
+    expect(await screen.findByRole('heading', { name: 'Que ninguna niña ni niño se quede a medio camino' })).toBeInTheDocument()
   })
 
   // Las copias en el encabezado de cada pantalla se ocultan con este selector

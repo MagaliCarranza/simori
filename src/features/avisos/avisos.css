@@ -21,8 +21,8 @@
 .aviso__burbuja {
   padding: 12px 14px;
   border-radius: 4px 16px 16px 16px;
-  background: #e8f6e8;
-  color: #0f172a;
+  background: var(--burbuja-mensaje);
+  color: var(--color-texto);
   line-height: 1.45;
 }
 
@@ -118,13 +118,13 @@
 }
 
 .insignia-aviso--pendiente {
-  background: #fff4cf;
-  color: #7a4c00;
+  background: var(--estado-pendiente-fondo);
+  color: var(--estado-pendiente);
 }
 
 .insignia-aviso--entregado {
-  background: #d7f0d0;
-  color: #1b5e20;
+  background: var(--estado-entregado-fondo);
+  color: var(--estado-entregado);
 }
 
 /* Recado escolar: al imprimir solo sale la vista previa del caso elegido. */
@@ -142,7 +142,7 @@
     position: absolute;
     inset: 0 0 auto 0;
     padding: 24px;
-    background: #ffffff;
+    background: var(--color-superficie);
     font-size: 14pt;
   }
 }

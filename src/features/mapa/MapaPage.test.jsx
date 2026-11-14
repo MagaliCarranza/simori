@@ -213,15 +213,17 @@ describe('MapaPage (HU09, RF10)', () => {
     expect(direccion).toEqual({ Chalpicote: 'bottom', 'Agua Caliente': 'top', 'San Pedro Itzicán': 'bottom' })
   })
 
-  it('el marcador elegido se resalta en azul oscuro y borde más grueso, sin naranja ni rojo', async () => {
+  it('los marcadores son turquesa; el elegido, turquesa más oscuro y borde más grueso, sin naranja ni rojo', async () => {
     await abrir()
     fireEvent.click(localidad('Chalpicote'))
     const marcadores = screen.getAllByTestId('marcador')
     const elegido = marcadores.find((m) => m.textContent === 'Chalpicote')
     const otro = marcadores.find((m) => m.textContent === 'Agua Caliente')
-    expect(elegido.dataset.color).toBe('#0b1f4d')
+    expect(otro.dataset.color).toBe('#0e6670')
+    expect(elegido.dataset.color).toBe('#0a525a')
     expect(Number(elegido.dataset.grosor)).toBeGreaterThan(Number(otro.dataset.grosor))
-    for (const m of marcadores) expect(m.dataset.color).not.toMatch(/^#c2410c$/i)
+    // Ni coral, ni rojo del semáforo, ni naranja.
+    for (const m of marcadores) expect(m.dataset.color).not.toMatch(/^#(c93a47|e8505b|8f1414|c2410c)$/i)
   })
 
   it('el marcador abre el mismo panel', async () => {

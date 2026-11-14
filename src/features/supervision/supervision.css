@@ -2,7 +2,7 @@
   max-width: 960px;
   margin: 0 auto;
   padding: 16px;
-  color: #0f172a;
+  color: var(--color-texto);
 }
 
 .supervision__encabezado {
@@ -47,8 +47,8 @@
 }
 
 .supervision__filtrar > summary:focus-visible {
-  outline: 3px solid var(--color-secondary);
-  outline-offset: 2px;
+  outline: 3px solid transparent;
+  box-shadow: var(--foco-anillo);
 }
 
 .supervision__filtrar-activos {
@@ -79,7 +79,7 @@
   border-radius: 12px;
   background: var(--color-superficie);
   font: inherit;
-  color: #0f172a;
+  color: var(--color-texto);
 }
 
 .supervision__kpi {
@@ -90,7 +90,7 @@
   margin-bottom: 16px;
   border-radius: var(--radio-tarjeta);
   background: var(--color-primary);
-  color: #ffffff;
+  color: var(--color-superficie);
 }
 
 .supervision__kpi-numero {
@@ -222,7 +222,7 @@
   padding: 8px 16px;
   border: 1px solid var(--color-primary);
   border-radius: var(--radio-pildora);
-  background: var(--color-superficie, #ffffff);
+  background: var(--color-superficie);
   color: var(--color-primary);
   font: inherit;
   font-weight: 600;
@@ -231,12 +231,12 @@
 
 .vistas__boton[aria-pressed='true'] {
   background: var(--color-primary);
-  color: #ffffff;
+  color: var(--color-superficie);
 }
 
 .vistas__boton:focus-visible {
-  outline: 3px solid #c2410c;
-  outline-offset: 2px;
+  outline: 3px solid transparent;
+  box-shadow: var(--foco-anillo);
 }
 
 @media (min-width: 768px) {

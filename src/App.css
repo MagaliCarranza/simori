@@ -1,6 +1,6 @@
 .app {
   min-height: 100dvh;
-  background: var(--color-fondo, #f3f7fd);
+  background: var(--color-fondo);
 }
 
 /* Marco: encabezado arriba; contenido; navegación abajo (celular) o a la
@@ -47,7 +47,7 @@
 .app__pie {
   margin: 24px 16px 0;
   font-size: 0.8rem;
-  color: var(--color-neutral, #4a5b75);
+  color: var(--color-neutral);
   text-align: center;
 }
 
@@ -74,11 +74,11 @@
   border: 1px solid var(--color-borde);
   border-radius: 12px;
   background: var(--color-superficie);
-  color: #0f172a;
+  color: var(--color-texto);
   font: inherit;
 }
 
 :where(.marco__contenido) :where(a, button, select, input, textarea, summary):not(:where(.leaflet-container *)):focus-visible {
-  outline: 3px solid var(--color-secondary);
-  outline-offset: 2px;
+  outline: 3px solid transparent;
+  box-shadow: var(--foco-anillo);
 }
