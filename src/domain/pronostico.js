@@ -4,10 +4,14 @@
 //   llegadas esperadas = citas programadas × (1 − pérdida del escenario)
 // redondeado al entero más cercano.
 //
-// Por qué no se cuenta dos veces la pérdida: en los casos simulados, los niños
-// que se pierden conservan su próxima cita agendada (la pérdida solo se nota
-// cuando la cita pasa sin resultado). Las citas futuras del escenario son, por
-// tanto, citas "programadas" y sobre ellas se aplica la pérdida del escenario.
+// Por qué aplicar la pérdida a las citas futuras: tras `fix/simulacion-sin-
+// eventos-futuros` (PR #34), el simulador ya no genera eventos con fecha
+// posterior a hoy. Los casos cuya siguiente fecha es futura quedan
+// `en_seguimiento` con esa fecha en `fechaProximaCita`, sin oportunidad
+// todavía de perderse (sólo se "pierde" un caso cuando su cita pasa sin
+// resultado). La pérdida del escenario representa la probabilidad de que
+// la familia no honre una cita cuando llegue; aplicarla aquí estima cuántas
+// de esas citas programadas se convertirán en llegadas reales.
 //
 // Solo cuentan los casos activos (en seguimiento y vigilancia) con próxima
 // cita dentro de la ventana. Las citas vencidas no cuentan.
