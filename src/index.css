@@ -1,10 +1,20 @@
+/* Tipografía de la identidad (docs/04), empaquetada para funcionar sin
+   internet: solo alfabeto latino y los pesos que se usan. */
+@import '@fontsource/nunito-sans/latin-400.css';
+@import '@fontsource/nunito-sans/latin-700.css';
+@import '@fontsource/plus-jakarta-sans/latin-600.css';
+@import '@fontsource/plus-jakarta-sans/latin-800.css';
+
 :root {
-  font-family: system-ui, 'Segoe UI', Roboto, sans-serif;
+  --fuente-cuerpo: 'Nunito Sans', system-ui, 'Segoe UI', Roboto, sans-serif;
+  --fuente-titulo: 'Plus Jakarta Sans', 'Nunito Sans', system-ui, 'Segoe UI', Roboto, sans-serif;
+
+  font-family: var(--fuente-cuerpo);
   font-size: 16px;
   line-height: 1.5;
   color-scheme: light;
   color: #0f172a;
-  background: #ffffff;
+  background: #f3f7fd;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
@@ -13,6 +23,7 @@
 body {
   margin: 0;
   min-height: 100dvh;
+  background: #f3f7fd;
 }
 
 #root {
@@ -23,4 +34,25 @@ body {
 *::before,
 *::after {
   box-sizing: border-box;
+}
+
+h1,
+h2,
+h3,
+h4 {
+  font-family: var(--fuente-titulo);
+  font-weight: 800;
+  line-height: 1.25;
+}
+
+h3,
+h4 {
+  font-weight: 600;
+}
+
+button,
+input,
+select,
+textarea {
+  font-family: inherit;
 }

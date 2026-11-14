@@ -181,4 +181,17 @@ describe('SupervisionPage (HU07, HU08)', () => {
       entidadId: 'embudo',
     })
   })
+
+  it('el indicador va antes de los filtros, plegados en "Filtrar" con el número de filtros activos', async () => {
+    render(<SupervisionPage hoyISO={HOY} usuario={supervisor} db={db} />)
+    await screen.findByText('Casos por etapa')
+    const filtrar = document.querySelector('details.supervision__filtrar')
+    expect(filtrar).not.toBeNull()
+    expect(filtrar.open).toBe(false)
+    expect(kpi().compareDocumentPosition(filtrar) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy()
+    const resumen = filtrar.querySelector('summary')
+    expect(resumen).toHaveTextContent(/^Filtrar$/)
+    fireEvent.change(screen.getByLabelText('Localidad'), { target: { value: '140660002' } })
+    expect(resumen).toHaveTextContent('Filtrar · 1 activo')
+  })
 })

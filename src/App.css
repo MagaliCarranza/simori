@@ -1,7 +1,47 @@
 .app {
   min-height: 100dvh;
-  padding: 0 0 32px;
   background: var(--color-fondo, #f3f7fd);
+}
+
+/* Marco: encabezado arriba; contenido; navegación abajo (celular) o a la
+   izquierda (escritorio). */
+.marco {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  min-height: 100dvh;
+}
+
+.marco__contenido {
+  min-width: 0;
+  padding-bottom: 32px;
+}
+
+/* Espacio para que la barra inferior no tape el final del contenido. */
+.marco--con-menu .marco__contenido {
+  padding-bottom: calc(96px + env(safe-area-inset-bottom, 0px));
+}
+
+@media (min-width: 768px) {
+  .marco--con-menu {
+    grid-template-columns: 220px minmax(0, 1fr);
+    grid-template-rows: auto 1fr;
+  }
+
+  .marco--con-menu > .nav-rol {
+    grid-column: 1 / -1;
+  }
+
+  .marco--con-menu .marco__contenido {
+    padding-bottom: 32px;
+  }
+}
+
+/* "Datos simulados" ya está en el encabezado del marco, visible en todas las
+   pantallas: se oculta solo la copia del encabezado de cada pantalla. Las
+   etiquetas que marcan algo concreto (vista previa del aviso, pendientes del
+   mapa) no están en ese encabezado y se quedan. */
+.marco__contenido > section > header .etiqueta-simulado {
+  display: none;
 }
 
 .app__pie {
@@ -9,4 +49,36 @@
   font-size: 0.8rem;
   color: var(--color-neutral, #4a5b75);
   text-align: center;
+}
+
+/* Estilos base para el contenido de todas las pantallas (M5, M6, M7, M8...)
+   sin editar sus archivos. Con :where() la especificidad es 0: el CSS propio
+   de cada módulo siempre gana y esto solo rellena lo que falte. Nunca aplica
+   dentro del mapa de Leaflet ni de la vista previa del aviso (M7). */
+:where(.marco__contenido) > :where(section) {
+  max-width: 1040px;
+  margin-inline: auto;
+}
+
+:where(.marco__contenido > section > header) :where(h2) {
+  margin: 0;
+  font-size: 1.35rem;
+  color: var(--color-primary);
+}
+
+:where(.marco__contenido) :where(select, input:not([type='checkbox'], [type='radio']), textarea):not(
+    :where(.leaflet-container, .aviso) *
+  ) {
+  min-height: 44px;
+  padding: 8px 12px;
+  border: 1px solid var(--color-borde);
+  border-radius: 12px;
+  background: var(--color-superficie);
+  color: #0f172a;
+  font: inherit;
+}
+
+:where(.marco__contenido) :where(a, button, select, input, textarea, summary):not(:where(.leaflet-container *)):focus-visible {
+  outline: 3px solid var(--color-secondary);
+  outline-offset: 2px;
 }
