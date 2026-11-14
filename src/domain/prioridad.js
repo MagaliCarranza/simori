@@ -77,15 +77,16 @@ function fraseDesdeCrudo(variable, crudo, grado) {
     return `${FORMATO_MATRICULA.format(crudo)} alumnos`
   }
   if (variable === 'hli') {
-    const pct = crudo * 100
-    const texto = Math.abs(pct - Math.round(pct)) < 1e-9 ? Math.round(pct).toString() : pct.toFixed(1)
+    // pctHLI ya viene en porcentaje (0.132 significa 0.132 %, no 13.2 %).
+    const texto = Math.abs(crudo - Math.round(crudo)) < 1e-9 ? Math.round(crudo).toString() : crudo.toFixed(1)
     return `${texto} % con lengua indígena`
   }
   return null
 }
 
 // Razón: las 2 variables que más aportan al puntaje, con su dato crudo.
-// La lengua indígena se omite si es despreciable (< hliMin).
+// La lengua indígena se omite si es despreciable (< hliMin). hliMin se
+// interpreta en las mismas unidades que crudas.hli, es decir, porcentaje.
 function componerRazon({ aportes, crudas, grado, faltantes, hliMin }) {
   const frases = aportes
     .filter((a) => {
@@ -112,15 +113,19 @@ function componerRazon({ aportes, crudas, grado, faltantes, hliMin }) {
 
 // localidades: arreglo con al menos { claveInegi, nombre, im2020, distanciaKm,
 // matricula, pctHLI, gradoMarginacion, enAlcance }.
+// marco: arreglo con el mismo shape, mas amplio, que se usa para normalizar
+// min-max y ordenar el lugar dentro del alcance. Si no se da, se usa
+// `localidades` tambien como marco (equivale al comportamiento anterior).
 export function calcularPrioridad(
   localidades,
   pesos = PRIORIDAD_PESOS,
   umbrales = PRIORIDAD_UMBRALES,
   hliMin = PRIORIDAD_HLI_MIN_PARA_RAZON,
+  marco = localidades,
 ) {
-  const rangos = minMaxPorVariable(localidades)
+  const rangos = minMaxPorVariable(marco)
 
-  const resultados = localidades.map((l) => {
+  function evaluar(l) {
     const crudas = {}
     const normalizadas = {}
     for (const v of Object.keys(EXTRACTORES)) {
@@ -128,14 +133,12 @@ export function calcularPrioridad(
       crudas[v] = valor
       normalizadas[v] = normalizar(valor, rangos[v], INVERTIR.has(v))
     }
-
     // Reparte proporcionalmente el peso de las variables sin dato entre las
     // presentes (docs/01: "si una variable es null, reparte su peso
     // proporcionalmente entre las demás").
     const presentes = Object.keys(pesos).filter((v) => normalizadas[v] !== null)
     const faltantes = Object.keys(pesos).filter((v) => normalizadas[v] === null)
     const suma = presentes.reduce((s, v) => s + pesos[v], 0)
-
     let puntaje = 0
     const aportes = []
     if (suma > 0) {
@@ -146,40 +149,36 @@ export function calcularPrioridad(
         aportes.push({ variable: v, aporte })
       }
     }
+    return { crudas, normalizadas, aportes, faltantes, puntaje: redondear(puntaje) }
+  }
 
+  // Ranking dentro de la zona de alcance: se calcula sobre el marco, no sobre
+  // `localidades`. Puntaje descendente; desempate por claveInegi para que el
+  // orden sea estable.
+  const alcanceOrden = marco
+    .filter((l) => l.enAlcance === true)
+    .map((l) => ({ claveInegi: l.claveInegi, puntaje: evaluar(l).puntaje }))
+    .sort((a, b) => {
+      if (b.puntaje !== a.puntaje) return b.puntaje - a.puntaje
+      return a.claveInegi.localeCompare(b.claveInegi)
+    })
+  const lugarPorClave = new Map(alcanceOrden.map(({ claveInegi }, i) => [claveInegi, i + 1]))
+  const totalAlcance = alcanceOrden.length
+
+  return localidades.map((l) => {
+    const { crudas, normalizadas, aportes, faltantes, puntaje } = evaluar(l)
     const grado = l.gradoMarginacion ?? null
-    const puntajeRedondeado = redondear(puntaje)
-
     return {
       claveInegi: l.claveInegi,
       nombre: l.nombre,
-      puntaje: puntajeRedondeado,
-      nivel: nivelDesde(puntajeRedondeado, umbrales),
+      puntaje,
+      nivel: nivelDesde(puntaje, umbrales),
       variables: { crudas, normalizadas },
       razon: componerRazon({ aportes, crudas, grado, faltantes, hliMin }),
-      lugarAlcance: null,
-      totalAlcance: 0,
+      lugarAlcance: lugarPorClave.get(l.claveInegi) ?? null,
+      totalAlcance,
     }
   })
-
-  // Ranking dentro de la zona de alcance: puntaje descendente, desempate por nombre.
-  const enAlcance = localidades
-    .map((l, i) => ({ l, r: resultados[i] }))
-    .filter(({ l }) => l.enAlcance === true)
-  // Puntaje descendente; desempate por claveInegi para que el orden sea
-  // estable y no dependa de acentos/mayúsculas del nombre.
-  const ordenados = [...enAlcance].sort((a, b) => {
-    if (b.r.puntaje !== a.r.puntaje) return b.r.puntaje - a.r.puntaje
-    return a.l.claveInegi.localeCompare(b.l.claveInegi)
-  })
-  ordenados.forEach(({ r }, i) => {
-    r.lugarAlcance = i + 1
-    r.totalAlcance = ordenados.length
-  })
-  // El total también se expone a las localidades fuera del alcance.
-  for (const r of resultados) r.totalAlcance = ordenados.length
-
-  return resultados
 }
 
 // Texto compacto para la UI: "Prioridad media · 1.º de 3 en el alcance · puntaje 0.52".

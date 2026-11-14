@@ -188,7 +188,32 @@ function PanelLocalidad({ panel }) {
   )
 }
 
-export function MapaPage({ hoyISO, usuario, db }) {
+// Marco amplio para normalizar el índice de prioridad: localidades_marco.json
+// trae todas las reales del municipio sin las filas de totales del ITER. No
+// se muestra en pantalla; si la carga falla, prioridad usa solo las 3 del
+// alcance (menos informativo, pero no rompe la UI).
+const RUTA_MARCO = '/data/localidades_marco.json'
+
+function useLocalidadesMarco(fetchImpl = fetch) {
+  const [marco, setMarco] = useState(null)
+  useEffect(() => {
+    let cancelado = false
+    fetchImpl(RUTA_MARCO)
+      .then((r) => (r.ok ? r.json() : []))
+      .then((datos) => {
+        if (!cancelado) setMarco(Array.isArray(datos) ? datos : [])
+      })
+      .catch(() => {
+        if (!cancelado) setMarco([])
+      })
+    return () => {
+      cancelado = true
+    }
+  }, [fetchImpl])
+  return marco
+}
+
+export function MapaPage({ hoyISO, usuario, db, fetchImpl = fetch }) {
   const { cargando, error, catalogos, porLocalidad } = useSupervision({
     hoyISO,
     filtros: FILTROS_INICIALES,
@@ -196,7 +221,11 @@ export function MapaPage({ hoyISO, usuario, db }) {
     db,
     vista: 'mapa',
   })
-  const paneles = useMemo(() => panelesPorLocalidad(catalogos, porLocalidad), [catalogos, porLocalidad])
+  const marco = useLocalidadesMarco(fetchImpl)
+  const paneles = useMemo(
+    () => panelesPorLocalidad(catalogos, porLocalidad, marco ?? catalogos.localidades),
+    [catalogos, porLocalidad, marco],
+  )
   const [seleccion, setSeleccion] = useState(null)
   const { sinMosaicos, eventos: eventosMosaicos } = useSinMosaicos()
   const panel = paneles.find((p) => p.claveInegi === seleccion) ?? null

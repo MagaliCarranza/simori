@@ -30,9 +30,23 @@ const nombreCentro = (c) => (c.provisional ? c.nombre.replace(/\s*\(provisional\
 const tieneCoordenadas = (l) => Number.isFinite(l.lat) && Number.isFinite(l.lng)
 
 // Un panel por localidad del catálogo, ordenado por nombre.
-export function panelesPorLocalidad({ localidades, escuelas, centros }, porLocalidad) {
+// `localidadesMarco` es el conjunto amplio (todas las del municipio sin
+// totales del ITER) que calcularPrioridad usa para normalizar min-max y
+// ordenar el lugar en el alcance. Si no se pasa, se usa el mismo catálogo
+// (menos marco, menos informativo).
+export function panelesPorLocalidad(
+  { localidades, escuelas, centros },
+  porLocalidad,
+  localidadesMarco,
+) {
   const grupoPorClave = new Map(porLocalidad.map((g) => [g.clave, g]))
-  const prioridadPorClave = new Map(calcularPrioridad(localidades).map((p) => [p.claveInegi, p]))
+  const marco = localidadesMarco && localidadesMarco.length > 0 ? localidadesMarco : localidades
+  const prioridadPorClave = new Map(
+    calcularPrioridad(localidades, undefined, undefined, undefined, marco).map((p) => [
+      p.claveInegi,
+      p,
+    ]),
+  )
   return localidades
     .map((l) => {
       const p = prioridadPorClave.get(l.claveInegi)
@@ -42,7 +56,15 @@ export function panelesPorLocalidad({ localidades, escuelas, centros }, porLocal
         gradoMarginacion: l.gradoMarginacion ?? null,
         poblacion5a14: l.poblacion5a14 ?? null,
         coordenadas: tieneCoordenadas(l) ? [l.lat, l.lng] : null,
-        prioridad: p ? { nivel: p.nivel, puntaje: p.puntaje, razon: p.razon } : null,
+        prioridad: p
+          ? {
+              nivel: p.nivel,
+              puntaje: p.puntaje,
+              lugarAlcance: p.lugarAlcance,
+              totalAlcance: p.totalAlcance,
+              razon: p.razon,
+            }
+          : null,
         escuelas: escuelas
           .filter((e) => e.claveInegi === l.claveInegi)
           .map((e) => ({

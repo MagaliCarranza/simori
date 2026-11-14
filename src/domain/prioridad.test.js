@@ -117,14 +117,71 @@ describe('calcularPrioridad — razón con datos crudos', () => {
     expect(buscar(r, 'L1').razon).not.toMatch(/lengua indígena/i)
   })
 
-  it('lengua indígena ≥ 5 % sí aparece en la razón', () => {
+  it('lengua indígena ≥ 5 % sí aparece en la razón (pctHLI en porcentaje)', () => {
+    // pctHLI está en porcentaje: 20 representa 20 %, no 20 (ratio).
     const locs = [
-      { claveInegi: 'L1', nombre: 'L1', im2020: 10, distanciaKm: 0, matricula: 0, pctHLI: 0.2, gradoMarginacion: 'Alto' },
+      { claveInegi: 'L1', nombre: 'L1', im2020: 10, distanciaKm: 0, matricula: 0, pctHLI: 20, gradoMarginacion: 'Alto' },
       { claveInegi: 'L2', nombre: 'L2', im2020: 10, distanciaKm: 0, matricula: 0, pctHLI: 0, gradoMarginacion: 'Muy bajo' },
     ]
     // Marg norm = 0 (min=max=10) para ambas: el aporte principal es HLI.
     const r = calcularPrioridad(locs)
     expect(buscar(r, 'L1').razon).toMatch(/20 % con lengua indígena/)
+  })
+
+  it('un pctHLI apenas por encima de 5 % entra; justo por debajo, no', () => {
+    const base = { im2020: 10, distanciaKm: 0, matricula: 0, gradoMarginacion: 'Alto' }
+    const r1 = calcularPrioridad([
+      { claveInegi: 'L1', nombre: 'L1', ...base, pctHLI: 5.1 },
+      { claveInegi: 'L2', nombre: 'L2', ...base, pctHLI: 0, gradoMarginacion: 'Muy bajo' },
+    ])
+    expect(buscar(r1, 'L1').razon).toMatch(/5\.1 % con lengua indígena/)
+
+    const r2 = calcularPrioridad([
+      { claveInegi: 'L1', nombre: 'L1', ...base, pctHLI: 4.9 },
+      { claveInegi: 'L2', nombre: 'L2', ...base, pctHLI: 0, gradoMarginacion: 'Muy bajo' },
+    ])
+    expect(buscar(r2, 'L1').razon).not.toMatch(/lengua indígena/i)
+  })
+})
+
+describe('calcularPrioridad — marco de normalización', () => {
+  // Blindaje contra la regresión: calcularPrioridad DEBE aceptar un marco
+  // amplio para que la normalización no colapse al pasar solo las 3 en
+  // alcance. Si alguien borra el parámetro `marco`, este bloque falla.
+  it('los puntajes con marco amplio son distintos a los que salen normalizando solo con 3', () => {
+    const alcance = [
+      { claveInegi: 'ALC-A', nombre: 'A', im2020: 18.57, distanciaKm: 3.7, matricula: 173, pctHLI: 0.132, gradoMarginacion: 'Alto', enAlcance: true },
+      { claveInegi: 'ALC-B', nombre: 'B', im2020: 19.54, distanciaKm: 2.72, matricula: 415, pctHLI: 0, gradoMarginacion: 'Medio', enAlcance: true },
+      { claveInegi: 'ALC-C', nombre: 'C', im2020: 19.76, distanciaKm: 0, matricula: 1452, pctHLI: 0.033, gradoMarginacion: 'Medio', enAlcance: true },
+    ]
+    // Marco amplio con extremos que mueven todos los min-max.
+    const marco = [
+      ...alcance,
+      { claveInegi: 'EXT-MIN', nombre: 'MinIM', im2020: 16, distanciaKm: 8, matricula: 0, pctHLI: 0, enAlcance: false },
+      { claveInegi: 'EXT-MAX', nombre: 'MaxIM', im2020: 26, distanciaKm: 0, matricula: 3000, pctHLI: 0.25, enAlcance: false },
+    ]
+    const sinMarco = calcularPrioridad(alcance).map((x) => x.puntaje)
+    const conMarco = calcularPrioridad(alcance, undefined, undefined, undefined, marco).map(
+      (x) => x.puntaje,
+    )
+    expect(conMarco).not.toEqual(sinMarco)
+  })
+
+  it('el lugar dentro del alcance se asigna según el marco, no según las 3 recibidas', () => {
+    // A tiene el puntaje más bajo dentro del alcance; con marco amplio
+    // el ranking cambia los números pero mantiene el orden.
+    const alcance = [
+      { claveInegi: 'ALC-A', nombre: 'A', im2020: 25, distanciaKm: 0, matricula: 0, pctHLI: 0, gradoMarginacion: 'Muy bajo', enAlcance: true },
+      { claveInegi: 'ALC-B', nombre: 'B', im2020: 15, distanciaKm: 5, matricula: 500, pctHLI: 0.1, gradoMarginacion: 'Alto', enAlcance: true },
+    ]
+    const marco = [
+      ...alcance,
+      { claveInegi: 'EXT', nombre: 'Extremo', im2020: 50, distanciaKm: 20, matricula: 10000, pctHLI: 10, enAlcance: false },
+    ]
+    const r = calcularPrioridad(alcance, undefined, undefined, undefined, marco)
+    expect(buscar(r, 'ALC-B').lugarAlcance).toBe(1)
+    expect(buscar(r, 'ALC-A').lugarAlcance).toBe(2)
+    expect(r.every((x) => x.totalAlcance === 2)).toBe(true)
   })
 })
 

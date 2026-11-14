@@ -12,6 +12,6 @@
   "PRIORIDAD": {
     "PESOS": { "marginacion": 0.4, "distancia": 0.3, "matricula": 0.2, "hli": 0.1 },
     "UMBRALES": { "alta": 0.66, "media": 0.33 },
-    "HLI_MIN_PARA_RAZON": 0.05
+    "HLI_MIN_PARA_RAZON": 5
   }
 }
