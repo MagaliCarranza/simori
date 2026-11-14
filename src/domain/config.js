@@ -26,3 +26,12 @@ export const PASOS_ENTRE_ETAPAS = config.PASOS_ENTRE_ETAPAS
 
 // Día supuesto para edad decimal (el modelo solo guarda mes/año).
 export const DIA_SUPUESTO_NACIMIENTO = config.DIA_SUPUESTO_NACIMIENTO
+
+// Índice de prioridad (docs/01 reporte-simori, anexo D):
+// marginación 40% (CONAPO), distancia a la unidad más cercana 30% (CLUES),
+// matrícula por localidad 20% (SEJ/SEP) y % de lengua indígena 10% (Censo).
+export const PRIORIDAD_PESOS = config.PRIORIDAD.PESOS
+export const PRIORIDAD_UMBRALES = config.PRIORIDAD.UMBRALES
+// Umbral para mencionar "lengua indígena" en la razón: por debajo de este
+// porcentaje (0..1) el dato es despreciable y no entra al texto.
+export const PRIORIDAD_HLI_MIN_PARA_RAZON = config.PRIORIDAD.HLI_MIN_PARA_RAZON

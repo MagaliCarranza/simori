@@ -4,6 +4,7 @@
 import 'leaflet/dist/leaflet.css'
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { CircleMarker, MapContainer, TileLayer, Tooltip } from 'react-leaflet'
+import { etiquetaPrioridad } from '../../domain/index.js'
 import { EtiquetaSimulado } from '../../components/EtiquetaSimulado.jsx'
 import { FILTROS_INICIALES } from '../supervision/filtros.js'
 import { useSupervision } from '../supervision/useSupervision.js'
@@ -103,11 +104,18 @@ function Par({ termino, children }) {
 }
 
 function PanelLocalidad({ panel }) {
-  const { pendientes } = panel
+  const { pendientes, prioridad } = panel
   const aproximada = panel.escuelas.some((e) => e.ubicacionAproximada)
   return (
     <>
       <h3 id="titulo-panel">{panel.nombre}</h3>
+
+      {prioridad && (
+        <p className={`mapa__prioridad mapa__prioridad--${prioridad.nivel}`}>
+          <span className="mapa__prioridad-etiqueta">{etiquetaPrioridad(prioridad)}</span>
+          <span className="mapa__prioridad-razon">{prioridad.razon}</span>
+        </p>
+      )}
 
       <dl className="supervision__pares">
         <Par termino="Grado de marginación">{panel.gradoMarginacion ?? 'Sin dato'}</Par>
@@ -180,7 +188,32 @@ function PanelLocalidad({ panel }) {
   )
 }
 
-export function MapaPage({ hoyISO, usuario, db }) {
+// Marco amplio para normalizar el índice de prioridad: localidades_marco.json
+// trae todas las reales del municipio sin las filas de totales del ITER. No
+// se muestra en pantalla; si la carga falla, prioridad usa solo las 3 del
+// alcance (menos informativo, pero no rompe la UI).
+const RUTA_MARCO = '/data/localidades_marco.json'
+
+function useLocalidadesMarco(fetchImpl = fetch) {
+  const [marco, setMarco] = useState(null)
+  useEffect(() => {
+    let cancelado = false
+    fetchImpl(RUTA_MARCO)
+      .then((r) => (r.ok ? r.json() : []))
+      .then((datos) => {
+        if (!cancelado) setMarco(Array.isArray(datos) ? datos : [])
+      })
+      .catch(() => {
+        if (!cancelado) setMarco([])
+      })
+    return () => {
+      cancelado = true
+    }
+  }, [fetchImpl])
+  return marco
+}
+
+export function MapaPage({ hoyISO, usuario, db, fetchImpl = fetch }) {
   const { cargando, error, catalogos, porLocalidad } = useSupervision({
     hoyISO,
     filtros: FILTROS_INICIALES,
@@ -188,7 +221,11 @@ export function MapaPage({ hoyISO, usuario, db }) {
     db,
     vista: 'mapa',
   })
-  const paneles = useMemo(() => panelesPorLocalidad(catalogos, porLocalidad), [catalogos, porLocalidad])
+  const marco = useLocalidadesMarco(fetchImpl)
+  const paneles = useMemo(
+    () => panelesPorLocalidad(catalogos, porLocalidad, marco ?? catalogos.localidades),
+    [catalogos, porLocalidad, marco],
+  )
   const [seleccion, setSeleccion] = useState(null)
   const { sinMosaicos, eventos: eventosMosaicos } = useSinMosaicos()
   const panel = paneles.find((p) => p.claveInegi === seleccion) ?? null
