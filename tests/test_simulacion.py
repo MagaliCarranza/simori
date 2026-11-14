@@ -121,7 +121,7 @@ def test_casos_esperando_siguiente_etapa_estan_en_seguimiento(salidas_default, e
 def test_grupos_al_hoy_suman_total(salidas_default, escenario):
     """Los cuatro grupos titular son disjuntos y cubren todos los casos."""
     datos = salidas_default[escenario]
-    total = datos["resumen"]["casos"]
+    total = len(datos["casos"])
     g = datos["resumen"]["grupos_al_hoy"]
     suma = (
         g["completo_evaluacion"]["n"]
@@ -131,6 +131,42 @@ def test_grupos_al_hoy_suman_total(salidas_default, escenario):
     )
     assert suma == total, (
         f"Escenario {escenario} %: suma de grupos {suma} != total {total}"
+    )
+
+
+@pytest.mark.parametrize("escenario", [11, 30, 50])
+def test_por_etapa_actual_suma_total(salidas_default, escenario):
+    """Cada caso tiene una etapaActual (1..4): el desglose cubre a todos."""
+    datos = salidas_default[escenario]
+    total = len(datos["casos"])
+    p = datos["resumen"]["por_etapa_actual"]
+    suma = p["etapa1"] + p["etapa2"] + p["etapa3"] + p["etapa4"]
+    assert suma == total, (
+        f"Escenario {escenario} %: suma por etapa {suma} != total {total}"
+    )
+
+
+@pytest.mark.parametrize("escenario", [11, 30, 50])
+def test_estados_suman_total(salidas_default, escenario):
+    """Los cinco estados son disjuntos y cubren a todos los casos."""
+    datos = salidas_default[escenario]
+    total = len(datos["casos"])
+    e = datos["resumen"]["estados"]
+    suma = e["en_seguimiento"] + e["vigilancia"] + e["alta"] + e["referido"] + e["sin_seguimiento"]
+    assert suma == total, (
+        f"Escenario {escenario} %: suma de estados {suma} != total {total}"
+    )
+
+
+@pytest.mark.parametrize("escenario", [11, 30, 50])
+def test_semaforo_al_hoy_suma_total(salidas_default, escenario):
+    """Cada caso cae en un color (verde/amarillo/rojo) o en sin_semaforo (cerrados)."""
+    datos = salidas_default[escenario]
+    total = len(datos["casos"])
+    s = datos["resumen"]["semaforo_al_hoy"]
+    suma = s["verde"] + s["amarillo"] + s["rojo"] + s["sin_semaforo"]
+    assert suma == total, (
+        f"Escenario {escenario} %: suma del semaforo {suma} != total {total}"
     )
 
 
