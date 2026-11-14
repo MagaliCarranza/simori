@@ -2,7 +2,9 @@
 //
 // - cargarCatalogos: localidades, escuelas, centros de salud y usuarios demo.
 //   Idempotente (bulkPut).
-// - cargarEscenario: vacía ninos/casos/eventos/avisos y carga un escenario.
+// - cargarEscenario: reemplaza los casos del escenario anterior por los del
+//   nuevo, pero conserva los que registró un usuario desde M3 (códigos que
+//   no vienen en el escenario), junto con sus niños, eventos y avisos.
 // - inicializar: si la DB todavía no tiene escenario activo, carga catálogos
 //   y el escenario default (11 %). Pensada para llamar al arrancar la app.
 
@@ -41,13 +43,48 @@ export async function cargarEscenario(numero, datos, db = dbDefault) {
     db.avisos,
     db.meta,
     async () => {
+      // Códigos que aporta el escenario entrante: sirven para distinguir
+      // los casos simulados (se reemplazan) de los registrados por el
+      // usuario desde M3 (se conservan).
+      const codigosEscenario = new Set((datos.casos ?? []).map((c) => c.codigo))
+
+      const casosConservados = (await db.casos.toArray()).filter(
+        (c) => !codigosEscenario.has(c.codigo),
+      )
+      const codigosCasoUsuario = new Set(casosConservados.map((c) => c.codigo))
+      const codigosNinoUsuario = new Set(casosConservados.map((c) => c.codigoNino))
+
+      const ninosConservados = (await db.ninos.toArray()).filter((n) =>
+        codigosNinoUsuario.has(n.codigo),
+      )
+      const eventosConservados = (await db.eventos.toArray()).filter((e) =>
+        codigosCasoUsuario.has(e.codigoCaso),
+      )
+      const avisosConservados = (await db.avisos.toArray()).filter((a) =>
+        codigosCasoUsuario.has(a.codigoCaso),
+      )
+
       await db.ninos.clear()
       await db.casos.clear()
       await db.eventos.clear()
       await db.avisos.clear()
+
       if (datos.ninos) await db.ninos.bulkAdd(datos.ninos)
       if (datos.casos) await db.casos.bulkAdd(datos.casos)
       if (datos.eventos) await db.eventos.bulkAdd(datos.eventos)
+
+      // Reinserta lo del usuario al final. Los ids autoincrementales de
+      // eventos y avisos se quitan para no colisionar; Dexie asigna uno
+      // nuevo en la base recién vaciada.
+      if (ninosConservados.length) await db.ninos.bulkPut(ninosConservados)
+      if (casosConservados.length) await db.casos.bulkPut(casosConservados)
+      if (eventosConservados.length) {
+        await db.eventos.bulkAdd(eventosConservados.map(({ id: _id, ...resto }) => resto))
+      }
+      if (avisosConservados.length) {
+        await db.avisos.bulkAdd(avisosConservados.map(({ id: _id, ...resto }) => resto))
+      }
+
       await db.meta.put({ clave: 'escenarioActivo', valor: String(numero) })
       if (datos.semilla != null) {
         await db.meta.put({ clave: 'semillaCarga', valor: String(datos.semilla) })

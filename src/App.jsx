@@ -1,13 +1,17 @@
 import { lazy, Suspense, useEffect, useState } from 'react'
 import { BrowserRouter, Navigate, Outlet, Route, Routes, useLocation, useNavigate } from 'react-router-dom'
-import { EnConstruccion } from './components/EnConstruccion.jsx'
 import { HOME_POR_ROL, NavegacionRol, RUTAS_POR_ROL } from './components/NavegacionRol.jsx'
 import { db } from './db/index.js'
 import { inicializar } from './db/seed.js'
 import { ListaAvisosPage } from './features/avisos/ListaAvisosPage.jsx'
 import { MisVisitasPage } from './features/campo/MisVisitasPage.jsx'
+import { InicioPage } from './features/inicio/InicioPage.jsx'
 import { PendientesPage } from './features/pendientes/PendientesPage.jsx'
+import { RegistrarCasoPage } from './features/registro/RegistrarCasoPage.jsx'
+import { PronosticoPage } from './features/pronostico/PronosticoPage.jsx'
+import { FichaCasoPage } from './features/ruta/FichaCasoPage.jsx'
 import { SupervisionPage } from './features/supervision/SupervisionPage.jsx'
+import { guardarRol, leerRolGuardado } from './roles/roles.js'
 import './App.css'
 
 // Mapa lazy: Leaflet es pesado y solo lo necesita supervisión.
@@ -30,44 +34,46 @@ function rutaPermitida(rol, pathname) {
   return permitidas.some((p) => pathname === p || pathname.startsWith(`${p}/`))
 }
 
-// Si el usuario cambia a un rol que no tiene acceso a la ruta actual, lo
+// "/" es la pantalla de inicio (elegir rol). Sin rol elegido, cualquier otra
+// ruta vuelve al inicio. Si el rol no tiene acceso a la ruta actual, lo
 // redirigimos a la home de su rol. Supervisión, por ejemplo, no puede entrar
 // a /caso/:codigo porque solo ve agregados.
-function GuardaPorRol({ usuario }) {
+function GuardaPorRol({ usuario, cargado }) {
   const location = useLocation()
   const navigate = useNavigate()
   useEffect(() => {
-    if (!usuario) return
-    if (location.pathname === '/') {
-      navigate(HOME_POR_ROL[usuario.rol], { replace: true })
+    if (location.pathname === '/') return
+    if (!usuario) {
+      if (cargado) navigate('/', { replace: true })
       return
     }
     if (!rutaPermitida(usuario.rol, location.pathname)) {
       navigate(HOME_POR_ROL[usuario.rol], { replace: true })
     }
-  }, [usuario, location.pathname, navigate])
+  }, [usuario, cargado, location.pathname, navigate])
   return <Outlet />
 }
 
-function Shell({ usuarios, usuarioId, setUsuarioId, usuario }) {
+// Marco: encabezado y navegación (NavegacionRol) + contenido de la pantalla.
+function Shell({ usuario, cargado }) {
   return (
-    <>
-      <NavegacionRol
-        usuarios={usuarios}
-        usuarioId={usuarioId}
-        onCambioUsuario={setUsuarioId}
-        usuario={usuario}
-      />
-      <GuardaPorRol usuario={usuario} />
-      <p className="app__pie">Prototipo con datos simulados. No es un sistema oficial y no diagnostica.</p>
-    </>
+    <div className={`marco${usuario ? ' marco--con-menu' : ''}`}>
+      <NavegacionRol usuario={usuario} />
+      <main className="marco__contenido">
+        <GuardaPorRol usuario={usuario} cargado={cargado} />
+        <p className="app__pie">Prototipo con datos simulados. No es un sistema oficial y no diagnostica.</p>
+      </main>
+    </div>
   )
 }
 
 function AplicacionInterna() {
   const [usuarios, setUsuarios] = useState([])
-  const [usuarioId, setUsuarioId] = useState('')
+  const [cargado, setCargado] = useState(false)
+  // El rol elegido en el inicio; se recuerda al recargar si se puede.
+  const [rol, setRol] = useState(() => leerRolGuardado())
   const [error, setError] = useState(null)
+  const navigate = useNavigate()
 
   useEffect(() => {
     let vigente = true
@@ -75,9 +81,8 @@ function AplicacionInterna() {
       .then(() => db.usuarios.toArray())
       .then((lista) => {
         if (!vigente) return
-        const conPantalla = lista.filter((u) => RUTAS_POR_ROL[u.rol])
-        setUsuarios(conPantalla)
-        if (conPantalla.length) setUsuarioId(conPantalla[0].id)
+        setUsuarios(lista.filter((u) => RUTAS_POR_ROL[u.rol]))
+        setCargado(true)
       })
       .catch((e) => vigente && setError(e))
     return () => {
@@ -85,7 +90,15 @@ function AplicacionInterna() {
     }
   }, [])
 
-  const usuario = usuarios.find((u) => u.id === usuarioId)
+  const usuario = rol ? usuarios.find((u) => u.rol === rol) : undefined
+
+  // Al elegir un rol: se recuerda y se abre su primera pantalla.
+  function elegirRol(nuevo) {
+    if (!nuevo || !RUTAS_POR_ROL[nuevo]) return
+    setRol(nuevo)
+    guardarRol(nuevo)
+    navigate(HOME_POR_ROL[nuevo])
+  }
 
   if (error) {
     return (
@@ -96,31 +109,15 @@ function AplicacionInterna() {
   }
 
   return (
-    <main className="app">
+    <div className="app">
       <Routes>
-        <Route element={<Shell usuarios={usuarios} usuarioId={usuarioId} setUsuarioId={setUsuarioId} usuario={usuario} />}>
-          <Route path="/" element={null} />
+        <Route element={<Shell usuario={usuario} cargado={cargado} />}>
+          <Route path="/" element={<InicioPage rolActual={rol} onElegir={elegirRol} />} />
 
           {/* Captura */}
-          <Route
-            path="/registrar"
-            element={
-              <EnConstruccion
-                titulo="Registrar caso"
-                descripcion="Pantalla pendiente (M3)."
-              />
-            }
-          />
+          <Route path="/registrar" element={usuario ? <RegistrarCasoPage usuario={usuario} hoyISO={HOY_DEMO} /> : null} />
           <Route path="/pendientes" element={usuario ? <PendientesPage usuario={usuario} hoyISO={HOY_DEMO} /> : null} />
-          <Route
-            path="/caso/:codigo"
-            element={
-              <EnConstruccion
-                titulo="Ficha de seguimiento"
-                descripcion="Pantalla pendiente (M4)."
-              />
-            }
-          />
+          <Route path="/caso/:codigo" element={usuario ? <FichaCasoPage usuario={usuario} hoyISO={HOY_DEMO} /> : null} />
 
           {/* Campo */}
           <Route path="/visitas" element={usuario ? <MisVisitasPage usuario={usuario} hoyISO={HOY_DEMO} /> : null} />
@@ -138,20 +135,12 @@ function AplicacionInterna() {
               ) : null
             }
           />
-          <Route
-            path="/supervision/pronostico"
-            element={
-              <EnConstruccion
-                titulo="Pronóstico de demanda"
-                descripcion="Pantalla pendiente (Anexo E del reporte)."
-              />
-            }
-          />
+          <Route path="/supervision/pronostico" element={usuario ? <PronosticoPage usuario={usuario} hoyISO={HOY_DEMO} /> : null} />
 
           <Route path="*" element={<Navigate to="/" replace />} />
         </Route>
       </Routes>
-    </main>
+    </div>
   )
 }
 

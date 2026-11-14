@@ -33,6 +33,7 @@ export function SupervisionPage({ hoyISO, usuario, db }) {
   const opciones = useMemo(() => opcionesFiltros(catalogos, filtros), [catalogos, filtros])
   const cambiar = (cambio) => setFiltros((f) => cambiarFiltro(f, cambio, catalogos))
   const pct = porcentaje(resumen.completado)
+  const activos = Object.values(filtros).filter(Boolean).length
 
   return (
     <section className="supervision" aria-labelledby="titulo-supervision">
@@ -51,42 +52,6 @@ export function SupervisionPage({ hoyISO, usuario, db }) {
 
       {!cargando && !error && (
         <>
-          <div className="supervision__filtros">
-            <label>
-              Localidad
-              <select value={filtros.localidad} onChange={(e) => cambiar({ localidad: e.target.value })}>
-                <option value="">Todas</option>
-                {opciones.localidades.map((l) => (
-                  <option key={l.claveInegi} value={l.claveInegi}>
-                    {l.nombre}
-                  </option>
-                ))}
-              </select>
-            </label>
-            <label>
-              Escuela
-              <select value={filtros.cct} onChange={(e) => cambiar({ cct: e.target.value })}>
-                <option value="">Todas</option>
-                {opciones.escuelas.map((e) => (
-                  <option key={e.cct} value={e.cct}>
-                    {e.nombre} ({e.cct})
-                  </option>
-                ))}
-              </select>
-            </label>
-            <label>
-              Centro de salud
-              <select value={filtros.clues} onChange={(e) => cambiar({ clues: e.target.value })}>
-                <option value="">Todos</option>
-                {opciones.centros.map((c) => (
-                  <option key={c.clues} value={c.clues}>
-                    {c.nombre}
-                  </option>
-                ))}
-              </select>
-            </label>
-          </div>
-
           <div className="supervision__kpi" aria-live="polite">
             <span className="supervision__kpi-numero">{pct ?? 'No disponible'}</span>
             <span className="supervision__kpi-texto">
@@ -98,6 +63,55 @@ export function SupervisionPage({ hoyISO, usuario, db }) {
               Positivos en la selección: <strong>{resumen.total}</strong>
             </span>
           </div>
+
+          {/* Filtros plegados: el indicador queda en la primera pantalla. */}
+          <details className="supervision__filtrar">
+            <summary>
+              Filtrar
+              {activos > 0 && (
+                <span className="supervision__filtrar-activos">
+                  {' '}
+                  · {activos} {activos === 1 ? 'activo' : 'activos'}
+                </span>
+              )}
+            </summary>
+            <div className="supervision__filtros">
+              <label>
+                Localidad
+                <select value={filtros.localidad} onChange={(e) => cambiar({ localidad: e.target.value })}>
+                  <option value="">Todas</option>
+                  {opciones.localidades.map((l) => (
+                    <option key={l.claveInegi} value={l.claveInegi}>
+                      {l.nombre}
+                    </option>
+                  ))}
+                </select>
+              </label>
+              <label>
+                Escuela
+                <select value={filtros.cct} onChange={(e) => cambiar({ cct: e.target.value })}>
+                  <option value="">Todas</option>
+                  {opciones.escuelas.map((e) => (
+                    <option key={e.cct} value={e.cct}>
+                      {e.nombre} ({e.cct})
+                    </option>
+                  ))}
+                </select>
+              </label>
+              <label>
+                Centro de salud
+                <select value={filtros.clues} onChange={(e) => cambiar({ clues: e.target.value })}>
+                  <option value="">Todos</option>
+                  {opciones.centros.map((c) => (
+                    <option key={c.clues} value={c.clues}>
+                      {c.nombre}
+                    </option>
+                  ))}
+                </select>
+              </label>
+            </div>
+
+          </details>
 
           <div className="supervision__rejilla">
             <section className="supervision__tarjeta" aria-labelledby="titulo-embudo">

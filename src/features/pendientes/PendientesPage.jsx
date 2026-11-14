@@ -6,7 +6,7 @@ import { filtrarPendientes, resumenPendientes } from './pendientes.js'
 import { usePendientesDelCentro } from './usePendientesDelCentro.js'
 import './pendientes.css'
 
-const FILTROS_INICIALES = { color: 'todos', cct: '', soloSinCita: false }
+const FILTROS_INICIALES = { color: 'todos', cct: '', soloSinCita: false, busqueda: '' }
 
 // HU03 · "Casos con retraso y pendientes" (rol captura). Solo casos del centro
 // del usuario, solo amarillo/rojo, ordenados por días de retraso.
@@ -87,6 +87,17 @@ export function PendientesPage({ usuario, hoyISO, db }) {
           ) : (
             <>
               <div className="pendientes__filtros">
+                <label>
+                  Buscar por código
+                  <input
+                    type="search"
+                    inputMode="text"
+                    autoComplete="off"
+                    placeholder="Ej. 0131 o AC-0131"
+                    value={filtros.busqueda}
+                    onChange={(e) => cambiar({ busqueda: e.target.value })}
+                  />
+                </label>
                 <label>
                   Semáforo
                   <select value={filtros.color} onChange={(e) => cambiar({ color: e.target.value })}>

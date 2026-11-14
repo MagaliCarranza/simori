@@ -19,7 +19,7 @@
   padding: 8px 16px;
   border: 1px solid var(--color-primary);
   border-radius: var(--radio-pildora);
-  background: var(--color-superficie, #ffffff);
+  background: var(--color-superficie);
   color: var(--color-primary);
   font: inherit;
   font-weight: 600;
@@ -28,21 +28,21 @@
 
 .mapa__localidad[aria-pressed='true'] {
   background: var(--color-primary);
-  color: #ffffff;
+  color: var(--color-superficie);
 }
 
 .mapa__localidad:focus-visible {
-  outline: 3px solid #c2410c;
-  outline-offset: 2px;
+  outline: 3px solid transparent;
+  box-shadow: var(--foco-anillo);
 }
 
 .mapa__aviso {
   margin: 0;
   padding: 8px 12px;
-  border: 1px solid var(--semaforo-amarillo, #6b4a00);
+  border: 1px solid var(--semaforo-amarillo);
   border-radius: 8px;
-  background: var(--semaforo-amarillo-fondo, #fff1c2);
-  color: var(--semaforo-amarillo, #6b4a00);
+  background: var(--semaforo-amarillo-fondo);
+  color: var(--semaforo-amarillo);
   font-weight: 600;
 }
 
@@ -67,8 +67,8 @@
 }
 
 .mapa__etiqueta--elegida {
-  border-color: #0b1f4d;
-  color: #0b1f4d;
+  border-color: var(--color-primary-hover);
+  color: var(--color-primary-hover);
   font-weight: 700;
 }
 
@@ -87,15 +87,13 @@
   color: var(--color-primary);
 }
 
-.mapa__escuelas,
-.mapa__centros {
+.mapa__escuelas {
   margin: 0;
   padding: 0;
   list-style: none;
 }
 
-.mapa__escuelas li,
-.mapa__centros li {
+.mapa__escuelas li {
   display: flex;
   flex-wrap: wrap;
   justify-content: space-between;
@@ -105,8 +103,7 @@
   border-bottom: 1px solid var(--color-borde);
 }
 
-.mapa__escuelas li:last-child,
-.mapa__centros li:last-child {
+.mapa__escuelas li:last-child {
   border-bottom: 0;
 }
 
@@ -140,6 +137,64 @@
   padding-left: 12px;
 }
 
+/* Prioridad por localidad. Paleta propia (rosa/violeta/pizarra) para no
+   confundirla con el semáforo (verde/amarillo/rojo) ni con los puntos del
+   mapa (azul). Siempre lleva texto además del color. */
+.mapa__prioridad {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin: 8px 0 12px;
+  padding: 8px 12px;
+  border-left: 4px solid currentColor;
+  border-radius: 6px;
+}
+
+.mapa__prioridad-etiqueta {
+  font-weight: 700;
+  text-transform: capitalize;
+}
+
+.mapa__prioridad-razon {
+  color: var(--color-texto);
+  font-size: 0.9375rem;
+  font-weight: 500;
+}
+
+.mapa__prioridad--alta {
+  background: var(--prioridad-alta-fondo);
+  color: var(--prioridad-alta);
+}
+
+.mapa__prioridad--media {
+  background: var(--prioridad-media-fondo);
+  color: var(--prioridad-media);
+}
+
+.mapa__prioridad--baja {
+  background: var(--prioridad-baja-fondo);
+  color: var(--prioridad-baja);
+}
+
+/* Marco no disponible (p. ej. sin red y sin precache). El índice no se
+   calcula; se comunica en una sola línea neutral para no competir con los
+   niveles alta/media/baja que usan rosa/violeta/pizarra. */
+.mapa__prioridad--indisponible {
+  background: var(--prioridad-indisponible-fondo);
+  border-left-color: var(--prioridad-indisponible-borde);
+  color: var(--prioridad-indisponible);
+  font-style: italic;
+}
+
+/* Grupo k-means de la localidad: solo texto, sin color propio. */
+.mapa__agrupacion {
+  margin: 0 0 12px;
+}
+
+.mapa__agrupacion p {
+  margin: 0;
+}
+
 @media (min-width: 768px) {
   .mapa__cuerpo {
     grid-template-columns: minmax(0, 1fr) 320px;
@@ -154,4 +209,66 @@
   .mapa__lienzo {
     height: 460px;
   }
+}
+
+/* Centro de salud: cuadrado morado, distinto del círculo azul de localidad y
+   de los colores del semáforo. */
+.mapa__icono-centro {
+  box-sizing: border-box;
+  border: 2px solid var(--color-superficie);
+  border-radius: 2px;
+  background: var(--color-centro);
+  box-shadow: 0 0 0 1px var(--color-centro-borde);
+}
+
+.mapa__etiqueta-centro {
+  font-weight: 600;
+  color: var(--color-centro-borde);
+}
+
+.mapa__leyenda {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 16px;
+  margin: -8px 0 0;
+  padding: 0;
+  list-style: none;
+  font-size: 0.875rem;
+}
+
+.mapa__leyenda li {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.mapa__simbolo {
+  display: inline-block;
+  width: 14px;
+  height: 14px;
+}
+
+.mapa__simbolo--localidad {
+  border: 2px solid var(--color-primary);
+  border-radius: 50%;
+  background: var(--color-localidad-relleno);
+}
+
+.mapa__simbolo--centro {
+  border: 2px solid var(--color-superficie);
+  border-radius: 2px;
+  background: var(--color-centro);
+  box-shadow: 0 0 0 1px var(--color-centro-borde);
+}
+
+.mapa__centro {
+  display: grid;
+  gap: 8px;
+  justify-items: start;
+}
+
+.mapa__centro-nombre {
+  margin: 0;
+  font-weight: 600;
+  overflow-wrap: anywhere;
 }

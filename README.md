@@ -40,8 +40,8 @@ Es un prototipo, **funciona sin internet** después de la primera carga, y podr�
 ## Instalación
 
 ```bash
-git clone https://github.com/MagaliCarranza/ruta-rinon.git
-cd ruta-rinon
+git clone https://github.com/MagaliCarranza/simori.git
+cd simori
 npm install
 ```
 
@@ -109,12 +109,14 @@ Todos los generan los scripts de `scripts/`. Son los únicos que la PWA consume 
 
 | Archivo | Origen | Qué contiene |
 |---|---|---|
-| `localidades.json` | ITER + CONAPO | **Todas** las localidades del municipio con lat/lng, población 5-14, IM 2020, grado de marginación, % lengua indígena, matrícula, distancia en km a la unidad SSA más cercana, `cluesOperativo` y `enAlcance`. |
+| `localidades.json` | ITER + CONAPO | **Solo las localidades `enAlcance`** (hoy San Pedro Itzicán, Agua Caliente y Chalpicote) con lat/lng, población 5-14, IM 2020, grado de marginación, % lengua indígena, matrícula, distancia en km a la unidad SSA operativa, `cluesOperativo` y `enAlcance`. Es lo único que la app muestra. |
+| `localidades_marco.json` | ITER + CONAPO | Todas las localidades reales del municipio (sin las filas de totales del ITER 0000/9998/9999). **No se muestra en ninguna pantalla**: solo lo usa `calcularPrioridad` para que la normalización min–max del índice tenga un marco amplio. |
 | `escuelas.json` | 911 SEP | CCT públicos primaria/secundaria con matrícula de las localidades `enAlcance`; coordenadas aproximadas (de la localidad). |
-| `centros_salud.json` | CLUES + DENUE (o fallback a localidad del ITER) | Unidades CLUES reales del municipio con `verificadaDENUE` y `ubicacionAproximada`. Sin `provisional`. |
+| `centros_salud.json` | CLUES + DENUE (o fallback a localidad del ITER) | **Solo el CLUES visible** que atiende a las tres localidades (hoy JCSSA004213, Centro de Salud de San Pedro Itzicán). Las demás unidades del municipio quedan en el preparado interno para calcular `distanciaKm`, pero no se publican. |
 | `usuarios_demo.json` | Definición del equipo | 1 captura, 1 campo (ambos del centro operativo) y 1 supervisión estatal. |
 | `casos_11.json`, `casos_30.json`, `casos_50.json` | `simular_casos.py` | Casos **simulados** para los tres escenarios de pérdida (11 %, 30 %, 50 %). Determinista por semilla. |
 | `data/procesado/union_clues_denue.csv` | `georreferenciar_unidades.py` | Trazabilidad de cada CLUES: método (`manual`, `denue`, `unica_loc`, `localidad`, `sin_coords`), clave DENUE, puntaje y confianza. |
+| `grupos_localidades.json` | `agrupar_localidades.py` | Grupos k-means de las localidades del municipio con las 4 variables del índice completas. Se descarta toda k que deje un grupo con menos de 3 localidades. Incluye la silueta de cada k probada y las variables usadas. Agrupa localidades, no personas. |
 
 **IM_2020 (CONAPO 2020):** un valor más alto significa **menos** marginación. Para interpretar, usar el grado (`GM_2020`).
 
@@ -123,9 +125,10 @@ Todos los generan los scripts de `scripts/`. Son los únicos que la PWA consume 
 ### Regenerar todo desde cero
 
 ```bash
-pip install -r requirements.txt                # pandas, openpyxl, xlrd, pytest
+pip install -r requirements.txt                # pandas, openpyxl, xlrd, pytest, scikit-learn
 python scripts/preparar_datos.py               # catálogos -> public/data/
 python scripts/simular_casos.py --semilla 2026 # casos_{11,30,50}.json
+python scripts/agrupar_localidades.py --k 3 --motivo "k = 2 tuvo mayor silueta pero solo separaba localidades grandes de pequeñas"  # grupos_localidades.json (después de preparar_datos)
 ```
 
 ## Extender a otros municipios

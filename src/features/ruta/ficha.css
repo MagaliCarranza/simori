@@ -1,0 +1,251 @@
+/* M4 · Ficha de seguimiento. Mobile-first, misma paleta que Pendientes
+   y Supervisión: tarjetas blancas con borde suave sobre fondo azul claro. */
+
+.ficha {
+  display: grid;
+  gap: 16px;
+  width: 100%;
+  max-width: 720px;
+  margin-inline: auto;
+}
+
+.ficha__encabezado {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px 12px;
+}
+
+.ficha__encabezado h2 {
+  margin: 0;
+  color: var(--color-primary);
+  font-size: 1.3rem;
+}
+
+.ficha__datos {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 6px 12px;
+  margin: 0;
+  padding: 16px;
+  border: 1px solid var(--color-borde);
+  border-radius: var(--radio-tarjeta);
+  background: var(--color-superficie);
+}
+
+.ficha__datos dt {
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: var(--color-neutral);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.ficha__datos dd {
+  margin: 0 0 6px;
+  color: #0f172a;
+  font-weight: 500;
+}
+
+.ficha__datos dd:last-child {
+  margin-bottom: 0;
+}
+
+@media (min-width: 560px) {
+  .ficha__datos {
+    grid-template-columns: max-content 1fr;
+    align-items: baseline;
+  }
+
+  .ficha__datos dt {
+    padding-top: 4px;
+  }
+
+  .ficha__datos dd {
+    margin-bottom: 0;
+  }
+}
+
+.ficha__seccion {
+  padding: 16px;
+  border: 1px solid var(--color-borde);
+  border-radius: var(--radio-tarjeta);
+  background: var(--color-superficie);
+}
+
+.ficha__seccion h3 {
+  margin: 0 0 12px;
+  color: var(--color-primary);
+  font-size: 1.05rem;
+}
+
+.ficha__form {
+  display: grid;
+  gap: 12px;
+}
+
+.ficha__campo {
+  display: grid;
+  gap: 4px;
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+
+.ficha__campo input,
+.ficha__campo select {
+  width: 100%;
+  min-height: 44px;
+  padding: 8px 10px;
+  border: 1px solid var(--color-borde);
+  border-radius: 10px;
+  font: inherit;
+  font-weight: 400;
+  color: #0f172a;
+  background: var(--color-superficie);
+}
+
+.ficha__grupo {
+  display: grid;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  min-width: 0;
+}
+
+.ficha__grupo legend {
+  margin-bottom: 6px;
+  font-weight: 700;
+}
+
+.ficha__grupo .boton--opcion {
+  min-height: 40px;
+  padding: 0 14px;
+}
+
+/* La tira de confirmación (botones 0/20/50/100) va en fila; los radios de
+   salida (etapa 4) se quedan apilados. */
+.ficha__grupo:has(> .boton--opcion) {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+}
+
+.ficha__grupo:has(> .boton--opcion) legend {
+  flex: 1 0 100%;
+  margin-bottom: 0;
+}
+
+.ficha__grupo:has(> .boton--opcion) .ficha__ayuda {
+  flex: 1 0 100%;
+}
+
+.ficha__opcion {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  min-height: 40px;
+  padding: 6px 10px;
+  border: 1px solid var(--color-borde);
+  border-radius: 10px;
+  background: var(--color-superficie);
+  font-weight: 500;
+}
+
+.ficha__opcion input[type='radio'] {
+  width: 20px;
+  height: 20px;
+  margin-top: 2px;
+  flex: none;
+}
+
+.ficha__ayuda {
+  margin: 0;
+  font-size: 0.85rem;
+  color: var(--color-neutral);
+}
+
+.ficha__calculo {
+  display: grid;
+  gap: 6px;
+  padding: 12px;
+  border-radius: 10px;
+  background: var(--semaforo-verde-fondo);
+  color: var(--semaforo-verde);
+}
+
+.ficha__calculo .ficha__ayuda {
+  color: var(--semaforo-verde);
+  font-style: italic;
+}
+
+.ficha__mensaje {
+  margin: 0;
+  padding: 10px 14px;
+  border-radius: 10px;
+  background: #e6efff;
+  color: var(--color-primary);
+  font-weight: 600;
+}
+
+.ficha__errores {
+  margin: 0;
+  padding: 8px 12px 8px 28px;
+  border-radius: 10px;
+  background: var(--semaforo-rojo-fondo);
+  color: var(--semaforo-rojo);
+  font-weight: 500;
+}
+
+.ficha__historial {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  gap: 8px;
+  border-left: 2px solid var(--color-borde);
+  padding-left: 14px;
+}
+
+.ficha__historial li {
+  position: relative;
+  padding: 6px 0;
+}
+
+.ficha__historial li::before {
+  content: '';
+  position: absolute;
+  left: -20px;
+  top: 12px;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--color-secondary);
+  border: 2px solid var(--color-superficie);
+  box-shadow: 0 0 0 1px var(--color-borde);
+}
+
+.ficha__historial time {
+  font-weight: 700;
+  color: var(--color-primary);
+  margin-right: 4px;
+}
+
+.ficha__volver {
+  justify-self: start;
+  display: inline-flex;
+  align-items: center;
+  min-height: 40px;
+  padding: 0 14px;
+  border-radius: var(--radio-pildora);
+  color: var(--color-primary);
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.ficha__volver:focus-visible {
+  outline: 3px solid var(--color-secondary);
+  outline-offset: 2px;
+}

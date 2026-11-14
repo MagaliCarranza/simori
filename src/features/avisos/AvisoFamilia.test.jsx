@@ -1,8 +1,8 @@
-import { fireEvent, render, screen, waitFor, within } from '@testing-library/react'
+import { act, fireEvent, render, screen, waitFor, within } from '@testing-library/react'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { crearDb } from '../../db/schema.js'
 import { MisVisitasPage } from '../campo/MisVisitasPage.jsx'
-import { elegirVoz } from './useLectorVoz.js'
+import { elegirVoz, LIMITE_INICIO_MS } from './useLectorVoz.js'
 
 const HOY = '2026-11-14'
 const campo = { id: 'USR-CAM-AC', rol: 'campo', clues: 'PROV-AC-01' }
@@ -16,20 +16,42 @@ class FraseFalsa {
   }
 }
 
-function instalarVoz() {
+const VOCES_LOCALES = [
+  { name: 'Inglés', lang: 'en-US', localService: true },
+  { name: 'España', lang: 'es-ES', localService: true },
+  { name: 'México', lang: 'es-MX', localService: true },
+]
+
+// Simula speechSynthesis. Como Chrome, al cancelar una frase en curso dispara
+// su onerror con 'interrupted'. `cargarVoces` simula el evento voiceschanged.
+function instalarVoz(voces = VOCES_LOCALES) {
+  let lista = voces
+  let enCurso = null
+  const oyentes = new Set()
   const sintesis = {
-    speak: vi.fn(),
-    cancel: vi.fn(),
-    getVoices: () => [
-      { name: 'Inglés', lang: 'en-US', localService: true },
-      { name: 'España', lang: 'es-ES', localService: true },
-      { name: 'México', lang: 'es-MX', localService: true },
-    ],
+    speak: vi.fn((frase) => {
+      enCurso = frase
+    }),
+    cancel: vi.fn(() => {
+      const f = enCurso
+      enCurso = null
+      f?.onerror?.({ error: 'interrupted' })
+    }),
+    getVoices: () => lista,
+    addEventListener: (tipo, fn) => tipo === 'voiceschanged' && oyentes.add(fn),
+    removeEventListener: (tipo, fn) => oyentes.delete(fn),
+    cargarVoces(nuevas) {
+      lista = nuevas
+      oyentes.forEach((fn) => fn())
+    },
+    frase: () => sintesis.speak.mock.calls.at(-1)?.[0],
   }
   window.speechSynthesis = sintesis
   window.SpeechSynthesisUtterance = FraseFalsa
   return sintesis
 }
+
+const MENSAJE_FALLO = 'No se pudo reproducir el audio en este equipo. Lee el aviso en voz alta a la familia.'
 
 function quitarVoz() {
   delete window.speechSynthesis
@@ -54,6 +76,7 @@ beforeEach(async () => {
 })
 
 afterEach(async () => {
+  vi.useRealTimers()
   quitarVoz()
   vi.restoreAllMocks()
   await db.delete()
@@ -91,12 +114,99 @@ describe('Aviso a la familia (HU06)', () => {
     fireEvent.click(a.getByRole('button', { name: /Detener audio/ }))
     expect(sintesis.cancel).toHaveBeenCalled()
     expect(a.getByRole('button', { name: /Escuchar aviso/ })).toBeInTheDocument()
+    // Detener provoca 'interrupted': no es una falla del equipo.
+    expect(a.queryByText(MENSAJE_FALLO)).not.toBeInTheDocument()
+  })
+
+  it('al terminar de leer, el botón regresa a "Escuchar aviso"', async () => {
+    const sintesis = instalarVoz()
+    const a = await abrirAviso()
+    fireEvent.click(a.getByRole('button', { name: /Escuchar aviso/ }))
+    act(() => sintesis.frase().onstart())
+    act(() => sintesis.frase().onend())
+    expect(a.getByRole('button', { name: /Escuchar aviso/ })).toBeInTheDocument()
+    expect(a.queryByText(MENSAJE_FALLO)).not.toBeInTheDocument()
   })
 
   it('si el navegador no tiene voz, lo dice', async () => {
     quitarVoz()
     const a = await abrirAviso()
     expect(a.getByText('Este navegador no puede leer el aviso en voz alta.')).toBeInTheDocument()
+  })
+
+  it('sin voces en español no habla con la voz por omisión y avisa', async () => {
+    const sintesis = instalarVoz([{ name: 'Inglés', lang: 'en-US', localService: true }])
+    const a = await abrirAviso()
+    fireEvent.click(a.getByRole('button', { name: /Escuchar aviso/ }))
+    expect(sintesis.speak).not.toHaveBeenCalled()
+    expect(a.getByRole('alert')).toHaveTextContent(MENSAJE_FALLO)
+    expect(a.getByRole('button', { name: /Escuchar aviso/ })).toBeInTheDocument()
+  })
+
+  it('espera a que carguen las voces (voiceschanged) antes de elegir', async () => {
+    const sintesis = instalarVoz([])
+    const a = await abrirAviso()
+    fireEvent.click(a.getByRole('button', { name: /Escuchar aviso/ }))
+    expect(sintesis.speak).not.toHaveBeenCalled()
+    expect(a.getByRole('button', { name: /Detener audio/ })).toBeInTheDocument()
+
+    act(() => sintesis.cargarVoces(VOCES_LOCALES))
+    expect(sintesis.speak).toHaveBeenCalledTimes(1)
+    expect(sintesis.frase().voice.name).toBe('México')
+  })
+
+  it('si la voz falla (onerror), regresa el botón y avisa', async () => {
+    const sintesis = instalarVoz()
+    const a = await abrirAviso()
+    fireEvent.click(a.getByRole('button', { name: /Escuchar aviso/ }))
+    act(() => sintesis.frase().onerror({ error: 'network' }))
+    expect(a.getByRole('alert')).toHaveTextContent(MENSAJE_FALLO)
+    expect(a.getByRole('button', { name: /Escuchar aviso/ })).toBeInTheDocument()
+  })
+
+  it('si en unos segundos no empieza a hablar, corta y avisa', async () => {
+    const sintesis = instalarVoz()
+    const a = await abrirAviso()
+    vi.useFakeTimers()
+    fireEvent.click(a.getByRole('button', { name: /Escuchar aviso/ }))
+
+    act(() => vi.advanceTimersByTime(LIMITE_INICIO_MS - 1))
+    expect(a.queryByText(MENSAJE_FALLO)).not.toBeInTheDocument()
+
+    act(() => vi.advanceTimersByTime(1))
+    expect(sintesis.cancel).toHaveBeenCalled()
+    expect(a.getByRole('alert')).toHaveTextContent(MENSAJE_FALLO)
+    expect(a.getByRole('button', { name: /Escuchar aviso/ })).toBeInTheDocument()
+  })
+
+  it('si la lista de voces nunca carga, el tiempo límite también avisa', async () => {
+    instalarVoz([])
+    const a = await abrirAviso()
+    vi.useFakeTimers()
+    fireEvent.click(a.getByRole('button', { name: /Escuchar aviso/ }))
+    act(() => vi.advanceTimersByTime(LIMITE_INICIO_MS))
+    expect(a.getByRole('alert')).toHaveTextContent(MENSAJE_FALLO)
+  })
+
+  it('si ya empezó a hablar (onstart), el tiempo límite no corta', async () => {
+    const sintesis = instalarVoz()
+    const a = await abrirAviso()
+    vi.useFakeTimers()
+    fireEvent.click(a.getByRole('button', { name: /Escuchar aviso/ }))
+    act(() => sintesis.frase().onstart())
+    act(() => vi.advanceTimersByTime(LIMITE_INICIO_MS * 3))
+    expect(a.queryByText(MENSAJE_FALLO)).not.toBeInTheDocument()
+    expect(a.getByRole('button', { name: /Detener audio/ })).toBeInTheDocument()
+  })
+
+  it('al volver a escuchar después de una falla, el aviso se quita', async () => {
+    const sintesis = instalarVoz()
+    const a = await abrirAviso()
+    fireEvent.click(a.getByRole('button', { name: /Escuchar aviso/ }))
+    act(() => sintesis.frase().onerror({ error: 'synthesis-failed' }))
+    expect(a.getByText(MENSAJE_FALLO)).toBeInTheDocument()
+    fireEvent.click(a.getByRole('button', { name: /Escuchar aviso/ }))
+    expect(a.queryByText(MENSAJE_FALLO)).not.toBeInTheDocument()
   })
 
   it('pide elegir canal antes de registrar', async () => {
@@ -139,15 +249,37 @@ describe('Aviso a la familia (HU06)', () => {
   })
 })
 
-describe('elegirVoz', () => {
-  it('prefiere es-MX local, luego cualquier español; nunca otro idioma', () => {
-    const mxRed = { lang: 'es-MX', localService: false }
-    const mxLocal = { lang: 'es_MX', localService: true }
-    const es = { lang: 'es-ES', localService: true }
-    const en = { lang: 'en-US', localService: true }
-    expect(elegirVoz([en, es, mxRed, mxLocal])).toBe(mxLocal)
-    expect(elegirVoz([en, es, mxRed])).toBe(mxRed)
-    expect(elegirVoz([en, es])).toBe(es)
+describe('elegirVoz (local antes que acento)', () => {
+  const mxLocal = { name: 'Sabina (es-MX)', lang: 'es_MX', localService: true }
+  const esLocal = { name: 'Helena (es-ES)', lang: 'es-ES', localService: true }
+  const mxRed = { name: 'Dalia Online (Natural) - Spanish (Mexico)', lang: 'es-MX', localService: false }
+  const esRed = { name: 'Google español', lang: 'es-ES', localService: false }
+  const usRed = { name: 'Google español de Estados Unidos', lang: 'es-US', localService: false }
+  const en = { name: 'English', lang: 'en-US', localService: true }
+
+  it('1.º local es-MX', () => {
+    expect(elegirVoz([en, esRed, mxRed, esLocal, mxLocal])).toBe(mxLocal)
+  })
+
+  it('2.º local en otro español, antes que es-MX de red', () => {
+    expect(elegirVoz([en, esRed, mxRed, esLocal])).toBe(esLocal)
+  })
+
+  it('Edge: Dalia Online (es-MX de red) contra una local es-ES gana la local', () => {
+    expect(elegirVoz([mxRed, esLocal])).toBe(esLocal)
+    expect(elegirVoz([esLocal, mxRed])).toBe(esLocal)
+  })
+
+  it('3.º es-MX de red, antes que otro español de red', () => {
+    expect(elegirVoz([en, esRed, usRed, mxRed])).toBe(mxRed)
+  })
+
+  it('4.º otro español de red', () => {
+    expect(elegirVoz([en, usRed])).toBe(usRed)
+  })
+
+  it('nunca otro idioma; sin voces en español devuelve null', () => {
     expect(elegirVoz([en])).toBeNull()
+    expect(elegirVoz([])).toBeNull()
   })
 })

@@ -1,11 +1,30 @@
-import { NavLink } from 'react-router-dom'
-import { EtiquetaSimulado } from './EtiquetaSimulado.jsx'
+import { Link, NavLink, useLocation } from 'react-router-dom'
+import { NOMBRE_ROL } from '../roles/roles.js'
+import { SelectorEscenario } from '../features/escenarios/SelectorEscenario.jsx'
+import {
+  IconoAvisos,
+  IconoCambiar,
+  IconoEmbudo,
+  IconoMapa,
+  IconoPendientes,
+  IconoPronostico,
+  IconoRegistrar,
+  IconoVisitas,
+} from './iconos.jsx'
+import { LogoSimbolo } from './Logo.jsx'
 import './navegacionRol.css'
 
 export const ETIQUETA_ROL = { captura: 'Captura', campo: 'Campo', supervision: 'Supervisión' }
 
-// Rutas por rol. La primera de cada rol es la "home" del rol: cuando el
-// usuario cambia de rol, App redirige a ella.
+// Pantallas "En construcción": no se muestran en el menú mientras esta
+// constante sea false. Siguen registradas en App (la dirección directa
+// funciona). Para publicar una, quita su `pendiente: true` o pon esto en true.
+const MOSTRAR_PANTALLAS_PENDIENTES = false
+
+const visible = (r) => MOSTRAR_PANTALLAS_PENDIENTES || !r.pendiente
+
+// Rutas por rol. La primera visible de cada rol es la "home" del rol: cuando
+// el usuario cambia de rol, App redirige a ella.
 export const RUTAS_POR_ROL = {
   captura: [
     { to: '/registrar', texto: 'Registrar caso' },
@@ -23,47 +42,68 @@ export const RUTAS_POR_ROL = {
 }
 
 export const HOME_POR_ROL = Object.fromEntries(
-  Object.entries(RUTAS_POR_ROL).map(([rol, rutas]) => [rol, rutas[0].to]),
+  Object.entries(RUTAS_POR_ROL).map(([rol, rutas]) => [rol, rutas.filter(visible)[0].to]),
 )
 
-// Encabezado con nombre, etiqueta simulada, selector de usuario (rol) y
-// navegación por rol. Es el "shell" que envuelve a cada pantalla.
-export function NavegacionRol({ usuarios, usuarioId, onCambioUsuario, usuario }) {
-  const rutas = usuario ? RUTAS_POR_ROL[usuario.rol] ?? [] : []
+// Ícono de cada sección (decorativo; el texto siempre lo acompaña).
+const ICONO_POR_RUTA = {
+  '/registrar': IconoRegistrar,
+  '/pendientes': IconoPendientes,
+  '/visitas': IconoVisitas,
+  '/avisos': IconoAvisos,
+  '/supervision/embudo': IconoEmbudo,
+  '/supervision/mapa': IconoMapa,
+  '/supervision/pronostico': IconoPronostico,
+}
+
+// Marco de la app: encabezado compacto (logo, chip del rol y el selector de
+// escenario de M10, que lleva la etiqueta "Datos simulados" y se ve en todas
+// las pantallas) y la navegación del rol: barra inferior en celular y barra
+// lateral desde 768 px.
+export function NavegacionRol({ usuario }) {
+  // En las pantallas de rol (no en el inicio) el encabezado es más compacto en
+  // celular: el nombre "SIMORI" se oculta a la vista para que logo y chip
+  // quepan en el primer renglón.
+  const { pathname } = useLocation()
+  const enPantallaDeRol = Boolean(usuario) && pathname !== '/'
+  const rutas = usuario ? (RUTAS_POR_ROL[usuario.rol] ?? []).filter(visible) : []
+  const nombreRol = usuario ? (NOMBRE_ROL[usuario.rol] ?? ETIQUETA_ROL[usuario.rol]) : null
 
   return (
-    <header className="nav-rol">
-      <div className="nav-rol__cabecera">
-        <h1 className="nav-rol__titulo">SIMORI</h1>
-        <EtiquetaSimulado />
-      </div>
-
-      {usuarios.length > 0 && (
-        <label className="nav-rol__usuario">
-          Usuario demo
-          <select value={usuarioId} onChange={(e) => onCambioUsuario(e.target.value)}>
-            {usuarios.map((u) => (
-              <option key={u.id} value={u.id}>
-                {ETIQUETA_ROL[u.rol] ?? u.rol}{u.clues ? ` · ${u.clues}` : ''}
-              </option>
-            ))}
-          </select>
-        </label>
-      )}
+    <>
+      <header className={`nav-rol${enPantallaDeRol ? ' nav-rol--en-rol' : ''}`}>
+        <Link to="/" className="nav-rol__inicio" aria-label="SIMORI, ir al inicio">
+          <LogoSimbolo tamano={30} />
+          <h1 className="nav-rol__titulo">SIMORI</h1>
+        </Link>
+        {nombreRol && (
+          <Link to="/" className="nav-rol__chip" aria-label={`Cambiar de rol (actual: ${nombreRol})`}>
+            <span className="nav-rol__chip-texto">{nombreRol}</span>
+            <IconoCambiar />
+          </Link>
+        )}
+        <div className="nav-rol__simulado">
+          <SelectorEscenario usuario={usuario} />
+        </div>
+      </header>
 
       {rutas.length > 0 && (
-        <nav className="nav-rol__menu" aria-label={`Menú de ${ETIQUETA_ROL[usuario.rol]}`}>
-          {rutas.map((r) => (
-            <NavLink
-              key={r.to}
-              to={r.to}
-              className={({ isActive }) => `nav-rol__link${isActive ? ' nav-rol__link--activo' : ''}`}
-            >
-              {r.texto}
-            </NavLink>
-          ))}
+        <nav className="nav-rol__menu" aria-label={`Menú de ${nombreRol}`}>
+          {rutas.map((r) => {
+            const Icono = ICONO_POR_RUTA[r.to]
+            return (
+              <NavLink
+                key={r.to}
+                to={r.to}
+                className={({ isActive }) => `nav-rol__link${isActive ? ' nav-rol__link--activo' : ''}`}
+              >
+                {Icono && <Icono />}
+                <span>{r.texto}</span>
+              </NavLink>
+            )
+          })}
         </nav>
       )}
-    </header>
+    </>
   )
 }
