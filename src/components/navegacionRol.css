@@ -45,6 +45,7 @@
 /* Chip del rol: enlace al inicio para cambiarlo. */
 .nav-rol__chip {
   display: inline-flex;
+  flex: 0 1 auto;
   align-items: center;
   gap: 4px;
   min-width: 0;
@@ -77,15 +78,62 @@
   min-width: 0;
 }
 
-/* Sobre el turquesa del encabezado, la etiqueta va en blanco (4.7). */
+/* Celular: máximo 2 renglones. Renglón 1: logo y chip del rol. Renglón 2:
+   selector de escenario y "Datos simulados", en una sola línea. */
+.nav-rol__simulado .escenario-selector {
+  display: flex;
+  flex-wrap: nowrap;
+  gap: 8px;
+  width: 100%;
+}
+
+.nav-rol__simulado .escenario-selector__select {
+  flex: 1 1 auto;
+  min-width: 0;
+  min-height: 40px;
+}
+
+.nav-rol__simulado .etiqueta-simulado {
+  flex: none;
+}
+
+/* "Escenario simulado" se oculta a la vista en celular, pero el lector de
+   pantalla lo sigue leyendo como etiqueta del selector. */
 .nav-rol__simulado .escenario-selector__etiqueta {
-  color: var(--color-superficie);
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+  border: 0;
 }
 
 @media (min-width: 900px) {
   .nav-rol__simulado {
     flex: none;
     margin-left: auto;
+  }
+
+  .nav-rol__simulado .escenario-selector {
+    width: auto;
+  }
+
+  .nav-rol__simulado .escenario-selector__select {
+    flex: none;
+  }
+
+  /* Sobre el turquesa del encabezado, la etiqueta va en blanco (4.7). */
+  .nav-rol__simulado .escenario-selector__etiqueta {
+    position: static;
+    width: auto;
+    height: auto;
+    margin: 0;
+    overflow: visible;
+    clip: auto;
+    color: var(--color-superficie);
   }
 }
 

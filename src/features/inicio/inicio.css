@@ -54,14 +54,12 @@
 }
 
 .inicio__figura {
-  position: relative;
   margin: 0;
-  overflow: hidden;
-  border-radius: 18px;
 }
 
 .inicio__ilustracion {
   display: block;
+  border-radius: 18px;
   width: 100%;
   height: auto;
   aspect-ratio: 16 / 10;
@@ -69,18 +67,14 @@
   object-position: center 70%;
 }
 
+/* Debajo de la imagen (no encima): a 360 px no cabía en un renglón y
+   tapaba a las personas. */
 .inicio__pie-imagen {
-  position: absolute;
-  right: 10px;
-  bottom: 10px;
-  left: 10px;
   display: flex;
   flex-wrap: wrap;
   justify-content: space-between;
-  gap: 4px 12px;
-  padding: 8px 14px;
-  border-radius: var(--radio-pildora);
-  background: var(--color-velo);
+  gap: 2px 12px;
+  padding: 10px 4px 0;
   color: var(--color-primary);
   font-family: var(--fuente-titulo, inherit);
   font-size: 0.8125rem;
