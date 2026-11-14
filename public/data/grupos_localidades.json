@@ -87,7 +87,7 @@
     {
       "grupo": 1,
       "tamano": 13,
-      "descripcion": "marginación más alta del municipio, más lejos de la unidad de salud, matrícula intermedia",
+      "descripcion": "marginación más alta del municipio, más lejos de la unidad de salud",
       "promedios": {
         "im2020": 19.397,
         "distanciaKm": 4.216,
@@ -103,7 +103,7 @@
     {
       "grupo": 2,
       "tamano": 6,
-      "descripcion": "marginación intermedia del municipio, más cerca de la unidad de salud, matrícula más alta",
+      "descripcion": "más cerca de la unidad de salud, matrícula más alta",
       "promedios": {
         "im2020": 22.916,
         "distanciaKm": 0.39,
@@ -119,7 +119,7 @@
     {
       "grupo": 3,
       "tamano": 21,
-      "descripcion": "marginación más baja del municipio, distancia intermedia a la unidad de salud, matrícula intermedia",
+      "descripcion": "marginación más baja del municipio",
       "promedios": {
         "im2020": 23.693,
         "distanciaKm": 2.15,

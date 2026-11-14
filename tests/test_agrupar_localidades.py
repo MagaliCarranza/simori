@@ -133,3 +133,19 @@ def test_lengua_indigena_baja_no_se_describe_como_hablantes():
 def test_motivo_sin_k_es_un_error():
     with pytest.raises(SystemExit):
         al.leer_argumentos(["--motivo", "algo"])
+
+
+def test_la_descripcion_omite_los_rasgos_intermedios():
+    variables = ["im2020", "distanciaKm", "matricula"]
+    # Más marginado (im2020 bajo), distancia en el promedio, matrícula alta.
+    texto = al.describir([-1.0, 0.1, 0.8], [18.0, 2.0, 900], variables)
+    assert texto == "marginación más alta del municipio, matrícula más alta"
+    assert "intermedia" not in texto
+
+
+def test_sin_rasgos_fuera_del_promedio_la_descripcion_queda_vacia():
+    assert al.describir([0.1, -0.2, 0.3], [22.0, 2.0, 100], ["im2020", "distanciaKm", "matricula"]) == ""
+
+
+def test_ningun_grupo_real_queda_sin_rasgos(resultado_k3):
+    assert all(g["descripcion"] for g in resultado_k3["grupos"])

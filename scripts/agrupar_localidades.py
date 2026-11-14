@@ -146,33 +146,28 @@ def conteo_grados(localidades):
 
 
 def describir(z_centro, centro, variables):
-    """Texto corto del grupo a partir de su centroide (estandarizado y real)."""
-    def nivel(z, alto, medio, bajo):
+    """Texto corto del grupo a partir de su centroide (estandarizado y real).
+
+    Solo nombra los rasgos en que el grupo se aleja del promedio del
+    municipio; los intermedios se omiten. Si ninguno se aleja, devuelve "".
+    """
+    def nivel(z, alto, bajo):
         if z >= UMBRAL_DESCRIPCION:
             return alto
         if z <= -UMBRAL_DESCRIPCION:
             return bajo
-        return medio
+        return None
 
     partes = []
     z = dict(zip(variables, z_centro))
     if "im2020" in z:
         # im2020 alto = menos marginación, por eso se invierte el signo.
-        partes.append(nivel(
-            -z["im2020"],
-            "marginación más alta del municipio",
-            "marginación intermedia del municipio",
-            "marginación más baja del municipio",
-        ))
+        partes.append(nivel(-z["im2020"], "marginación más alta del municipio", "marginación más baja del municipio"))
     if "distanciaKm" in z:
-        partes.append(nivel(
-            z["distanciaKm"],
-            "más lejos de la unidad de salud",
-            "distancia intermedia a la unidad de salud",
-            "más cerca de la unidad de salud",
-        ))
+        partes.append(nivel(z["distanciaKm"], "más lejos de la unidad de salud", "más cerca de la unidad de salud"))
     if "matricula" in z:
-        partes.append(nivel(z["matricula"], "matrícula más alta", "matrícula intermedia", "matrícula más baja"))
+        partes.append(nivel(z["matricula"], "matrícula más alta", "matrícula más baja"))
+    partes = [p for p in partes if p]
     real = dict(zip(variables, centro))
     if "pctHLI" in z and z["pctHLI"] >= UMBRAL_DESCRIPCION and real["pctHLI"] >= HLI_MIN_DESCRIPCION:
         partes.append("con hablantes de lengua indígena")
