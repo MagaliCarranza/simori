@@ -19,7 +19,7 @@ export default defineConfig({
         // ~0.7 MB; es un costo aceptable porque, sin precache, el cambio de
         // escenario no funcionaría sin conexión.
         globPatterns: [
-          '**/*.{js,css,html,woff2,webp,png}',
+          '**/*.{js,css,html,woff2,jpg,png}',
           'data/localidades_marco.json',
           'data/grupos_localidades.json',
           'data/casos_11.json',

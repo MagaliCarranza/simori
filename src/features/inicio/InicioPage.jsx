@@ -4,7 +4,7 @@
 
 import { IconoBarras, IconoEscudo, IconoFlecha, IconoPortapapeles, IconoSinConexion, IconoUbicacion } from '../../components/iconos.jsx'
 import { LogoSimbolo } from '../../components/Logo.jsx'
-import imagenInicio from '../../assets/inicio-simori.webp'
+import imagenInicio from '../../assets/inicio-simori.jpg'
 import { ROLES } from '../../roles/roles.js'
 import './inicio.css'
 
@@ -24,7 +24,7 @@ export function InicioPage({ rolActual, onElegir }) {
       <article className="inicio__portada">
         {/* Portada: personal de salud usando SIMORI frente a una clínica, con una familia. */}
         <figure className="inicio__figura">
-          <img className="inicio__ilustracion" src={imagenInicio} width="1280" height="715" alt="" />
+          <img className="inicio__ilustracion" src={imagenInicio} width="1280" height="714" alt="" />
           <figcaption className="inicio__pie-imagen">
             <span>
               <span className="inicio__punto" aria-hidden="true" /> Comunidad y centro de salud
