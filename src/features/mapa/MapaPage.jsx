@@ -103,7 +103,7 @@ function Par({ termino, children }) {
   )
 }
 
-function PanelLocalidad({ panel }) {
+function PanelLocalidad({ panel, prioridadIndisponible }) {
   const { pendientes, prioridad, agrupacion } = panel
   const aproximada = panel.escuelas.some((e) => e.ubicacionAproximada)
   return (
@@ -114,6 +114,15 @@ function PanelLocalidad({ panel }) {
         <p className={`mapa__prioridad mapa__prioridad--${prioridad.nivel}`}>
           <span className="mapa__prioridad-etiqueta">{etiquetaPrioridad(prioridad)}</span>
           <span className="mapa__prioridad-razon">{prioridad.razon}</span>
+        </p>
+      )}
+
+      {!prioridad && prioridadIndisponible && (
+        <p
+          className="mapa__prioridad mapa__prioridad--indisponible"
+          role="status"
+        >
+          Prioridad no disponible sin conexión
         </p>
       )}
 
@@ -199,27 +208,38 @@ function PanelLocalidad({ panel }) {
 
 // Marco amplio para normalizar el índice de prioridad: localidades_marco.json
 // trae todas las reales del municipio sin las filas de totales del ITER. No
-// se muestra en pantalla; si la carga falla, prioridad usa solo las 3 del
-// alcance (menos informativo, pero no rompe la UI).
+// se muestra en pantalla. Se precachea con vite-plugin-pwa, así que debería
+// estar disponible offline después de la primera carga; si aun así falla,
+// marcamos el marco como "indisponible" y la UI omite el índice (ver UI).
 const RUTA_MARCO = '/data/localidades_marco.json'
 
+// Devuelve { cargando, marco, error }:
+//   cargando=true    la petición sigue en curso; el índice no se pinta aún.
+//   marco=array      disponible; calcularPrioridad puede usarlo.
+//   error=truthy     fallo definitivo; la UI muestra "Prioridad no disponible".
 function useLocalidadesMarco(fetchImpl = fetch) {
-  const [marco, setMarco] = useState(null)
+  const [estado, setEstado] = useState({ cargando: true, marco: null, error: null })
   useEffect(() => {
     let cancelado = false
-    fetchImpl(RUTA_MARCO)
-      .then((r) => (r.ok ? r.json() : []))
-      .then((datos) => {
-        if (!cancelado) setMarco(Array.isArray(datos) ? datos : [])
+    Promise.resolve()
+      .then(() => fetchImpl(RUTA_MARCO))
+      .then((r) => {
+        if (!r || !r.ok) throw new Error('no-ok')
+        return r.json()
       })
-      .catch(() => {
-        if (!cancelado) setMarco([])
+      .then((datos) => {
+        if (cancelado) return
+        if (!Array.isArray(datos) || datos.length === 0) throw new Error('vacio')
+        setEstado({ cargando: false, marco: datos, error: null })
+      })
+      .catch((err) => {
+        if (!cancelado) setEstado({ cargando: false, marco: null, error: err })
       })
     return () => {
       cancelado = true
     }
   }, [fetchImpl])
-  return marco
+  return estado
 }
 
 // Grupos k-means de scripts/agrupar_localidades.py. Si no carga, queda en
@@ -253,11 +273,15 @@ export function MapaPage({ hoyISO, usuario, db, fetchImpl = fetch }) {
     db,
     vista: 'mapa',
   })
-  const marco = useLocalidadesMarco(fetchImpl)
+  const marcoEstado = useLocalidadesMarco(fetchImpl)
   const gruposLocalidades = useGruposLocalidades(fetchImpl)
+  // Mientras el marco carga no pintamos "indisponible" (evita parpadeo); una
+  // vez terminado, si no hay marco válido el panel marca el índice como no
+  // disponible.
+  const prioridadIndisponible = !marcoEstado.cargando && !marcoEstado.marco
   const paneles = useMemo(
-    () => panelesPorLocalidad(catalogos, porLocalidad, marco ?? catalogos.localidades, gruposLocalidades),
-    [catalogos, porLocalidad, marco, gruposLocalidades],
+    () => panelesPorLocalidad(catalogos, porLocalidad, marcoEstado.marco, gruposLocalidades),
+    [catalogos, porLocalidad, marcoEstado.marco, gruposLocalidades],
   )
   const [seleccion, setSeleccion] = useState(null)
   const { sinMosaicos, eventos: eventosMosaicos } = useSinMosaicos()
@@ -361,7 +385,11 @@ export function MapaPage({ hoyISO, usuario, db, fetchImpl = fetch }) {
             aria-labelledby={panel ? 'titulo-panel' : undefined}
             aria-label={panel ? undefined : 'Datos de la localidad'}
           >
-            {panel ? <PanelLocalidad panel={panel} /> : <p>Elige una localidad en la lista o en el mapa.</p>}
+            {panel ? (
+              <PanelLocalidad panel={panel} prioridadIndisponible={prioridadIndisponible} />
+            ) : (
+              <p>Elige una localidad en la lista o en el mapa.</p>
+            )}
           </section>
         </div>
       )}

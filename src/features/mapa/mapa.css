@@ -179,6 +179,16 @@
   color: #334155;
 }
 
+/* Marco no disponible (p. ej. sin red y sin precache). El índice no se
+   calcula; se comunica en una sola línea neutral para no competir con los
+   niveles alta/media/baja que usan rosa/violeta/pizarra. */
+.mapa__prioridad--indisponible {
+  background: #f8fafc;
+  border-left-color: #64748b;
+  color: #475569;
+  font-style: italic;
+}
+
 /* Grupo k-means de la localidad: solo texto, sin color propio. */
 .mapa__agrupacion {
   margin: 0 0 12px;

@@ -69,8 +69,11 @@ export function textoAgrupacion({ grupo, totalGrupos, descripcion, parecidas }) 
 // Un panel por localidad del catálogo, ordenado por nombre.
 // `localidadesMarco` es el conjunto amplio (todas las del municipio sin
 // totales del ITER) que calcularPrioridad usa para normalizar min-max y
-// ordenar el lugar en el alcance. Si no se pasa, se usa el mismo catálogo
-// (menos marco, menos informativo).
+// ordenar el lugar en el alcance. Si no se pasa un marco válido (p. ej. el
+// JSON no cargó por falta de red y tampoco está en el precache de la PWA),
+// NO se calcula prioridad: normalizar solo con las 3 localidades daría
+// puntajes distorsionados. En ese caso cada panel trae `prioridad: null` y
+// la UI decide cómo comunicar que falta el índice.
 // `gruposLocalidades` es el contenido de grupos_localidades.json; si falta,
 // cada panel trae `agrupacion: null`.
 export function panelesPorLocalidad(
@@ -81,16 +84,18 @@ export function panelesPorLocalidad(
 ) {
   const grupoPorClave = new Map(porLocalidad.map((g) => [g.clave, g]))
   const agrupacion = agrupacionPorClave(gruposLocalidades)
-  const marco = localidadesMarco && localidadesMarco.length > 0 ? localidadesMarco : localidades
-  const prioridadPorClave = new Map(
-    calcularPrioridad(localidades, undefined, undefined, undefined, marco).map((p) => [
-      p.claveInegi,
-      p,
-    ]),
-  )
+  const marcoValido = Array.isArray(localidadesMarco) && localidadesMarco.length > 0
+  const prioridadPorClave = marcoValido
+    ? new Map(
+        calcularPrioridad(localidades, undefined, undefined, undefined, localidadesMarco).map((p) => [
+          p.claveInegi,
+          p,
+        ]),
+      )
+    : null
   return localidades
     .map((l) => {
-      const p = prioridadPorClave.get(l.claveInegi)
+      const p = prioridadPorClave?.get(l.claveInegi)
       return {
         claveInegi: l.claveInegi,
         nombre: l.nombre,

@@ -56,9 +56,9 @@ function caso(codigo, cct, extra = {}) {
 // Agua Caliente: 5 verdes y 3 rojos. San Pedro: 6 verdes. Chalpicote: sin casos.
 async function sembrar() {
   await db.localidades.bulkAdd([
-    { claveInegi: '140660002', nombre: 'Agua Caliente', gradoMarginacion: 'Medio', poblacion5a14: 445, lat: 20.312568, lng: -102.928629 },
-    { claveInegi: '140660031', nombre: 'San Pedro Itzicán', gradoMarginacion: 'Medio', poblacion5a14: 1954, lat: 20.315556, lng: -102.951944 },
-    { claveInegi: '140660043', nombre: 'Chalpicote', gradoMarginacion: 'Alto', poblacion5a14: 276, lat: 20.310201, lng: -102.919552 },
+    { claveInegi: '140660002', nombre: 'Agua Caliente', gradoMarginacion: 'Medio', poblacion5a14: 445, im2020: 19.54, distanciaKm: 2.72, matricula: 415, pctHLI: 0, lat: 20.312568, lng: -102.928629 },
+    { claveInegi: '140660031', nombre: 'San Pedro Itzicán', gradoMarginacion: 'Medio', poblacion5a14: 1954, im2020: 19.76, distanciaKm: 0, matricula: 1452, pctHLI: 0.033, lat: 20.315556, lng: -102.951944 },
+    { claveInegi: '140660043', nombre: 'Chalpicote', gradoMarginacion: 'Alto', poblacion5a14: 276, im2020: 18.57, distanciaKm: 3.7, matricula: 173, pctHLI: 0.132, lat: 20.310201, lng: -102.919552 },
   ])
   await db.escuelas.bulkAdd([
     { cct: '14DPR1710G', nombre: 'Emiliano Zapata', turno: 'matutino', claveInegi: '140660002', matricula: 157, ubicacionAproximada: true },
@@ -94,6 +94,30 @@ afterEach(async () => {
 async function abrir(fetchImpl) {
   render(<MapaPage hoyISO={HOY} usuario={supervisor} db={db} {...(fetchImpl ? { fetchImpl } : {})} />)
   await screen.findByRole('navigation', { name: 'Localidades' })
+}
+
+// Marco amplio ficticio pero plausible: 3 en alcance + 1 extra que amplía
+// los rangos lo suficiente para que las normalizadas no colapsen a {0, 1}.
+const MARCO_FICTICIO = [
+  { claveInegi: '140660002', nombre: 'Agua Caliente', im2020: 19.54, distanciaKm: 2.72, matricula: 415, pctHLI: 0, gradoMarginacion: 'Medio', enAlcance: true },
+  { claveInegi: '140660031', nombre: 'San Pedro Itzicán', im2020: 19.76, distanciaKm: 0, matricula: 1452, pctHLI: 0.033, gradoMarginacion: 'Medio', enAlcance: true },
+  { claveInegi: '140660043', nombre: 'Chalpicote', im2020: 18.57, distanciaKm: 3.7, matricula: 173, pctHLI: 0.132, gradoMarginacion: 'Alto', enAlcance: true },
+  { claveInegi: '140660099', nombre: 'Otra lejana', im2020: 24, distanciaKm: 8, matricula: 1800, pctHLI: 0.22, enAlcance: false },
+]
+
+// fetch que responde al marco con datos; el resto devuelve 404.
+function fetchConMarco(datos = MARCO_FICTICIO) {
+  return vi.fn(async (url) => {
+    if (url === '/data/localidades_marco.json') {
+      return { ok: true, json: async () => datos }
+    }
+    return { ok: false, status: 404, json: async () => null }
+  })
+}
+
+// fetch que siempre rechaza: simula estar sin red y sin precache.
+function fetchSinRed() {
+  return vi.fn(() => Promise.reject(new TypeError('Failed to fetch')))
 }
 
 describe('MapaPage (HU09, RF10)', () => {
@@ -203,6 +227,48 @@ describe('MapaPage (HU09, RF10)', () => {
 
     fireEvent.click(localidad('Agua Caliente'))
     expect(panel().queryByText(/^Grupo \d+ de/)).not.toBeInTheDocument()
+  })
+
+  describe('índice de prioridad y marco amplio', () => {
+    it('con localidades_marco.json disponible, el panel de Chalpicote pinta nivel, lugar y razón del índice', async () => {
+      // El marco de prueba es ficticio; el puntaje exacto depende del marco
+      // real (0.52 con el JSON de producción). La prueba fija la forma de la
+      // línea y los campos que sí dependen de la lógica, no de los valores
+      // numéricos del marco particular.
+      await abrir(fetchConMarco())
+      fireEvent.click(localidad('Chalpicote'))
+      await waitFor(() => {
+        expect(panel().getByText(/Prioridad media · 1\.º de 3 en el alcance · puntaje 0\.\d{2}/)).toBeInTheDocument()
+      })
+      expect(panel().getByText(/Marginación alta/)).toBeInTheDocument()
+      expect(panel().queryByText(/Prioridad no disponible/)).not.toBeInTheDocument()
+    })
+
+    it('sin red y sin precache: el panel muestra "Prioridad no disponible sin conexión" y el resto sigue funcionando', async () => {
+      const fetchImpl = fetchSinRed()
+      await abrir(fetchImpl)
+      fireEvent.click(localidad('Chalpicote'))
+      // Espera a que el estado de carga termine y se pinte el aviso.
+      await waitFor(() => expect(panel().getByText('Prioridad no disponible sin conexión')).toBeInTheDocument())
+      // Nada de puntajes pintados: el índice no se calcula con las 3.
+      expect(panel().queryByText(/puntaje \d/)).not.toBeInTheDocument()
+      expect(panel().queryByText(/Prioridad (alta|media|baja) /)).not.toBeInTheDocument()
+      // El resto del panel sigue mostrando datos.
+      expect(panel().getByRole('heading', { name: 'Chalpicote' })).toBeInTheDocument()
+      expect(valor('Grado de marginación')).toBe('Alto')
+      expect(valor('Población de 5 a 14 años')).toBe('276')
+      // Se intentó cargar el marco (confirma que no fue silencioso por omitir el fetch).
+      expect(fetchImpl).toHaveBeenCalledWith('/data/localidades_marco.json')
+    })
+
+    it('mientras el marco está cargando no se muestra el aviso de "no disponible"', async () => {
+      // Promesa pendiente: estado "cargando" sin resolver nunca.
+      const fetchImpl = vi.fn(() => new Promise(() => {}))
+      await abrir(fetchImpl)
+      fireEvent.click(localidad('Chalpicote'))
+      expect(panel().queryByText('Prioridad no disponible sin conexión')).not.toBeInTheDocument()
+      expect(panel().queryByText(/puntaje \d/)).not.toBeInTheDocument()
+    })
   })
 
   it('si grupos_localidades.json no carga, el panel no muestra el grupo y no falla', async () => {
