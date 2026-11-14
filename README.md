@@ -116,6 +116,7 @@ Todos los generan los scripts de `scripts/`. Son los únicos que la PWA consume 
 | `usuarios_demo.json` | Definición del equipo | 1 captura, 1 campo (ambos del centro operativo) y 1 supervisión estatal. |
 | `casos_11.json`, `casos_30.json`, `casos_50.json` | `simular_casos.py` | Casos **simulados** para los tres escenarios de pérdida (11 %, 30 %, 50 %). Determinista por semilla. |
 | `data/procesado/union_clues_denue.csv` | `georreferenciar_unidades.py` | Trazabilidad de cada CLUES: método (`manual`, `denue`, `unica_loc`, `localidad`, `sin_coords`), clave DENUE, puntaje y confianza. |
+| `grupos_localidades.json` | `agrupar_localidades.py` | Grupos k-means de las localidades del municipio con las 4 variables del índice completas. Se descarta toda k que deje un grupo con menos de 3 localidades. Incluye la silueta de cada k probada y las variables usadas. Agrupa localidades, no personas. |
 
 **IM_2020 (CONAPO 2020):** un valor más alto significa **menos** marginación. Para interpretar, usar el grado (`GM_2020`).
 
@@ -124,9 +125,10 @@ Todos los generan los scripts de `scripts/`. Son los únicos que la PWA consume 
 ### Regenerar todo desde cero
 
 ```bash
-pip install -r requirements.txt                # pandas, openpyxl, xlrd, pytest
+pip install -r requirements.txt                # pandas, openpyxl, xlrd, pytest, scikit-learn
 python scripts/preparar_datos.py               # catálogos -> public/data/
 python scripts/simular_casos.py --semilla 2026 # casos_{11,30,50}.json
+python scripts/agrupar_localidades.py --k 3 --motivo "k = 2 tuvo mayor silueta pero solo separaba localidades grandes de pequeñas"  # grupos_localidades.json (después de preparar_datos)
 ```
 
 ## Extender a otros municipios

@@ -179,6 +179,15 @@
   color: #334155;
 }
 
+/* Grupo k-means de la localidad: solo texto, sin color propio. */
+.mapa__agrupacion {
+  margin: 0 0 12px;
+}
+
+.mapa__agrupacion p {
+  margin: 0;
+}
+
 @media (min-width: 768px) {
   .mapa__cuerpo {
     grid-template-columns: minmax(0, 1fr) 320px;

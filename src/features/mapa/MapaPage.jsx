@@ -8,7 +8,7 @@ import { etiquetaPrioridad } from '../../domain/index.js'
 import { EtiquetaSimulado } from '../../components/EtiquetaSimulado.jsx'
 import { FILTROS_INICIALES } from '../supervision/filtros.js'
 import { useSupervision } from '../supervision/useSupervision.js'
-import { panelesPorLocalidad } from './panelLocalidad.js'
+import { panelesPorLocalidad, textoAgrupacion } from './panelLocalidad.js'
 import '../supervision/supervision.css'
 import './mapa.css'
 
@@ -104,7 +104,7 @@ function Par({ termino, children }) {
 }
 
 function PanelLocalidad({ panel }) {
-  const { pendientes, prioridad } = panel
+  const { pendientes, prioridad, agrupacion } = panel
   const aproximada = panel.escuelas.some((e) => e.ubicacionAproximada)
   return (
     <>
@@ -115,6 +115,15 @@ function PanelLocalidad({ panel }) {
           <span className="mapa__prioridad-etiqueta">{etiquetaPrioridad(prioridad)}</span>
           <span className="mapa__prioridad-razon">{prioridad.razon}</span>
         </p>
+      )}
+
+      {agrupacion && (
+        <div className="mapa__agrupacion">
+          <p>{textoAgrupacion(agrupacion)}</p>
+          <p className="supervision__nota">
+            Agrupación con k-means (aprendizaje automático); comparada con el promedio del municipio
+          </p>
+        </div>
       )}
 
       <dl className="supervision__pares">
@@ -213,6 +222,29 @@ function useLocalidadesMarco(fetchImpl = fetch) {
   return marco
 }
 
+// Grupos k-means de scripts/agrupar_localidades.py. Si no carga, queda en
+// null y el panel no muestra la línea del grupo.
+const RUTA_GRUPOS = '/data/grupos_localidades.json'
+
+function useGruposLocalidades(fetchImpl = fetch) {
+  const [grupos, setGrupos] = useState(null)
+  useEffect(() => {
+    let cancelado = false
+    fetchImpl(RUTA_GRUPOS)
+      .then((r) => (r.ok ? r.json() : null))
+      .then((datos) => {
+        if (!cancelado) setGrupos(datos && typeof datos === 'object' && !Array.isArray(datos) ? datos : null)
+      })
+      .catch(() => {
+        if (!cancelado) setGrupos(null)
+      })
+    return () => {
+      cancelado = true
+    }
+  }, [fetchImpl])
+  return grupos
+}
+
 export function MapaPage({ hoyISO, usuario, db, fetchImpl = fetch }) {
   const { cargando, error, catalogos, porLocalidad } = useSupervision({
     hoyISO,
@@ -222,9 +254,10 @@ export function MapaPage({ hoyISO, usuario, db, fetchImpl = fetch }) {
     vista: 'mapa',
   })
   const marco = useLocalidadesMarco(fetchImpl)
+  const gruposLocalidades = useGruposLocalidades(fetchImpl)
   const paneles = useMemo(
-    () => panelesPorLocalidad(catalogos, porLocalidad, marco ?? catalogos.localidades),
-    [catalogos, porLocalidad, marco],
+    () => panelesPorLocalidad(catalogos, porLocalidad, marco ?? catalogos.localidades, gruposLocalidades),
+    [catalogos, porLocalidad, marco, gruposLocalidades],
   )
   const [seleccion, setSeleccion] = useState(null)
   const { sinMosaicos, eventos: eventosMosaicos } = useSinMosaicos()
