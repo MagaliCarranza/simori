@@ -79,4 +79,11 @@ describe('App', () => {
       cleanup()
     }
   })
+
+  it('/pendientes lleva a "Pacientes tamizados"', async () => {
+    window.localStorage.setItem('simori.rol', 'captura')
+    abrirEn('/pendientes')
+    await waitFor(() => expect(window.location.pathname).toBe('/tamizados'))
+    expect(await screen.findByRole('button', { name: 'Con retraso' })).toHaveAttribute('aria-pressed', 'true')
+  })
 })
