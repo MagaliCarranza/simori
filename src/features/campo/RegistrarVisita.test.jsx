@@ -1,4 +1,5 @@
 import { fireEvent, render, screen, waitFor, within } from '@testing-library/react'
+import { MemoryRouter } from 'react-router-dom'
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 import { crearDb } from '../../db/schema.js'
 import { PendientesPage } from '../pendientes/PendientesPage.jsx'
@@ -96,7 +97,11 @@ describe('Registrar visita (HU05)', () => {
   })
 
   it('el rol captura no registra visitas desde su lista', async () => {
-    render(<PendientesPage usuario={captura} hoyISO={HOY} db={db} />)
+    render(
+      <MemoryRouter>
+        <PendientesPage usuario={captura} hoyISO={HOY} db={db} />
+      </MemoryRouter>,
+    )
     await screen.findByText('PON-AC-0001')
     expect(screen.queryByRole('button', { name: 'Registrar visita' })).not.toBeInTheDocument()
   })

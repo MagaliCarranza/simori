@@ -1,8 +1,18 @@
 import { fireEvent, render, screen, waitFor, within } from '@testing-library/react'
+import { MemoryRouter } from 'react-router-dom'
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 import { crearDb } from '../../db/schema.js'
 import { MisVisitasPage } from '../campo/MisVisitasPage.jsx'
 import { PendientesPage } from './PendientesPage.jsx'
+
+// PendientesPage usa <Link to="/caso/:codigo">. Las pruebas la envuelven con
+// MemoryRouter porque no se monta desde la App completa.
+const renderPendientes = (props) =>
+  render(
+    <MemoryRouter>
+      <PendientesPage {...props} />
+    </MemoryRouter>,
+  )
 
 const HOY = '2026-11-14'
 const captura = { id: 'USR-CAP-AC', rol: 'captura', clues: 'PROV-AC-01' }
@@ -65,7 +75,7 @@ describe('PendientesPage (HU03)', () => {
   })
 
   it('muestra solo amarillo y rojo de mi centro, ordenados por retraso, con texto', async () => {
-    render(<PendientesPage usuario={captura} hoyISO={HOY} db={db} />)
+    renderPendientes({ usuario: captura, hoyISO: HOY, db })
     await screen.findByText('Centro de Salud Agua Caliente')
     expect(codigosEnLista()).toEqual(['PON-AC-0002', 'PON-AC-0004', 'PON-AC-0001'])
     expect(screen.getByText('Retraso alto (40 días)')).toBeInTheDocument()
@@ -76,7 +86,7 @@ describe('PendientesPage (HU03)', () => {
   })
 
   it('las tarjetas resumen filtran la lista', async () => {
-    render(<PendientesPage usuario={captura} hoyISO={HOY} db={db} />)
+    renderPendientes({ usuario: captura, hoyISO: HOY, db })
     const rojo = await screen.findByRole('button', { name: /Urgentes/ })
     expect(rojo).toHaveTextContent('1')
     fireEvent.click(rojo)
@@ -89,14 +99,14 @@ describe('PendientesPage (HU03)', () => {
   })
 
   it('filtra por escuela', async () => {
-    render(<PendientesPage usuario={captura} hoyISO={HOY} db={db} />)
+    renderPendientes({ usuario: captura, hoyISO: HOY, db })
     const select = await screen.findByLabelText('Escuela')
     fireEvent.change(select, { target: { value: '14DTV0442U' } })
     expect(codigosEnLista()).toEqual(['PON-AC-0004'])
   })
 
   it('deja la consulta en la bitácora', async () => {
-    render(<PendientesPage usuario={captura} hoyISO={HOY} db={db} />)
+    renderPendientes({ usuario: captura, hoyISO: HOY, db })
     await screen.findByText('Centro de Salud Agua Caliente')
     await waitFor(async () => {
       const b = await db.bitacora.where('accion').equals('consultar').toArray()
@@ -108,7 +118,7 @@ describe('PendientesPage (HU03)', () => {
 describe('PendientesPage, sin pendientes', () => {
   it('muestra "Todo al día en tu centro"', async () => {
     await sembrar([caso('PON-AC-0003', { fechaProximaCita: '2026-12-01' })])
-    render(<PendientesPage usuario={captura} hoyISO={HOY} db={db} />)
+    renderPendientes({ usuario: captura, hoyISO: HOY, db })
     expect(await screen.findByText('Todo al día en tu centro')).toBeInTheDocument()
   })
 })
@@ -122,7 +132,7 @@ describe('Sin seguimiento (RF14)', () => {
         { codigoCaso: 'PON-AC-0010', tipo: 'visita', etapa: 1, fecha: '2026-11-01', visitaResultado: 'no_localizada' },
       ],
     )
-    render(<PendientesPage usuario={captura} hoyISO={HOY} db={db} />)
+    renderPendientes({ usuario: captura, hoyISO: HOY, db })
     expect(await screen.findByText('Sin seguimiento')).toBeInTheDocument()
     await waitFor(async () => {
       expect((await db.casos.get('PON-AC-0010')).estado).toBe('sin_seguimiento')

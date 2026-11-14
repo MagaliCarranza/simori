@@ -118,12 +118,13 @@ def cargar_entradas():
     escuelas = json.loads((PUBLIC_DATA / "escuelas.json").read_text(encoding="utf-8"))
     centros = json.loads((PUBLIC_DATA / "centros_salud.json").read_text(encoding="utf-8"))
     usuarios = json.loads((PUBLIC_DATA / "usuarios_demo.json").read_text(encoding="utf-8"))
+    localidades = json.loads((PUBLIC_DATA / "localidades.json").read_text(encoding="utf-8"))
     config = json.loads(DOMINIO_CONFIG.read_text(encoding="utf-8"))
-    return escuelas, centros, usuarios, config
+    return escuelas, centros, usuarios, localidades, config
 
 
-def centro_por_localidad(centros, clave_inegi):
-    return next(c for c in centros if c["claveInegi"] == clave_inegi)
+def clues_operativo_por_claveinegi(localidades):
+    return {l["claveInegi"]: l["cluesOperativo"] for l in localidades if l.get("cluesOperativo")}
 
 
 def usuarios_por_centro(usuarios, clues):
@@ -135,7 +136,7 @@ def usuarios_por_centro(usuarios, clues):
 
 # ----- Generacion base (comun a los tres escenarios) -----
 
-def generar_poblacion(escuelas, centros, usuarios, rng, args):
+def generar_poblacion(escuelas, centros, usuarios, localidades, rng, args):
     """Genera todos los casos positivos con sus datos clinicos y los uniformes de perdida.
 
     Devuelve (ninos, casos_base). `casos_base` incluye datos privados (_*) que
@@ -147,6 +148,7 @@ def generar_poblacion(escuelas, centros, usuarios, rng, args):
     tiras_positivas = [20, 50, 100]
     pesos_tiras = [0.60, 0.30, 0.10]
 
+    clues_por_loc = clues_operativo_por_claveinegi(localidades)
     ninos = []
     casos_base = []
     contador = {"SPI": 0, "AC": 0, "CHA": 0}
@@ -157,8 +159,13 @@ def generar_poblacion(escuelas, centros, usuarios, rng, args):
         n_positivos = round(n_tamizados * args.tasa_positivos)
 
         loc = CLAVE_CORTA[escuela["claveInegi"]]
-        centro = centro_por_localidad(centros, escuela["claveInegi"])
-        usrs = usuarios_por_centro(usuarios, centro["clues"])
+        clues_asignado = clues_por_loc.get(escuela["claveInegi"])
+        if not clues_asignado:
+            raise ValueError(
+                f"La escuela {escuela['cct']} (localidad {escuela['claveInegi']}) "
+                "no tiene cluesOperativo en localidades.json."
+            )
+        usrs = usuarios_por_centro(usuarios, clues_asignado)
 
         for _ in range(n_positivos):
             contador[loc] += 1
@@ -211,7 +218,7 @@ def generar_poblacion(escuelas, centros, usuarios, rng, args):
                 "codigo": codigo_caso,
                 "codigoNino": codigo_nino,
                 "cct": escuela["cct"],
-                "clues": centro["clues"],
+                "clues": clues_asignado,
                 "fechaTamizaje": fecha_tamizaje,
                 "_sexo": sexo,
                 "_mes_nac": mes_nac,
@@ -490,9 +497,9 @@ def resumen_escenario(casos, eventos, hoy_iso):
 # ----- Entrada principal (expuesta para pytest) -----
 
 def simular(args):
-    escuelas, centros, usuarios, config = cargar_entradas()
+    escuelas, centros, usuarios, localidades, config = cargar_entradas()
     rng = random.Random(args.semilla)
-    ninos, casos_base = generar_poblacion(escuelas, centros, usuarios, rng, args)
+    ninos, casos_base = generar_poblacion(escuelas, centros, usuarios, localidades, rng, args)
 
     escenarios = [int(x.strip()) for x in args.escenarios.split(",")]
     salidas = {}

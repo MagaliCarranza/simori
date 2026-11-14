@@ -4,15 +4,16 @@ import { calcularSemaforo } from './semaforo.js'
 const HOY = '2026-06-15'
 
 describe('calcularSemaforo — caso cerrado', () => {
+  // Cerrado lo decide estadoDerivado: hace falta el evento 'alta' o 'referencia'.
   it('alta no tiene color y etiqueta "Cerrado"', () => {
-    const r = calcularSemaforo({ estado: 'alta' }, [], HOY)
+    const r = calcularSemaforo({ estado: 'alta' }, [{ tipo: 'alta', fecha: '2026-06-01' }], HOY)
     expect(r.color).toBe(null)
     expect(r.etiqueta).toBe('Cerrado')
     expect(r.referencia).toBe('cerrado')
   })
 
   it('referido tampoco tiene color', () => {
-    const r = calcularSemaforo({ estado: 'referido' }, [], HOY)
+    const r = calcularSemaforo({ estado: 'referido' }, [{ tipo: 'referencia', fecha: '2026-06-01' }], HOY)
     expect(r.color).toBe(null)
     expect(r.referencia).toBe('cerrado')
   })
@@ -125,5 +126,28 @@ describe('calcularSemaforo — etiqueta siempre presente', () => {
     const r = calcularSemaforo(caso, eventos, HOY)
     expect(typeof r.etiqueta).toBe('string')
     expect(r.etiqueta.length).toBeGreaterThan(0)
+  })
+})
+
+describe('calcularSemaforo — manda el evento, no el estado guardado', () => {
+  it("estado 'alta' sin evento alta da color", () => {
+    const r = calcularSemaforo({ estado: 'alta', fechaProximaCita: '2026-07-01' }, [], HOY)
+    expect(r).toEqual({ color: 'verde', etiqueta: 'A tiempo', diasRetraso: 0, referencia: 'cita' })
+  })
+
+  it("estado 'referido' sin evento referencia da color", () => {
+    const r = calcularSemaforo({ estado: 'referido', fechaProximaCita: '2026-06-14' }, [], HOY)
+    expect(r.color).toBe('amarillo')
+  })
+
+  it("estado 'en_seguimiento' con evento 'referencia' queda \"Cerrado\"", () => {
+    const eventos = [{ tipo: 'referencia', fecha: '2026-06-01' }]
+    const r = calcularSemaforo({ estado: 'en_seguimiento', fechaProximaCita: '2026-05-01' }, eventos, HOY)
+    expect(r).toEqual({ color: null, etiqueta: 'Cerrado', diasRetraso: 0, referencia: 'cerrado' })
+  })
+
+  it("estado 'en_seguimiento' con evento 'alta' queda \"Cerrado\"", () => {
+    const r = calcularSemaforo({ estado: 'en_seguimiento' }, [{ tipo: 'alta', fecha: '2026-06-01' }], HOY)
+    expect(r.referencia).toBe('cerrado')
   })
 })

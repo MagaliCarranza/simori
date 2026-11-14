@@ -1,4 +1,5 @@
 import { useMemo, useState } from 'react'
+import { Link } from 'react-router-dom'
 import { EtiquetaSimulado } from '../../components/EtiquetaSimulado.jsx'
 import { CasoPendiente } from './CasoPendiente.jsx'
 import { filtrarPendientes, resumenPendientes } from './pendientes.js'
@@ -124,7 +125,11 @@ export function PendientesPage({ usuario, hoyISO, db }) {
               ) : (
                 <ul className="pendientes__lista">
                   {visibles.map((f) => (
-                    <CasoPendiente key={f.codigo} fila={f} escuela={escuelas.get(f.cct)} />
+                    <CasoPendiente key={f.codigo} fila={f} escuela={escuelas.get(f.cct)}>
+                      <Link to={`/caso/${f.codigo}`} className="caso-pendiente__ficha">
+                        Ver ficha
+                      </Link>
+                    </CasoPendiente>
                   ))}
                 </ul>
               )}

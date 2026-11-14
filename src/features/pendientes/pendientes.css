@@ -144,6 +144,26 @@
   gap: 6px 12px;
 }
 
+.caso-pendiente__ficha {
+  display: inline-flex;
+  align-items: center;
+  min-height: 36px;
+  padding: 0 14px;
+  border-radius: 999px;
+  border: 1px solid var(--color-primary, #0b3c7a);
+  background: var(--color-superficie, #ffffff);
+  color: var(--color-primary, #0b3c7a);
+  font-weight: 600;
+  font-size: 0.9rem;
+  text-decoration: none;
+  width: fit-content;
+}
+
+.caso-pendiente__ficha:focus-visible {
+  outline: 3px solid var(--color-secondary, #2f8cff);
+  outline-offset: 2px;
+}
+
 .caso-pendiente__codigo {
   font-weight: 800;
   font-size: 1.05rem;
