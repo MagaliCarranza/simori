@@ -3,10 +3,12 @@ import { useEffect, useId, useMemo, useRef, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import { EtiquetaSimulado } from '../../components/EtiquetaSimulado.jsx'
 import { SemaforoBadge } from '../../components/SemaforoBadge.jsx'
+import '../../components/ui.css'
 import { db as dbDefault } from '../../db/index.js'
 import { registrar } from '../../db/bitacora.js'
 import { calcularSemaforo, edadDecimal } from '../../domain/index.js'
 import { formatearFecha } from '../pendientes/formato.js'
+import './ficha.css'
 import {
   agendarCita,
   calcularClasificacion,
@@ -268,7 +270,7 @@ export function FichaCasoPage({ usuario, hoyISO, db, codigo: codigoProp }) {
     return (
       <section className="ficha">
         <p role="alert">No se encontró el caso {codigo} en tu centro de salud.</p>
-        <Link to="/tamizados">Volver a pacientes tamizados</Link>
+        <Link to="/tamizados" className="ficha__volver">← Volver a pacientes tamizados</Link>
       </section>
     )
   }
@@ -330,7 +332,7 @@ export function FichaCasoPage({ usuario, hoyISO, db, codigo: codigoProp }) {
         </ol>
       </section>
 
-      <Link to="/tamizados">Volver a pacientes tamizados</Link>
+      <Link to="/tamizados" className="ficha__volver">← Volver a pacientes tamizados</Link>
     </section>
   )
 }

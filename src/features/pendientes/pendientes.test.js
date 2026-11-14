@@ -88,6 +88,13 @@ describe('filtrarPendientes', () => {
     expect(filtrarPendientes(filas, { soloSinCita: true }).map((f) => f.codigo)).toEqual(['PON-AC-0004'])
   })
 
+  it('busca por subcadena del código (case-insensitive y aceptando "0001" o "AC-0001")', () => {
+    expect(filtrarPendientes(filas, { busqueda: '0001' }).map((f) => f.codigo)).toEqual(['PON-AC-0001'])
+    expect(filtrarPendientes(filas, { busqueda: 'ac-0002' }).map((f) => f.codigo)).toEqual(['PON-AC-0002'])
+    expect(filtrarPendientes(filas, { busqueda: '  ' }).length).toBeGreaterThan(0)
+    expect(filtrarPendientes(filas, { busqueda: 'XYZ' })).toEqual([])
+  })
+
   it('sin pendientes regresa lista vacía', () => {
     const alDia = evaluarCentro({ casos: [casos[2]], eventos: [], clues: CENTRO, hoyISO: HOY })
     expect(filtrarPendientes(alDia)).toEqual([])
