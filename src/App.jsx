@@ -1,6 +1,5 @@
 import { lazy, Suspense, useEffect, useState } from 'react'
 import { BrowserRouter, Navigate, Outlet, Route, Routes, useLocation, useNavigate } from 'react-router-dom'
-import { EnConstruccion } from './components/EnConstruccion.jsx'
 import { HOME_POR_ROL, NavegacionRol, RUTAS_POR_ROL } from './components/NavegacionRol.jsx'
 import { db } from './db/index.js'
 import { inicializar } from './db/seed.js'
@@ -8,6 +7,7 @@ import { ListaAvisosPage } from './features/avisos/ListaAvisosPage.jsx'
 import { MisVisitasPage } from './features/campo/MisVisitasPage.jsx'
 import { PendientesPage } from './features/pendientes/PendientesPage.jsx'
 import { RegistrarCasoPage } from './features/registro/RegistrarCasoPage.jsx'
+import { PronosticoPage } from './features/pronostico/PronosticoPage.jsx'
 import { FichaCasoPage } from './features/ruta/FichaCasoPage.jsx'
 import { SupervisionPage } from './features/supervision/SupervisionPage.jsx'
 import './App.css'
@@ -124,15 +124,7 @@ function AplicacionInterna() {
               ) : null
             }
           />
-          <Route
-            path="/supervision/pronostico"
-            element={
-              <EnConstruccion
-                titulo="Pronóstico de demanda"
-                descripcion="Pantalla pendiente (Anexo E del reporte)."
-              />
-            }
-          />
+          <Route path="/supervision/pronostico" element={usuario ? <PronosticoPage usuario={usuario} hoyISO={HOY_DEMO} /> : null} />
 
           <Route path="*" element={<Navigate to="/" replace />} />
         </Route>
