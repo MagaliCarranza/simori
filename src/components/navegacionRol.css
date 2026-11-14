@@ -197,6 +197,23 @@
   text-underline-offset: 3px;
 }
 
+/* Celular, pantallas de rol: "SIMORI" solo para el lector de pantalla; el
+   logo y el chip del rol quedan juntos en el primer renglón. En el inicio
+   se sigue viendo. */
+@media (max-width: 767px) {
+  .nav-rol--en-rol .nav-rol__titulo {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    margin: -1px;
+    padding: 0;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    white-space: nowrap;
+    border: 0;
+  }
+}
+
 @media (max-width: 380px) {
   .nav-rol {
     gap: 6px;

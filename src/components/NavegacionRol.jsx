@@ -1,4 +1,4 @@
-import { Link, NavLink } from 'react-router-dom'
+import { Link, NavLink, useLocation } from 'react-router-dom'
 import { NOMBRE_ROL } from '../roles/roles.js'
 import { SelectorEscenario } from '../features/escenarios/SelectorEscenario.jsx'
 import {
@@ -61,12 +61,17 @@ const ICONO_POR_RUTA = {
 // las pantallas) y la navegación del rol: barra inferior en celular y barra
 // lateral desde 768 px.
 export function NavegacionRol({ usuario }) {
+  // En las pantallas de rol (no en el inicio) el encabezado es más compacto en
+  // celular: el nombre "SIMORI" se oculta a la vista para que logo y chip
+  // quepan en el primer renglón.
+  const { pathname } = useLocation()
+  const enPantallaDeRol = Boolean(usuario) && pathname !== '/'
   const rutas = usuario ? (RUTAS_POR_ROL[usuario.rol] ?? []).filter(visible) : []
   const nombreRol = usuario ? (NOMBRE_ROL[usuario.rol] ?? ETIQUETA_ROL[usuario.rol]) : null
 
   return (
     <>
-      <header className="nav-rol">
+      <header className={`nav-rol${enPantallaDeRol ? ' nav-rol--en-rol' : ''}`}>
         <Link to="/" className="nav-rol__inicio" aria-label="SIMORI, ir al inicio">
           <LogoSimbolo tamano={30} />
           <h1 className="nav-rol__titulo">SIMORI</h1>
