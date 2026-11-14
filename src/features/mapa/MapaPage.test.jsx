@@ -91,8 +91,8 @@ afterEach(async () => {
   await db.delete()
 })
 
-async function abrir() {
-  render(<MapaPage hoyISO={HOY} usuario={supervisor} db={db} />)
+async function abrir(fetchImpl) {
+  render(<MapaPage hoyISO={HOY} usuario={supervisor} db={db} {...(fetchImpl ? { fetchImpl } : {})} />)
   await screen.findByRole('navigation', { name: 'Localidades' })
 }
 
@@ -178,6 +178,41 @@ describe('MapaPage (HU09, RF10)', () => {
     expect(valor('Total de positivos')).toBe('menos de 5')
     expect(valor('Rojo')).toBe('menos de 5')
     expect(panel().getByText('Sin centro de salud registrado.')).toBeInTheDocument()
+  })
+
+  it('muestra el grupo k-means de la localidad con su nota', async () => {
+    const grupos = {
+      kElegida: 3,
+      grupos: [{ grupo: 1, tamano: 13, descripcion: 'marginación más alta del municipio, más lejos de la unidad de salud' }],
+      localidades: [{ claveInegi: '140660043', grupo: 1 }],
+    }
+    const fetchImpl = vi.fn((ruta) =>
+      Promise.resolve({ ok: true, json: () => Promise.resolve(ruta.includes('grupos_localidades') ? grupos : []) }),
+    )
+    await abrir(fetchImpl)
+    fireEvent.click(localidad('Chalpicote'))
+    expect(
+      await panel().findByText(
+        'Grupo 1 de 3: marginación más alta del municipio, más lejos de la unidad de salud ' +
+          '(otras 12 localidades con perfil parecido)',
+      ),
+    ).toBeInTheDocument()
+    expect(
+      panel().getByText('Agrupación con k-means (aprendizaje automático); comparada con el promedio del municipio'),
+    ).toBeInTheDocument()
+
+    fireEvent.click(localidad('Agua Caliente'))
+    expect(panel().queryByText(/^Grupo \d+ de/)).not.toBeInTheDocument()
+  })
+
+  it('si grupos_localidades.json no carga, el panel no muestra el grupo y no falla', async () => {
+    const fetchImpl = vi.fn(() => Promise.reject(new Error('sin red')))
+    await abrir(fetchImpl)
+    fireEvent.click(localidad('Chalpicote'))
+    await waitFor(() => expect(fetchImpl).toHaveBeenCalledWith('/data/grupos_localidades.json'))
+    expect(panel().getByRole('heading', { name: 'Chalpicote' })).toBeInTheDocument()
+    expect(panel().queryByText(/^Grupo \d+ de/)).not.toBeInTheDocument()
+    expect(panel().queryByText(/k-means/)).not.toBeInTheDocument()
   })
 
   it('no muestra códigos de caso ni de niño', async () => {
