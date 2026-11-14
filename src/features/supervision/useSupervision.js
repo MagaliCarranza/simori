@@ -7,6 +7,7 @@ import { useEffect, useMemo, useRef, useState } from 'react'
 import { db as dbDefault } from '../../db/index.js'
 import { registrar } from '../../db/bitacora.js'
 import { resumenPorGrupo, resumenSupervision } from '../../domain/index.js'
+import { catalogosEnAlcance } from './catalogos.js'
 import { filtrarCasos, localidadDeCaso } from './filtros.js'
 
 const VACIO = { casos: [], eventos: [], localidades: [], escuelas: [], centros: [] }
@@ -59,7 +60,12 @@ export function useSupervision({ hoyISO, filtros, usuario, db = dbDefault, vista
     return { resumen: resumenSupervision(filtrados, eventos, hoyISO), porLocalidad }
   }, [casos, eventos, localidades, escuelas, filtros, hoyISO])
 
-  const catalogos = useMemo(() => ({ localidades, escuelas, centros }), [localidades, escuelas, centros])
+  // Solo localidades en alcance: así ni el mapa ni los filtros ofrecen
+  // "Total del Municipio" ni localidades fuera de la zona.
+  const catalogos = useMemo(
+    () => catalogosEnAlcance({ localidades, escuelas, centros }),
+    [localidades, escuelas, centros],
+  )
 
   return { cargando: estado.cargando, error: estado.error, catalogos, ...agregados }
 }
