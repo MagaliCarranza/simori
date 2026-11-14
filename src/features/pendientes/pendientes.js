@@ -87,13 +87,20 @@ export function ordenarPorRetraso(filas) {
 }
 
 // Solo amarillo y rojo (HU03, HU04), con filtros opcionales.
-export function filtrarPendientes(filas, { color = 'todos', cct = '', soloSinCita = false } = {}) {
+// `busqueda`: subcadena que aparece en el código del caso (case-insensitive);
+// permite buscar por "0131", "AC-0131" o "PON-AC-0131".
+export function filtrarPendientes(
+  filas,
+  { color = 'todos', cct = '', soloSinCita = false, busqueda = '' } = {},
+) {
+  const q = busqueda.trim().toUpperCase()
   return ordenarPorRetraso(
     filas.filter((f) => {
       if (!COLORES_PENDIENTES.includes(f.semaforo.color)) return false
       if (color !== 'todos' && f.semaforo.color !== color) return false
       if (cct && f.cct !== cct) return false
       if (soloSinCita && !f.sinCita) return false
+      if (q && !f.codigo.toUpperCase().includes(q)) return false
       return true
     }),
   )
