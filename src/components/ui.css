@@ -129,3 +129,18 @@
 .boton--opcion[aria-pressed='true']::before {
   content: '✓ ';
 }
+
+/* Logo (símbolo + nombre). */
+.logo {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.logo__nombre {
+  font-family: var(--fuente-titulo, inherit);
+  font-weight: 800;
+  font-size: 1.25rem;
+  letter-spacing: 0.04em;
+  color: var(--color-primary);
+}
