@@ -1,0 +1,96 @@
+/* Pantalla de inicio. Mobile-first desde 360 px. */
+
+.inicio {
+  display: grid;
+  gap: 12px;
+  max-width: 720px;
+  margin: 0 auto;
+  padding: 16px;
+}
+
+.inicio__ilustracion {
+  width: 100%;
+  height: auto;
+  max-height: 220px;
+}
+
+.inicio__titulo {
+  margin: 4px 0 0;
+  font-size: 1.5rem;
+  color: var(--color-primary);
+}
+
+.inicio__texto {
+  margin: 0;
+  color: var(--color-neutral);
+}
+
+.inicio__pregunta {
+  margin: 8px 0 0;
+  font-size: 1.05rem;
+  color: var(--color-primary);
+}
+
+.inicio__roles {
+  display: grid;
+  gap: 12px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.inicio__rol {
+  display: grid;
+  gap: 4px;
+  width: 100%;
+  min-height: 44px;
+  padding: 16px;
+  border: 2px solid var(--color-borde);
+  border-radius: var(--radio-tarjeta);
+  background: var(--color-superficie);
+  color: inherit;
+  text-align: left;
+  font: inherit;
+  cursor: pointer;
+  box-shadow: 0 1px 2px rgb(11 60 122 / 8%);
+}
+
+.inicio__rol:hover {
+  border-color: var(--color-secondary);
+}
+
+.inicio__rol:focus-visible {
+  outline: 3px solid var(--color-secondary);
+  outline-offset: 2px;
+}
+
+.inicio__rol--actual {
+  border-color: var(--color-primary);
+}
+
+.inicio__rol-nombre {
+  font-family: var(--fuente-titulo, inherit);
+  font-weight: 800;
+  font-size: 1.05rem;
+  color: var(--color-primary);
+}
+
+.inicio__rol-texto {
+  color: var(--color-neutral);
+}
+
+.inicio__rol-marca {
+  justify-self: start;
+  padding: 0.1em 0.7em;
+  border-radius: var(--radio-pildora);
+  background: var(--color-primary);
+  color: #ffffff;
+  font-size: 0.8125rem;
+  font-weight: 700;
+}
+
+@media (min-width: 768px) {
+  .inicio__roles {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
