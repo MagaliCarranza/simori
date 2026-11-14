@@ -1,5 +1,6 @@
 import { BarElement, CategoryScale, Chart as ChartJS, LinearScale } from 'chart.js'
 import { Bar } from 'react-chartjs-2'
+import { COLORES } from '../../components/colores.js'
 
 ChartJS.register(BarElement, CategoryScale, LinearScale)
 
@@ -14,7 +15,7 @@ export function EmbudoGrafico({ embudo }) {
     datasets: [
       {
         data: embudo.map((e) => (typeof e.n === 'number' ? e.n : null)),
-        backgroundColor: '#2f8cff',
+        backgroundColor: COLORES.principal,
         borderRadius: 6,
         maxBarThickness: 36,
       },

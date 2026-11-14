@@ -2,7 +2,7 @@
   max-width: 960px;
   margin: 0 auto;
   padding: 16px;
-  color: #0f172a;
+  color: var(--color-texto);
 }
 
 .pendientes__encabezado {
@@ -48,13 +48,13 @@
 }
 
 .tarjeta-resumen[aria-pressed='true'] {
-  border-color: var(--color-secondary);
-  box-shadow: 0 0 0 2px rgb(47 140 255 / 0.2);
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 2px var(--color-primary-suave);
 }
 
 .tarjeta-resumen:focus-visible {
-  outline: 3px solid var(--color-secondary);
-  outline-offset: 2px;
+  outline: 3px solid transparent;
+  box-shadow: var(--foco-anillo);
 }
 
 .tarjeta-resumen__numero {
@@ -103,7 +103,7 @@
   border-radius: 10px;
   background: var(--color-superficie);
   font: inherit;
-  color: #0f172a;
+  color: var(--color-texto);
   max-width: 100%;
 }
 
@@ -150,9 +150,9 @@
   min-height: 36px;
   padding: 0 14px;
   border-radius: 999px;
-  border: 1px solid var(--color-primary, #0b3c7a);
-  background: var(--color-superficie, #ffffff);
-  color: var(--color-primary, #0b3c7a);
+  border: 1px solid var(--color-secondary);
+  background: var(--color-superficie);
+  color: var(--color-secondary);
   font-weight: 600;
   font-size: 0.9rem;
   text-decoration: none;
@@ -160,8 +160,8 @@
 }
 
 .caso-pendiente__ficha:focus-visible {
-  outline: 3px solid var(--color-secondary, #2f8cff);
-  outline-offset: 2px;
+  outline: 3px solid transparent;
+  box-shadow: var(--foco-anillo);
 }
 
 .caso-pendiente__codigo {
@@ -196,8 +196,8 @@
   display: inline-block;
   padding: 0.15em 0.6em;
   border-radius: var(--radio-pildora);
-  background: #2b2f36;
-  color: #ffffff;
+  background: var(--color-texto);
+  color: var(--color-superficie);
   font-size: 0.8rem;
   font-weight: 700;
 }

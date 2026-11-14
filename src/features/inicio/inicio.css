@@ -39,7 +39,7 @@
   font-weight: 600;
   letter-spacing: 0.04em;
   text-transform: uppercase;
-  color: #1f6fd1;
+  color: var(--color-secondary);
 }
 
 /* Portada: tarjeta blanca con imagen y presentación. */
@@ -47,12 +47,10 @@
   display: grid;
   gap: 20px;
   padding: 16px;
-  border: 1px solid #d5e4f7;
+  border: 1px solid var(--color-borde);
   border-radius: 24px;
-  background: #ffffff;
-  box-shadow:
-    0 2px 8px -2px rgb(11 60 122 / 6%),
-    0 1px 4px -1px rgb(11 60 122 / 4%);
+  background: var(--color-superficie);
+  box-shadow: var(--sombra-tarjeta);
 }
 
 .inicio__figura {
@@ -82,7 +80,7 @@
   gap: 4px 12px;
   padding: 8px 14px;
   border-radius: var(--radio-pildora);
-  background: rgb(255 255 255 / 92%);
+  background: var(--color-velo);
   color: var(--color-primary);
   font-family: var(--fuente-titulo, inherit);
   font-size: 0.8125rem;
@@ -100,7 +98,7 @@
   height: 8px;
   margin-right: 4px;
   border-radius: 50%;
-  background: #8fd11a;
+  background: var(--color-detalle);
   vertical-align: middle;
 }
 
@@ -114,10 +112,9 @@
   justify-self: start;
   margin: 0;
   padding: 4px 12px;
-  border: 1px solid #d5e4f7;
   border-radius: var(--radio-pildora);
-  background: #eef5ff;
-  color: var(--color-primary);
+  background: var(--color-secondary-suave);
+  color: var(--color-secondary);
   font-family: var(--fuente-titulo, inherit);
   font-size: 0.75rem;
   font-weight: 800;
@@ -134,11 +131,11 @@
   color: var(--color-primary);
 }
 
-/* "a medio camino" en azul con subrayado lima (como en la vista). */
+/* "a medio camino" en coral oscuro con subrayado dorado. */
 .inicio__resaltado {
-  color: #1f6fd1;
+  color: var(--color-secondary);
   text-decoration: underline;
-  text-decoration-color: var(--color-tertiary);
+  text-decoration-color: var(--color-dorado);
   text-decoration-thickness: 4px;
   text-underline-offset: 6px;
 }
@@ -164,10 +161,10 @@
   align-items: center;
   gap: 6px;
   padding: 6px 14px;
-  border: 1px solid #d5e4f7;
+  border: 1px solid var(--color-borde);
   border-radius: var(--radio-pildora);
-  background: #ffffff;
-  color: var(--color-primary);
+  background: var(--color-superficie);
+  color: var(--color-texto);
   font-size: 0.875rem;
   font-weight: 600;
 }
@@ -175,7 +172,7 @@
 .inicio__pildoras .icono {
   width: 18px;
   height: 18px;
-  color: #147a48;
+  color: var(--color-detalle);
 }
 
 /* Roles. */
@@ -197,10 +194,9 @@
 
 .inicio__conteo {
   padding: 2px 12px;
-  border: 1px solid #d5e4f7;
   border-radius: var(--radio-pildora);
-  background: #eef5ff;
-  color: #1f6fd1;
+  background: var(--color-secondary-suave);
+  color: var(--color-secondary);
   font-size: 0.8125rem;
   font-weight: 700;
 }
@@ -218,12 +214,10 @@
   gap: 8px;
   height: 100%;
   padding: 20px;
-  border: 1px solid #e2eefc;
+  border: 1px solid var(--color-borde);
   border-radius: 24px;
-  background: #ffffff;
-  box-shadow:
-    0 2px 8px -2px rgb(11 60 122 / 6%),
-    0 1px 4px -1px rgb(11 60 122 / 4%);
+  background: var(--color-superficie);
+  box-shadow: var(--sombra-tarjeta);
 }
 
 .inicio__rol--actual {
@@ -243,30 +237,21 @@
   width: 52px;
   height: 52px;
   border-radius: 16px;
-  background: #eef5ff;
+  background: var(--color-primary-suave);
   color: var(--color-primary);
-}
-
-.inicio__rol--campo .inicio__rol-icono {
-  background: #f3fbe3;
 }
 
 /* Etiqueta pequeña de apoyo: Clínica, Brigada, Gestión. */
 .inicio__rol-etiqueta {
   padding: 2px 10px;
   border-radius: var(--radio-pildora);
-  background: #eef5ff;
-  color: #1f5fb4;
+  background: var(--color-secondary-suave);
+  color: var(--color-secondary);
   font-family: var(--fuente-titulo, inherit);
   font-size: 0.75rem;
   font-weight: 800;
   letter-spacing: 0.06em;
   text-transform: uppercase;
-}
-
-.inicio__rol--campo .inicio__rol-etiqueta {
-  background: #f3fbe3;
-  color: #2d5a00;
 }
 
 .inicio__rol-nombre {
@@ -286,7 +271,7 @@
   padding: 0.1em 0.7em;
   border-radius: var(--radio-pildora);
   background: var(--color-primary);
-  color: #ffffff;
+  color: var(--color-superficie);
   font-size: 0.8125rem;
   font-weight: 700;
 }
@@ -300,7 +285,7 @@
   align-self: end;
   margin-top: 8px;
   padding-top: 14px;
-  border-top: 1px solid #e2eefc;
+  border-top: 1px solid var(--color-borde);
 }
 
 .inicio__rol-detalle {
@@ -318,7 +303,7 @@
   border: 0;
   border-radius: var(--radio-pildora);
   background: var(--color-primary);
-  color: #ffffff;
+  color: var(--color-superficie);
   font-family: var(--fuente-titulo, inherit);
   font-size: 1rem;
   font-weight: 700;
@@ -326,12 +311,14 @@
 }
 
 .inicio__entrar:hover {
-  background: #082e5e;
+  background: var(--color-primary-hover);
+  box-shadow: var(--hover-anillo);
 }
 
+/* Después del hover: con teclado, el anillo coral gana. */
 .inicio__entrar:focus-visible {
-  outline: 3px solid var(--color-secondary);
-  outline-offset: 3px;
+  outline: 3px solid transparent;
+  box-shadow: var(--foco-anillo);
 }
 
 .inicio__entrar-flecha {
@@ -340,12 +327,7 @@
   width: 36px;
   height: 36px;
   border-radius: 50%;
-  background: rgb(255 255 255 / 18%);
-}
-
-.inicio__rol--campo .inicio__entrar-flecha {
-  background: var(--color-tertiary);
-  color: var(--color-primary);
+  background: var(--color-flecha);
 }
 
 .inicio__entrar-flecha .icono {

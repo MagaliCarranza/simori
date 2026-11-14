@@ -1,12 +1,46 @@
-/* Tokens y piezas compartidas (guía visual de Stitch). */
+/* Tokens y piezas compartidas. Paleta del logo, "Turquesa principal"
+   (aprobada por el equipo). Contraste sobre blanco entre paréntesis.
+   Regla: coral y turquesa nunca van juntos como texto sobre fondo (1.3).
+   Todos los colores de la app salen de aquí (salvo los del semáforo,
+   también aquí, y los de Chart.js/Leaflet, que no leen variables CSS). */
 :root {
-  --color-primary: #0b3c7a;
-  --color-secondary: #2f8cff;
-  --color-tertiary: #b6f24a;
-  --color-neutral: #4a5b75;
-  --color-fondo: #f3f7fd;
+  /* Principal: turquesa oscuro (6.7). Títulos, botones, sección activa, chip del rol. */
+  --color-primary: #0e6670;
+  --color-primary-hover: #0a525a; /* (8.9) */
+  --color-primary-suave: #e9f6f7;
+  --color-encabezado: #1a7f8a; /* fondo del encabezado; blanco encima (4.7) */
+
+  /* Secundario: coral oscuro (5.0). Enlaces, etiquetas, antetítulos, foco. */
+  --color-secondary: #c93a47;
+  --color-secondary-suave: #fff1f0;
+
+  /* Detalles: coral del logo (3.7) solo en puntos e íconos, nunca en texto. */
+  --color-detalle: #e8505b;
+  /* Dorado (1.9): solo subrayados, decoración y hover. Nunca para el foco. */
+  --color-dorado: #e0b84d;
+  --color-tertiary: var(--color-dorado);
+
+  --color-texto: #1b2430;
+  --color-neutral: #4f5b66;
+  --color-fondo: #f4fafa;
   --color-superficie: #ffffff;
-  --color-borde: #d6e0ee;
+  --color-borde: #d3e8ea;
+  --color-velo: rgb(255 255 255 / 92%);
+  --color-flecha: rgb(255 255 255 / 18%);
+
+  --sombra-tarjeta: 0 2px 8px -2px rgb(14 102 112 / 8%), 0 1px 4px -1px rgb(14 102 112 / 5%);
+  --sombra-barra: 0 -2px 8px rgb(14 102 112 / 10%);
+
+  /* Foco con teclado: 3px blanco + 3px coral oscuro. Hover: 3px blanco + 3px dorado. */
+  --foco-anillo: 0 0 0 3px var(--color-superficie), 0 0 0 6px var(--color-secondary);
+  --hover-anillo: 0 0 0 3px var(--color-superficie), 0 0 0 6px var(--color-dorado);
+
+  /* Estados que no son del semáforo (avisos de M7 y "en construcción"). */
+  --estado-pendiente: #7a4c00;
+  --estado-pendiente-fondo: #fff4cf;
+  --estado-entregado: #1b5e20;
+  --estado-entregado-fondo: #d7f0d0;
+  --burbuja-mensaje: #e8f6e8;
 
   /* Semáforo: texto oscuro sobre fondo claro, contraste AA (>= 4.5:1). */
   --semaforo-verde: #1b5e20;
@@ -57,17 +91,16 @@
   background: var(--color-fondo);
 }
 
-/* "Datos simulados": píldora azul con ícono de información (vistas de Stitch).
-   Texto #0b3c7a sobre #eaf3ff: contraste AA. */
+/* "Datos simulados": píldora con ícono de información. Texto coral oscuro
+   sobre coral suave (4.6); en el encabezado, sobre blanco (5.0). */
 .etiqueta-simulado {
   display: inline-flex;
   align-items: center;
   gap: 0.4em;
   padding: 0.2em 0.8em;
-  border: 1px solid #b9d6ff;
   border-radius: var(--radio-pildora);
-  background: #eaf3ff;
-  color: var(--color-primary);
+  background: var(--color-secondary-suave);
+  color: var(--color-secondary);
   font-size: 0.8rem;
   font-weight: 700;
   letter-spacing: 0.01em;
@@ -78,7 +111,7 @@
   flex: none;
   width: 1.1em;
   height: 1.1em;
-  color: var(--color-secondary);
+  color: var(--color-detalle);
 }
 
 /* Botones compartidos (píldora). */
@@ -92,9 +125,14 @@
   cursor: pointer;
 }
 
-.boton:focus-visible {
-  outline: 3px solid var(--color-secondary);
-  outline-offset: 2px;
+.boton:hover:not(:disabled) {
+  box-shadow: var(--hover-anillo);
+}
+
+/* Misma especificidad que el hover y después de él: con teclado, el foco gana. */
+.boton:focus-visible:not(:disabled) {
+  outline: 3px solid transparent;
+  box-shadow: var(--foco-anillo);
 }
 
 .boton:disabled {
@@ -104,7 +142,12 @@
 
 .boton--primario {
   background: var(--color-primary);
-  color: #ffffff;
+  color: var(--color-superficie);
+}
+
+.boton--primario:hover:not(:disabled),
+.boton--chico:hover:not(:disabled) {
+  background: var(--color-primary-hover);
 }
 
 .boton--secundario {
@@ -122,7 +165,7 @@
 .boton--opcion {
   background: var(--color-superficie);
   border-color: var(--color-borde);
-  color: #0f172a;
+  color: var(--color-texto);
 }
 
 .boton--chico {
@@ -130,11 +173,11 @@
   padding: 0 12px;
   font-size: 0.85rem;
   background: var(--color-primary);
-  color: #ffffff;
+  color: var(--color-superficie);
 }
 
 .boton--opcion[aria-pressed='true'] {
-  background: #e6efff;
+  background: var(--color-primary-suave);
   border-color: var(--color-primary);
   color: var(--color-primary);
 }
@@ -164,7 +207,7 @@
   border: 1px solid var(--color-borde);
   border-radius: var(--radio-tarjeta);
   background: var(--color-superficie);
-  box-shadow: 0 1px 2px rgb(11 60 122 / 6%);
+  box-shadow: var(--sombra-tarjeta);
 }
 
 .titulo-pantalla {

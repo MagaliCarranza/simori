@@ -45,7 +45,7 @@ export default defineConfig({
         short_name: 'SIMORI',
         description: 'SIMORI: registro de seguimiento de tamizaje renal en Poncitlán, Jalisco.',
         lang: 'es-MX',
-        theme_color: '#0b3c7a',
+        theme_color: '#1a7f8a',
         background_color: '#ffffff',
         display: 'standalone',
         start_url: '/',

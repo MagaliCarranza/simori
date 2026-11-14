@@ -11,8 +11,7 @@
   gap: 8px;
   min-height: 56px;
   padding: 8px 16px;
-  background: var(--color-superficie, #ffffff);
-  border-bottom: 1px solid var(--color-borde, #d6e0ee);
+  background: var(--color-encabezado);
 }
 
 .nav-rol__inicio {
@@ -20,9 +19,19 @@
   align-items: center;
   gap: 8px;
   min-height: 44px;
-  color: var(--color-primary, #0b3c7a);
+  color: var(--color-superficie);
   text-decoration: none;
-  border-radius: 10px;
+  border-radius: 12px;
+}
+
+/* El logo va en un cuadro blanco redondeado sobre el turquesa. */
+.nav-rol__inicio .logo__simbolo {
+  flex: none;
+  width: auto;
+  height: 40px;
+  padding: 4px;
+  border-radius: 12px;
+  background: var(--color-superficie);
 }
 
 .nav-rol__titulo {
@@ -30,7 +39,7 @@
   font-size: 1.2rem;
   font-weight: 800;
   letter-spacing: 0.04em;
-  color: var(--color-primary, #0b3c7a);
+  color: var(--color-superficie);
 }
 
 /* Chip del rol: enlace al inicio para cambiarlo. */
@@ -41,10 +50,9 @@
   min-width: 0;
   min-height: 44px;
   padding: 4px 10px 4px 12px;
-  border: 1px solid var(--color-primary, #0b3c7a);
-  border-radius: var(--radio-pildora, 999px);
-  background: #e6f0ff;
-  color: var(--color-primary, #0b3c7a);
+  border-radius: var(--radio-pildora);
+  background: var(--color-superficie);
+  color: var(--color-primary);
   font-weight: 700;
   font-size: 0.875rem;
   text-decoration: none;
@@ -77,15 +85,17 @@
 }
 
 .nav-rol__simulado .etiqueta-simulado {
+  background: var(--color-superficie);
   padding: 0.3em 0.8em;
   font-size: 0.8125rem;
 }
 
+/* Foco: anillo blanco + coral (el coral solo sobre el turquesa daría 1.1). */
 .nav-rol__inicio:focus-visible,
 .nav-rol__chip:focus-visible,
 .nav-rol__link:focus-visible {
-  outline: 3px solid var(--color-secondary, #2f8cff);
-  outline-offset: 2px;
+  outline: 3px solid transparent;
+  box-shadow: var(--foco-anillo);
 }
 
 /* Barra inferior (celular). */
@@ -99,9 +109,9 @@
   justify-content: space-around;
   gap: 4px;
   padding: 6px 8px calc(6px + env(safe-area-inset-bottom, 0px));
-  background: var(--color-superficie, #ffffff);
-  border-top: 1px solid var(--color-borde, #d6e0ee);
-  box-shadow: 0 -2px 8px rgb(11 60 122 / 8%);
+  background: var(--color-superficie);
+  border-top: 1px solid var(--color-borde);
+  box-shadow: var(--sombra-barra);
 }
 
 .nav-rol__link {
@@ -115,7 +125,7 @@
   max-width: 160px;
   padding: 4px 6px;
   border-radius: 14px;
-  color: var(--color-neutral, #4a5b75);
+  color: var(--color-neutral);
   font-size: 0.8125rem;
   font-weight: 700;
   text-align: center;
@@ -123,8 +133,8 @@
 }
 
 .nav-rol__link--activo {
-  background: #e6f0ff;
-  color: var(--color-primary, #0b3c7a);
+  background: var(--color-primary-suave);
+  color: var(--color-primary);
 }
 
 /* Marca extra de la sección activa (no solo color). */
@@ -163,7 +173,7 @@
     height: calc(100dvh - 56px);
     padding: 16px 12px;
     border-top: 0;
-    border-right: 1px solid var(--color-borde, #d6e0ee);
+    border-right: 1px solid var(--color-borde);
     box-shadow: none;
   }
 
@@ -180,8 +190,8 @@
   }
 
   .nav-rol__link--activo {
-    background: var(--color-primary, #0b3c7a);
-    color: #ffffff;
+    background: var(--color-primary);
+    color: var(--color-superficie);
   }
 
   .nav-rol__link--activo span {

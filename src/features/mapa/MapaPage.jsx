@@ -6,6 +6,7 @@ import { divIcon } from 'leaflet'
 import 'leaflet/dist/leaflet.css'
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { CircleMarker, MapContainer, Marker, TileLayer, Tooltip } from 'react-leaflet'
+import { COLORES } from '../../components/colores.js'
 import { etiquetaPrioridad } from '../../domain/index.js'
 import { EtiquetaSimulado } from '../../components/EtiquetaSimulado.jsx'
 import { FILTROS_INICIALES } from '../supervision/filtros.js'
@@ -34,9 +35,9 @@ const MARGEN_GRADOS = 0.05
 // Un mosaico que falla suelto no basta para avisar: solo varios seguidos.
 const FALLOS_PARA_AVISO = 3
 
-// Solo azules: naranja o rojo se confundirían con el semáforo.
-const COLOR_PUNTO = '#2563eb'
-const COLOR_SELECCION = '#0b1f4d'
+// Solo turquesas de la paleta: naranja o rojo se confundirían con el semáforo.
+const COLOR_PUNTO = COLORES.principal
+const COLOR_SELECCION = COLORES.principalHover
 
 // Dirección de la etiqueta por localidad. Chalpicote está a menos de 1 km de
 // Agua Caliente: a 360 px sus etiquetas se encimaban, así que va abajo.
