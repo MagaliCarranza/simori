@@ -2,6 +2,7 @@
 // resumenPorGrupo; las cifras ya vienen enmascaradas del dominio.
 
 import { calcularPrioridad, COLORES_SEMAFORO, enmascararMenorQue5 } from '../../domain/index.js'
+import { atiende } from '../supervision/catalogos.js'
 
 // Una localidad sin casos no aparece en resumenPorGrupo: su 0 se muestra como
 // "menos de 5" (limitación conocida: no entra en la supresión por columna).
@@ -24,10 +25,34 @@ function pendientesDe(grupo) {
   }
 }
 
-// El catálogo trae "(provisional)" en el nombre; el panel ya lo dice con su etiqueta.
-const nombreCentro = (c) => (c.provisional ? c.nombre.replace(/\s*\(provisional\)\s*$/i, '') : c.nombre)
+const tieneCoordenadas = (x) => Number.isFinite(x.lat) && Number.isFinite(x.lng)
 
-const tieneCoordenadas = (l) => Number.isFinite(l.lat) && Number.isFinite(l.lng)
+// Centro que atiende a la localidad (cluesOperativo), aunque esté en otra.
+// El nombre se deja tal como viene en CLUES.
+function centroDe(localidad, centros) {
+  const c = centros.find((centro) => atiende(localidad, centro))
+  if (!c) return null
+  return {
+    clues: c.clues,
+    nombre: c.nombre,
+    institucion: c.institucion ?? null,
+    distanciaKm: Number.isFinite(localidad.distanciaKm) ? localidad.distanciaKm : null,
+    ubicacionAproximada: Boolean(c.ubicacionAproximada),
+  }
+}
+
+// Centros que atienden a alguna localidad, con coordenadas, para el mapa.
+export function centrosEnMapa(localidades, centros) {
+  return centros
+    .filter((c) => tieneCoordenadas(c) && localidades.some((l) => atiende(l, c)))
+    .map((c) => ({
+      clues: c.clues,
+      nombre: c.nombre,
+      coordenadas: [c.lat, c.lng],
+      ubicacionAproximada: Boolean(c.ubicacionAproximada),
+    }))
+    .sort((a, b) => a.nombre.localeCompare(b.nombre, 'es'))
+}
 
 // Grupo k-means de la localidad, tomado de grupos_localidades.json (salida de
 // scripts/agrupar_localidades.py). Devuelve null si el JSON no cargó, no
@@ -122,9 +147,7 @@ export function panelesPorLocalidad(
             ubicacionAproximada: Boolean(e.ubicacionAproximada),
           }))
           .sort((a, b) => a.nombre.localeCompare(b.nombre, 'es')),
-        centros: centros
-          .filter((c) => c.claveInegi === l.claveInegi)
-          .map((c) => ({ clues: c.clues, nombre: nombreCentro(c), provisional: Boolean(c.provisional) })),
+        centro: centroDe(l, centros),
         pendientes: pendientesDe(grupoPorClave.get(l.claveInegi)),
       }
     })
