@@ -4,6 +4,7 @@ Determinismo (RNF09): misma semilla, mismos parametros -> misma salida.
 Tambien verificamos los 4 casos de CKiD U25 contra los valores del dominio en JS.
 """
 import copy
+from datetime import date
 from types import SimpleNamespace
 
 import pytest
@@ -79,3 +80,65 @@ def test_ckid_u25_fuera_de_rango_devuelve_none():
     assert tfge_ckid_u25("M", 0.5, 70, 0.3) is None
     assert tfge_ckid_u25("M", 25, 175, 1.0) is None
     assert tfge_ckid_u25("F", 30, 165, 0.9) is None
+
+
+@pytest.fixture(scope="module")
+def salidas_default():
+    return simular(_args_default())
+
+
+@pytest.mark.parametrize("escenario", [11, 30, 50])
+def test_ningun_evento_posterior_a_hoy(salidas_default, escenario):
+    hoy = date.fromisoformat(_args_default().hoy)
+    datos = salidas_default[escenario]
+    futuros = [e for e in datos["eventos"] if date.fromisoformat(e["fecha"]) > hoy]
+    assert futuros == [], (
+        f"Escenario {escenario} %: {len(futuros)} eventos con fecha posterior a {hoy}"
+    )
+
+
+@pytest.mark.parametrize("escenario", [11, 30, 50])
+def test_casos_esperando_siguiente_etapa_estan_en_seguimiento(salidas_default, escenario):
+    """Los casos en etapas 1-3 con cita futura estan esperando, en_seguimiento.
+    No se cuenta vigilancia porque esa cita (+6 meses) marca la siguiente
+    revision de un caso ya clasificado, no una etapa pendiente."""
+    hoy = date.fromisoformat(_args_default().hoy)
+    datos = salidas_default[escenario]
+    esperando = [
+        c for c in datos["casos"]
+        if c.get("fechaProximaCita")
+        and date.fromisoformat(c["fechaProximaCita"]) > hoy
+        and c["etapaActual"] < 4
+    ]
+    assert esperando, f"Escenario {escenario} %: ningun caso esperando cita futura"
+    for c in esperando:
+        assert c["estado"] == "en_seguimiento", (
+            f"{c['codigo']} esperando cita futura pero estado {c['estado']!r}"
+        )
+
+
+def test_citas_futuras_no_aumentan_con_la_perdida(salidas_default):
+    """Mas perdida -> menos (o igual) casos con cita futura; ninguno gana cita."""
+    hoy = date.fromisoformat(_args_default().hoy)
+
+    def cita_futura_por_codigo(datos):
+        return {
+            c["codigo"]: c["fechaProximaCita"]
+            for c in datos["casos"]
+            if c.get("fechaProximaCita") and date.fromisoformat(c["fechaProximaCita"]) > hoy
+        }
+
+    f11 = cita_futura_por_codigo(salidas_default[11])
+    f30 = cita_futura_por_codigo(salidas_default[30])
+    f50 = cita_futura_por_codigo(salidas_default[50])
+
+    assert len(f11) >= len(f30) >= len(f50), (
+        f"Total citas futuras no monotonico: 11={len(f11)} 30={len(f30)} 50={len(f50)}"
+    )
+    # Ningun caso puede "ganar" cita futura al subir la perdida: si un caso
+    # tiene cita futura en el 30 %, debe tenerla tambien en el 11 % (misma
+    # fecha, porque los uniformes son compartidos).
+    for cod, fecha in f30.items():
+        assert f11.get(cod) == fecha, f"{cod} gana/cambia cita futura al pasar de 11 a 30"
+    for cod, fecha in f50.items():
+        assert f11.get(cod) == fecha, f"{cod} gana/cambia cita futura al pasar de 11 a 50"
