@@ -1,5 +1,5 @@
 import { NavLink } from 'react-router-dom'
-import { EtiquetaSimulado } from './EtiquetaSimulado.jsx'
+import { SelectorEscenario } from '../features/escenarios/SelectorEscenario.jsx'
 import './navegacionRol.css'
 
 export const ETIQUETA_ROL = { captura: 'Captura', campo: 'Campo', supervision: 'Supervisión' }
@@ -35,7 +35,7 @@ export function NavegacionRol({ usuarios, usuarioId, onCambioUsuario, usuario })
     <header className="nav-rol">
       <div className="nav-rol__cabecera">
         <h1 className="nav-rol__titulo">SIMORI</h1>
-        <EtiquetaSimulado />
+        <SelectorEscenario usuario={usuario} />
       </div>
 
       {usuarios.length > 0 && (
