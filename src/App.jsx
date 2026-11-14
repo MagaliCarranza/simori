@@ -8,6 +8,7 @@ import { ListaAvisosPage } from './features/avisos/ListaAvisosPage.jsx'
 import { MisVisitasPage } from './features/campo/MisVisitasPage.jsx'
 import { PendientesPage } from './features/pendientes/PendientesPage.jsx'
 import { RegistrarCasoPage } from './features/registro/RegistrarCasoPage.jsx'
+import { FichaCasoPage } from './features/ruta/FichaCasoPage.jsx'
 import { SupervisionPage } from './features/supervision/SupervisionPage.jsx'
 import './App.css'
 
@@ -105,15 +106,7 @@ function AplicacionInterna() {
           {/* Captura */}
           <Route path="/registrar" element={usuario ? <RegistrarCasoPage usuario={usuario} hoyISO={HOY_DEMO} /> : null} />
           <Route path="/pendientes" element={usuario ? <PendientesPage usuario={usuario} hoyISO={HOY_DEMO} /> : null} />
-          <Route
-            path="/caso/:codigo"
-            element={
-              <EnConstruccion
-                titulo="Ficha de seguimiento"
-                descripcion="Pantalla pendiente (M4)."
-              />
-            }
-          />
+          <Route path="/caso/:codigo" element={usuario ? <FichaCasoPage usuario={usuario} hoyISO={HOY_DEMO} /> : null} />
 
           {/* Campo */}
           <Route path="/visitas" element={usuario ? <MisVisitasPage usuario={usuario} hoyISO={HOY_DEMO} /> : null} />
