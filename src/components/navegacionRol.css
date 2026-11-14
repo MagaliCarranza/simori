@@ -77,6 +77,11 @@
   min-width: 0;
 }
 
+/* Sobre el turquesa del encabezado, la etiqueta va en blanco (4.7). */
+.nav-rol__simulado .escenario-selector__etiqueta {
+  color: var(--color-superficie);
+}
+
 @media (min-width: 900px) {
   .nav-rol__simulado {
     flex: none;

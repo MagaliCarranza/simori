@@ -42,6 +42,27 @@
   --estado-entregado-fondo: #d7f0d0;
   --burbuja-mensaje: #e8f6e8;
 
+  /* Mapa: centro de salud en morado (ni rojo ni naranja, distinto del
+     turquesa de las localidades). */
+  --color-centro: #6b21a8;
+  --color-centro-borde: #3b0764;
+  --color-localidad-relleno: rgb(14 102 112 / 50%); /* = --color-primary al 50 %, como el marcador */
+
+  /* Índice de prioridad en el panel del mapa (escala propia, no es semáforo). */
+  --prioridad-alta: #9d174d;
+  --prioridad-alta-fondo: #fdf2f8;
+  --prioridad-media: #5b21b6;
+  --prioridad-media-fondo: #f3e8ff;
+  --prioridad-baja: #334155;
+  --prioridad-baja-fondo: #f1f5f9;
+  --prioridad-indisponible: #475569;
+  --prioridad-indisponible-borde: #64748b;
+  --prioridad-indisponible-fondo: #f8fafc;
+
+  /* Diálogos (confirmación de escenario). */
+  --sombra-dialogo: 0 10px 30px rgb(14 102 112 / 18%);
+  --fondo-modal: rgb(27 36 48 / 45%);
+
   /* Semáforo: texto oscuro sobre fondo claro, contraste AA (>= 4.5:1). */
   --semaforo-verde: #1b5e20;
   --semaforo-verde-fondo: #e3f4e4;

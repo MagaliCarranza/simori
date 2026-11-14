@@ -156,33 +156,33 @@
 }
 
 .mapa__prioridad-razon {
-  color: var(--color-texto, #111827);
+  color: var(--color-texto);
   font-size: 0.9375rem;
   font-weight: 500;
 }
 
 .mapa__prioridad--alta {
-  background: #fdf2f8;
-  color: #9d174d;
+  background: var(--prioridad-alta-fondo);
+  color: var(--prioridad-alta);
 }
 
 .mapa__prioridad--media {
-  background: #f3e8ff;
-  color: #5b21b6;
+  background: var(--prioridad-media-fondo);
+  color: var(--prioridad-media);
 }
 
 .mapa__prioridad--baja {
-  background: #f1f5f9;
-  color: #334155;
+  background: var(--prioridad-baja-fondo);
+  color: var(--prioridad-baja);
 }
 
 /* Marco no disponible (p. ej. sin red y sin precache). El índice no se
    calcula; se comunica en una sola línea neutral para no competir con los
    niveles alta/media/baja que usan rosa/violeta/pizarra. */
 .mapa__prioridad--indisponible {
-  background: #f8fafc;
-  border-left-color: #64748b;
-  color: #475569;
+  background: var(--prioridad-indisponible-fondo);
+  border-left-color: var(--prioridad-indisponible-borde);
+  color: var(--prioridad-indisponible);
   font-style: italic;
 }
 
@@ -215,15 +215,15 @@
    de los colores del semáforo. */
 .mapa__icono-centro {
   box-sizing: border-box;
-  border: 2px solid #ffffff;
+  border: 2px solid var(--color-superficie);
   border-radius: 2px;
-  background: #6b21a8;
-  box-shadow: 0 0 0 1px #3b0764;
+  background: var(--color-centro);
+  box-shadow: 0 0 0 1px var(--color-centro-borde);
 }
 
 .mapa__etiqueta-centro {
   font-weight: 600;
-  color: #3b0764;
+  color: var(--color-centro-borde);
 }
 
 .mapa__leyenda {
@@ -249,16 +249,16 @@
 }
 
 .mapa__simbolo--localidad {
-  border: 2px solid #2563eb;
+  border: 2px solid var(--color-primary);
   border-radius: 50%;
-  background: rgb(37 99 235 / 50%);
+  background: var(--color-localidad-relleno);
 }
 
 .mapa__simbolo--centro {
-  border: 2px solid #ffffff;
+  border: 2px solid var(--color-superficie);
   border-radius: 2px;
-  background: #6b21a8;
-  box-shadow: 0 0 0 1px #3b0764;
+  background: var(--color-centro);
+  box-shadow: 0 0 0 1px var(--color-centro-borde);
 }
 
 .mapa__centro {
