@@ -134,6 +134,11 @@ export function AvisoFamilia({ fila, centro, usuario, hoyISO, db = dbDefault }) 
         ) : (
           <p className="aviso__nota">Este navegador no puede leer el aviso en voz alta.</p>
         )}
+        {voz.fallo && (
+          <p className="aviso__nota" role="alert">
+            No se pudo reproducir el audio en este equipo. Lee el aviso en voz alta a la familia.
+          </p>
+        )}
       </div>
 
       <fieldset className="aviso__canales">
