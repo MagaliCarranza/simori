@@ -1,0 +1,377 @@
+{
+  "metodo": "k-means (scikit-learn) sobre variables estandarizadas",
+  "semilla": 42,
+  "tamanoMinimoGrupo": 3,
+  "variablesCandidatas": [
+    "im2020",
+    "distanciaKm",
+    "matricula",
+    "pctHLI"
+  ],
+  "variablesUsadas": [
+    "im2020",
+    "distanciaKm",
+    "matricula",
+    "pctHLI"
+  ],
+  "seQuitoLenguaIndigena": false,
+  "totalLocalidades": 64,
+  "localidadesCompletas": 40,
+  "localidadesConUnidadConfianzaBaja": 7,
+  "notaDistancia": "distanciaKm es línea recta (haversine) a la unidad SSA más cercana. Para Agua Caliente y Chalpicote se mide a JCSSA004213; se verificó de forma aproximada (coordenadas de las localidades con centro SSA propio) que es también su unidad más cercana.",
+  "kElegida": 3,
+  "motivoK": "elegida por interpretabilidad: k = 2 tuvo mayor silueta pero solo separaba localidades grandes de pequeñas",
+  "silueta": 0.3676,
+  "siluetasProbadas": {
+    "2": 0.4874,
+    "3": 0.3676,
+    "4": 0.3766,
+    "5": 0.4032
+  },
+  "notaDescripcion": "Las descripciones comparan el promedio del grupo con el promedio de las localidades agrupadas del municipio; no equivalen al grado de CONAPO.",
+  "intentos": [
+    {
+      "variables": [
+        "im2020",
+        "distanciaKm",
+        "matricula",
+        "pctHLI"
+      ],
+      "pruebas": [
+        {
+          "k": 2,
+          "silueta": 0.4874,
+          "tamanos": [
+            34,
+            6
+          ],
+          "valida": true
+        },
+        {
+          "k": 3,
+          "silueta": 0.3676,
+          "tamanos": [
+            21,
+            13,
+            6
+          ],
+          "valida": true
+        },
+        {
+          "k": 4,
+          "silueta": 0.3766,
+          "tamanos": [
+            20,
+            13,
+            4,
+            3
+          ],
+          "valida": true
+        },
+        {
+          "k": 5,
+          "silueta": 0.4032,
+          "tamanos": [
+            20,
+            8,
+            6,
+            4,
+            2
+          ],
+          "valida": false
+        }
+      ]
+    }
+  ],
+  "grupos": [
+    {
+      "grupo": 1,
+      "tamano": 13,
+      "descripcion": "marginación más alta del municipio, más lejos de la unidad de salud",
+      "promedios": {
+        "im2020": 19.397,
+        "distanciaKm": 4.216,
+        "matricula": 109.077,
+        "pctHLI": 0.01
+      },
+      "gradosConapo": {
+        "Alto": 6,
+        "Medio": 4,
+        "Bajo": 3
+      }
+    },
+    {
+      "grupo": 2,
+      "tamano": 6,
+      "descripcion": "más cerca de la unidad de salud, matrícula más alta",
+      "promedios": {
+        "im2020": 22.916,
+        "distanciaKm": 0.39,
+        "matricula": 1208.833,
+        "pctHLI": 0.115
+      },
+      "gradosConapo": {
+        "Medio": 1,
+        "Bajo": 1,
+        "Muy bajo": 4
+      }
+    },
+    {
+      "grupo": 3,
+      "tamano": 21,
+      "descripcion": "marginación más baja del municipio",
+      "promedios": {
+        "im2020": 23.693,
+        "distanciaKm": 2.15,
+        "matricula": 90.0,
+        "pctHLI": 0.0
+      },
+      "gradosConapo": {
+        "Bajo": 6,
+        "Muy bajo": 15
+      }
+    }
+  ],
+  "localidades": [
+    {
+      "claveInegi": "140660001",
+      "nombre": "Poncitlán",
+      "grupo": 2,
+      "enAlcance": false
+    },
+    {
+      "claveInegi": "140660002",
+      "nombre": "Agua Caliente",
+      "grupo": 1,
+      "enAlcance": true
+    },
+    {
+      "claveInegi": "140660004",
+      "nombre": "Tlachichilco del Carmen",
+      "grupo": 3,
+      "enAlcance": false
+    },
+    {
+      "claveInegi": "140660006",
+      "nombre": "Casa Blanca",
+      "grupo": 3,
+      "enAlcance": false
+    },
+    {
+      "claveInegi": "140660007",
+      "nombre": "Celanese Mexicana",
+      "grupo": 3,
+      "enAlcance": false
+    },
+    {
+      "claveInegi": "140660010",
+      "nombre": "Cuesta de Mezcala",
+      "grupo": 3,
+      "enAlcance": false
+    },
+    {
+      "claveInegi": "140660011",
+      "nombre": "Cuitzeo (La Estancia)",
+      "grupo": 2,
+      "enAlcance": false
+    },
+    {
+      "claveInegi": "140660013",
+      "nombre": "Estancia de San Nicolás",
+      "grupo": 3,
+      "enAlcance": false
+    },
+    {
+      "claveInegi": "140660016",
+      "nombre": "El Gusano (El Mezquite)",
+      "grupo": 1,
+      "enAlcance": false
+    },
+    {
+      "claveInegi": "140660017",
+      "nombre": "Santa María de la Joya",
+      "grupo": 1,
+      "enAlcance": false
+    },
+    {
+      "claveInegi": "140660019",
+      "nombre": "Mezcala",
+      "grupo": 2,
+      "enAlcance": false
+    },
+    {
+      "claveInegi": "140660021",
+      "nombre": "Ojo de Agua",
+      "grupo": 1,
+      "enAlcance": false
+    },
+    {
+      "claveInegi": "140660022",
+      "nombre": "San José de las Pilas",
+      "grupo": 1,
+      "enAlcance": false
+    },
+    {
+      "claveInegi": "140660025",
+      "nombre": "San Jacinto",
+      "grupo": 3,
+      "enAlcance": false
+    },
+    {
+      "claveInegi": "140660026",
+      "nombre": "San José de Ornelas",
+      "grupo": 3,
+      "enAlcance": false
+    },
+    {
+      "claveInegi": "140660027",
+      "nombre": "San Juan Tecomatlán",
+      "grupo": 3,
+      "enAlcance": false
+    },
+    {
+      "claveInegi": "140660028",
+      "nombre": "San Luis del Agua Caliente",
+      "grupo": 3,
+      "enAlcance": false
+    },
+    {
+      "claveInegi": "140660030",
+      "nombre": "San Miguel Zapotitlán",
+      "grupo": 3,
+      "enAlcance": false
+    },
+    {
+      "claveInegi": "140660031",
+      "nombre": "San Pedro Itzicán",
+      "grupo": 2,
+      "enAlcance": true
+    },
+    {
+      "claveInegi": "140660032",
+      "nombre": "San Sebastián",
+      "grupo": 1,
+      "enAlcance": false
+    },
+    {
+      "claveInegi": "140660033",
+      "nombre": "Santa Cruz el Grande",
+      "grupo": 2,
+      "enAlcance": false
+    },
+    {
+      "claveInegi": "140660036",
+      "nombre": "El Zapote",
+      "grupo": 1,
+      "enAlcance": false
+    },
+    {
+      "claveInegi": "140660037",
+      "nombre": "La Zapotera",
+      "grupo": 1,
+      "enAlcance": false
+    },
+    {
+      "claveInegi": "140660040",
+      "nombre": "Los Galápagos (Rancho del Ingeniero Matute Remus)",
+      "grupo": 3,
+      "enAlcance": false
+    },
+    {
+      "claveInegi": "140660041",
+      "nombre": "El Campo",
+      "grupo": 3,
+      "enAlcance": false
+    },
+    {
+      "claveInegi": "140660042",
+      "nombre": "Colonia la Granjena",
+      "grupo": 3,
+      "enAlcance": false
+    },
+    {
+      "claveInegi": "140660043",
+      "nombre": "Chalpicote",
+      "grupo": 1,
+      "enAlcance": true
+    },
+    {
+      "claveInegi": "140660044",
+      "nombre": "San Miguel [Granjas]",
+      "grupo": 3,
+      "enAlcance": false
+    },
+    {
+      "claveInegi": "140660048",
+      "nombre": "La Ladrillera",
+      "grupo": 3,
+      "enAlcance": false
+    },
+    {
+      "claveInegi": "140660051",
+      "nombre": "El Romereño (INFONAVIT)",
+      "grupo": 2,
+      "enAlcance": false
+    },
+    {
+      "claveInegi": "140660054",
+      "nombre": "Las Tortugas",
+      "grupo": 3,
+      "enAlcance": false
+    },
+    {
+      "claveInegi": "140660057",
+      "nombre": "La Arena",
+      "grupo": 1,
+      "enAlcance": false
+    },
+    {
+      "claveInegi": "140660080",
+      "nombre": "Kilómetro Cuarenta y Tres",
+      "grupo": 3,
+      "enAlcance": false
+    },
+    {
+      "claveInegi": "140660092",
+      "nombre": "La Ocoterita (La Ocotera Chica)",
+      "grupo": 1,
+      "enAlcance": false
+    },
+    {
+      "claveInegi": "140660102",
+      "nombre": "Potrero Mirto",
+      "grupo": 1,
+      "enAlcance": false
+    },
+    {
+      "claveInegi": "140660123",
+      "nombre": "La Toma de San Mateo (Rancho Mendoza)",
+      "grupo": 3,
+      "enAlcance": false
+    },
+    {
+      "claveInegi": "140660124",
+      "nombre": "Potrero Torrecillas",
+      "grupo": 3,
+      "enAlcance": false
+    },
+    {
+      "claveInegi": "140660133",
+      "nombre": "Las Lajas",
+      "grupo": 3,
+      "enAlcance": false
+    },
+    {
+      "claveInegi": "140660142",
+      "nombre": "San Miguel [Granja]",
+      "grupo": 3,
+      "enAlcance": false
+    },
+    {
+      "claveInegi": "140660152",
+      "nombre": "La Peña",
+      "grupo": 1,
+      "enAlcance": false
+    }
+  ]
+}
