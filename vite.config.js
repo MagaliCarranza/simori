@@ -11,15 +11,15 @@ export default defineConfig({
       // Mosaicos de OpenStreetMap: se guardan solo los que se ven (sin descarga
       // previa, por la política de uso de OSM) y con límite, para el mapa offline.
       workbox: {
-        // Patrón por omisión de Workbox más las fuentes woff2 (tipografía sin
-        // internet) y los JSON que la app necesita
+        // Patrón por omisión de Workbox más fuentes woff2 e imágenes de Inicio (se
+        // ven sin internet) y los JSON que la app necesita
         // cuando no hay red: el marco del índice y los grupos k-means (los
         // pide el mapa en cada visita) y los tres datasets de escenarios
         // de pérdida (M10, selector de encabezado). Cada casos_*.json pesa
         // ~0.7 MB; es un costo aceptable porque, sin precache, el cambio de
         // escenario no funcionaría sin conexión.
         globPatterns: [
-          '**/*.{js,css,html,woff2}',
+          '**/*.{js,css,html,woff2,webp,jpg}',
           'data/localidades_marco.json',
           'data/grupos_localidades.json',
           'data/casos_11.json',

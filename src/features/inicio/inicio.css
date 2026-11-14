@@ -1,39 +1,213 @@
-/* Pantalla de inicio. Mobile-first desde 360 px. */
+/* Pantalla de inicio (vista "Bienvenida" de UI-SIMORI). Mobile-first desde
+   360 px; desde 900 px la portada va en dos columnas y los roles en tres. */
 
 .inicio {
   display: grid;
-  gap: 12px;
-  max-width: 720px;
+  gap: 20px;
+  max-width: 1120px;
   margin: 0 auto;
   padding: 16px;
 }
 
+/* Marca: logo oficial + nombre. */
+.inicio__marca {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.inicio__marca .logo__simbolo {
+  flex: none;
+  height: 56px;
+  width: auto;
+}
+
+.inicio__nombre {
+  margin: 0;
+  font-family: var(--fuente-titulo, inherit);
+  font-size: 1.6rem;
+  font-weight: 800;
+  line-height: 1.1;
+  letter-spacing: 0.02em;
+  color: var(--color-primary);
+}
+
+.inicio__lema {
+  margin: 2px 0 0;
+  font-family: var(--fuente-titulo, inherit);
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: #1f6fd1;
+}
+
+/* Portada: tarjeta blanca con imagen y presentación. */
+.inicio__portada {
+  display: grid;
+  gap: 20px;
+  padding: 16px;
+  border: 1px solid #d5e4f7;
+  border-radius: 24px;
+  background: #ffffff;
+  box-shadow:
+    0 2px 8px -2px rgb(11 60 122 / 6%),
+    0 1px 4px -1px rgb(11 60 122 / 4%);
+}
+
+.inicio__figura {
+  position: relative;
+  margin: 0;
+  overflow: hidden;
+  border-radius: 18px;
+}
+
 .inicio__ilustracion {
+  display: block;
   width: 100%;
   height: auto;
-  max-height: 220px;
+  aspect-ratio: 16 / 10;
+  object-fit: cover;
+  object-position: center 70%;
+}
+
+.inicio__pie-imagen {
+  position: absolute;
+  right: 10px;
+  bottom: 10px;
+  left: 10px;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 4px 12px;
+  padding: 8px 14px;
+  border-radius: var(--radio-pildora);
+  background: rgb(255 255 255 / 92%);
+  color: var(--color-primary);
+  font-family: var(--fuente-titulo, inherit);
+  font-size: 0.8125rem;
+  font-weight: 600;
+}
+
+.inicio__pie-lugar {
+  color: var(--color-neutral);
+  font-weight: 600;
+}
+
+.inicio__punto {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  margin-right: 4px;
+  border-radius: 50%;
+  background: #8fd11a;
+  vertical-align: middle;
+}
+
+.inicio__presentacion {
+  display: grid;
+  align-content: center;
+  gap: 12px;
+}
+
+.inicio__antetitulo {
+  justify-self: start;
+  margin: 0;
+  padding: 4px 12px;
+  border: 1px solid #d5e4f7;
+  border-radius: var(--radio-pildora);
+  background: #eef5ff;
+  color: var(--color-primary);
+  font-family: var(--fuente-titulo, inherit);
+  font-size: 0.75rem;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
 }
 
 .inicio__titulo {
-  margin: 4px 0 0;
-  font-size: 1.5rem;
+  margin: 0;
+  font-size: 1.625rem;
+  font-weight: 800;
+  line-height: 1.2;
+  letter-spacing: -0.015em;
   color: var(--color-primary);
+}
+
+/* "a medio camino" en azul con subrayado lima (como en la vista). */
+.inicio__resaltado {
+  color: #1f6fd1;
+  text-decoration: underline;
+  text-decoration-color: var(--color-tertiary);
+  text-decoration-thickness: 4px;
+  text-underline-offset: 6px;
 }
 
 .inicio__texto {
   margin: 0;
+  font-size: 1.0625rem;
+  line-height: 1.6;
   color: var(--color-neutral);
 }
 
-.inicio__pregunta {
-  margin: 8px 0 0;
-  font-size: 1.05rem;
+.inicio__pildoras {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.inicio__pildoras li {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 14px;
+  border: 1px solid #d5e4f7;
+  border-radius: var(--radio-pildora);
+  background: #ffffff;
   color: var(--color-primary);
+  font-size: 0.875rem;
+  font-weight: 600;
+}
+
+.inicio__pildoras .icono {
+  width: 18px;
+  height: 18px;
+  color: #147a48;
+}
+
+/* Roles. */
+.inicio__roles-encabezado {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.inicio__pregunta {
+  margin: 0;
+  font-size: 1.3rem;
+  font-weight: 800;
+  color: var(--color-primary);
+}
+
+.inicio__conteo {
+  padding: 2px 12px;
+  border: 1px solid #d5e4f7;
+  border-radius: var(--radio-pildora);
+  background: #eef5ff;
+  color: #1f6fd1;
+  font-size: 0.8125rem;
+  font-weight: 700;
 }
 
 .inicio__roles {
   display: grid;
-  gap: 12px;
+  gap: 16px;
   margin: 0;
   padding: 0;
   list-style: none;
@@ -41,41 +215,69 @@
 
 .inicio__rol {
   display: grid;
-  gap: 4px;
-  width: 100%;
-  min-height: 44px;
-  padding: 16px;
-  border: 2px solid var(--color-borde);
-  border-radius: var(--radio-tarjeta);
-  background: var(--color-superficie);
-  color: inherit;
-  text-align: left;
-  font: inherit;
-  cursor: pointer;
-  box-shadow: 0 1px 2px rgb(11 60 122 / 8%);
-}
-
-.inicio__rol:hover {
-  border-color: var(--color-secondary);
-}
-
-.inicio__rol:focus-visible {
-  outline: 3px solid var(--color-secondary);
-  outline-offset: 2px;
+  gap: 8px;
+  height: 100%;
+  padding: 20px;
+  border: 1px solid #e2eefc;
+  border-radius: 24px;
+  background: #ffffff;
+  box-shadow:
+    0 2px 8px -2px rgb(11 60 122 / 6%),
+    0 1px 4px -1px rgb(11 60 122 / 4%);
 }
 
 .inicio__rol--actual {
-  border-color: var(--color-primary);
+  border: 2px solid var(--color-primary);
+}
+
+.inicio__rol-cabeza {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.inicio__rol-icono {
+  display: grid;
+  place-items: center;
+  width: 52px;
+  height: 52px;
+  border-radius: 16px;
+  background: #eef5ff;
+  color: var(--color-primary);
+}
+
+.inicio__rol--campo .inicio__rol-icono {
+  background: #f3fbe3;
+}
+
+/* Etiqueta pequeña de apoyo: Clínica, Brigada, Gestión. */
+.inicio__rol-etiqueta {
+  padding: 2px 10px;
+  border-radius: var(--radio-pildora);
+  background: #eef5ff;
+  color: #1f5fb4;
+  font-family: var(--fuente-titulo, inherit);
+  font-size: 0.75rem;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.inicio__rol--campo .inicio__rol-etiqueta {
+  background: #f3fbe3;
+  color: #2d5a00;
 }
 
 .inicio__rol-nombre {
-  font-family: var(--fuente-titulo, inherit);
+  margin: 4px 0 0;
+  font-size: 1.2rem;
   font-weight: 800;
-  font-size: 1.05rem;
   color: var(--color-primary);
 }
 
 .inicio__rol-texto {
+  margin: 0;
   color: var(--color-neutral);
 }
 
@@ -89,7 +291,87 @@
   font-weight: 700;
 }
 
-@media (min-width: 768px) {
+.inicio__rol-pie {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  align-self: end;
+  margin-top: 8px;
+  padding-top: 14px;
+  border-top: 1px solid #e2eefc;
+}
+
+.inicio__rol-detalle {
+  font-size: 0.875rem;
+  color: var(--color-neutral);
+}
+
+/* Botón píldora con círculo y flecha diagonal (DESIGN.md). */
+.inicio__entrar {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 48px;
+  padding: 6px 6px 6px 20px;
+  border: 0;
+  border-radius: var(--radio-pildora);
+  background: var(--color-primary);
+  color: #ffffff;
+  font-family: var(--fuente-titulo, inherit);
+  font-size: 1rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.inicio__entrar:hover {
+  background: #082e5e;
+}
+
+.inicio__entrar:focus-visible {
+  outline: 3px solid var(--color-secondary);
+  outline-offset: 3px;
+}
+
+.inicio__entrar-flecha {
+  display: grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: rgb(255 255 255 / 18%);
+}
+
+.inicio__rol--campo .inicio__entrar-flecha {
+  background: var(--color-tertiary);
+  color: var(--color-primary);
+}
+
+.inicio__entrar-flecha .icono {
+  width: 18px;
+  height: 18px;
+}
+
+@media (min-width: 900px) {
+  .inicio {
+    padding: 24px 32px;
+  }
+
+  .inicio__portada {
+    grid-template-columns: 1.1fr 1fr;
+    align-items: center;
+    padding: 32px;
+  }
+
+  .inicio__presentacion {
+    order: -1;
+  }
+
+  .inicio__titulo {
+    font-size: 2.5rem;
+  }
+
   .inicio__roles {
     grid-template-columns: repeat(3, 1fr);
   }
