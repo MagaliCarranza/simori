@@ -174,4 +174,12 @@ describe('MisVisitasPage (HU04)', () => {
     render(<MisVisitasPage usuario={campo} hoyISO={HOY} db={db} />)
     expect(await screen.findByText('No tienes visitas pendientes')).toBeInTheDocument()
   })
+
+  it('explica que el domicilio se busca en la hoja de enlace del centro de salud', async () => {
+    await sembrar([caso('PON-AC-0003', { fechaProximaCita: '2026-12-01' })])
+    render(<MisVisitasPage usuario={campo} hoyISO={HOY} db={db} />)
+    await screen.findByText('No tienes visitas pendientes')
+    expect(document.body).toHaveTextContent('busca el código en la hoja de enlace del centro de salud')
+    expect(document.body).toHaveTextContent('No escribas nombres ni domicilios en la app.')
+  })
 })

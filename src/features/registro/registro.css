@@ -4,6 +4,8 @@
   width: 100%;
   max-width: 560px;
   margin-inline: auto;
+  /* Mismo margen lateral que las otras secciones (16 px). */
+  padding: 16px;
 }
 
 .registro__encabezado {

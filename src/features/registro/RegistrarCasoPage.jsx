@@ -86,7 +86,11 @@ export function RegistrarCasoPage({ usuario, hoyISO, db }) {
             Cita de confirmación (segunda muestra de orina):{' '}
             <strong>{formatearFecha(registrado.fechaProximaCita)}</strong>, 12 semanas después del tamizaje.
           </p>
-          <p className="registro__ayuda">Anota el código en el expediente del centro de salud; la app no guarda nombres.</p>
+          <p className="registro__ayuda">
+            <strong>Anota este código en la hoja de enlace del centro de salud</strong>, junto con el nombre de la madre,
+            el padre o el tutor y su domicilio. Esa hoja es de papel, se queda en el centro de salud y sirve para
+            localizar a la familia. La app solo guarda el código.
+          </p>
         </div>
         <div className="registro__acciones">
           <Link to={`/caso/${registrado.codigo}`} className="boton boton--primario registro__enlace">
@@ -103,13 +107,14 @@ export function RegistrarCasoPage({ usuario, hoyISO, db }) {
   return (
     <section className="registro" aria-labelledby={`${id}-titulo`}>
       <header className="registro__encabezado">
-        <h2 id={`${id}-titulo`} className="registro__titulo">Registrar caso positivo</h2>
+        <h2 id={`${id}-titulo`} className="registro__titulo">Nuevo tamizaje</h2>
         <EtiquetaSimulado />
       </header>
-      <p className="registro__ayuda">Tamizaje con tira reactiva en la comunidad o la escuela.</p>
+      <p className="registro__ayuda">Registro de caso positivo: tamizaje con tira reactiva en la comunidad o la escuela.</p>
       <p className="registro__privacidad">
         <strong>Privacidad:</strong> no escribas nombres, CURP ni domicilios. Cada niña o niño se identifica solo con el
-        código que asigna el sistema.
+        código que asigna el sistema. Los datos para localizar a la familia van en la{' '}
+        <strong>hoja de enlace en papel</strong> que guarda el centro de salud.
       </p>
 
       <form className="registro__form" onSubmit={guardar} aria-label="Registrar caso positivo" noValidate>

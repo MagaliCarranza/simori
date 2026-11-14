@@ -33,7 +33,9 @@ export const RUTAS_POR_ROL = {
     { to: '/registrar', texto: 'Nuevo tamizaje' },
     { to: '/tamizados', texto: 'Pacientes tamizados' },
     { to: '/muestras', texto: 'Muestras y lab' },
-    { to: '/guardados', texto: 'Guardados en el equipo' },
+    // En la barra se llama "Guardados" para que no ocupe 3 renglones; el
+    // título de la pantalla sigue siendo "Guardados en el equipo".
+    { to: '/guardados', texto: 'Guardados' },
   ],
   campo: [
     { to: '/visitas', texto: 'Mis visitas' },
