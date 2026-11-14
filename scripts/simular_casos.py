@@ -265,7 +265,14 @@ def _nuevo_caso(base):
 
 
 def expandir_escenario(escenario_pct, casos_base, args, rng_visitas):
-    """Para un escenario (p%), filtra casos segun los uniformes y genera eventos."""
+    """Para un escenario (p%), filtra casos segun los uniformes y genera eventos.
+
+    Reglas temporales:
+      - Ningun evento con fecha posterior a hoy (--hoy).
+      - Un caso solo puede perderse en pasos cuya fecha programada ya paso.
+      - Si la fecha programada del siguiente paso es futura, el caso queda en
+        su etapa actual, en_seguimiento, con esa fecha en fechaProximaCita.
+    """
     p = escenario_pct / 100.0
     hoy = date.fromisoformat(args.hoy)
     casos_out = []
@@ -275,9 +282,9 @@ def expandir_escenario(escenario_pct, casos_base, args, rng_visitas):
     for base in casos_base:
         caso = _nuevo_caso(base)
         usr_cap = base["_usuarios"]["captura"]
-        usr_cam = base["_usuarios"]["campo"]
 
-        # Evento 1: tamizaje positivo (siempre).
+        # Evento 1: tamizaje positivo. La poblacion se genera entre feb y oct
+        # 2026, siempre antes de hoy, asi que no se filtra por fecha.
         eventos_out.append({
             "id": event_id, "codigoCaso": caso["codigo"], "usuarioId": usr_cap["id"],
             "etapa": 1, "fecha": caso["fechaTamizaje"], "tipo": "resultado",
@@ -285,15 +292,23 @@ def expandir_escenario(escenario_pct, casos_base, args, rng_visitas):
         })
         event_id += 1
 
-        # Paso 1 -> 2: perdida.
+        # Fecha ideal de confirmacion (12 semanas + jitter).
+        fecha_confirm = sumar_dias_iso(caso["fechaTamizaje"], 84 + base["_jitter_confirmacion"])
+
+        # Cita futura: el caso aun no tuvo oportunidad de perderse.
+        if date.fromisoformat(fecha_confirm) > hoy:
+            caso["fechaProximaCita"] = fecha_confirm
+            casos_out.append(caso)
+            continue
+
+        # Fecha pasada: aplica la tasa de perdida del paso 1 -> 2.
         if base["_u_12"] < p:
-            # Queda en etapa 1. Habia una cita de confirmacion agendada.
-            caso["fechaProximaCita"] = sumar_dias_iso(caso["fechaTamizaje"], 84)
+            # No regresaron a la cita de confirmacion que ya paso.
+            caso["fechaProximaCita"] = fecha_confirm
             casos_out.append(caso)
             continue
 
         # Etapa 2: confirmacion.
-        fecha_confirm = sumar_dias_iso(caso["fechaTamizaje"], 84 + base["_jitter_confirmacion"])
         caso["etapaActual"] = 2
         if base["_u_confirm"] < args.tasa_confirmacion:
             tira_confirm = base["_tira_tamizaje"]  # persiste
@@ -318,13 +333,19 @@ def expandir_escenario(escenario_pct, casos_base, args, rng_visitas):
             casos_out.append(caso)
             continue
 
-        # Paso 2 -> 3: perdida.
+        # Fecha ideal de valoracion.
+        fecha_valor = sumar_dias_iso(fecha_confirm, base["_jitter_valoracion"])
+
+        if date.fromisoformat(fecha_valor) > hoy:
+            caso["fechaProximaCita"] = fecha_valor
+            casos_out.append(caso)
+            continue
+
         if base["_u_23"] < p:
             casos_out.append(caso)
             continue
 
         # Etapa 3: valoracion.
-        fecha_valor = sumar_dias_iso(fecha_confirm, base["_jitter_valoracion"])
         edad_val = edad_decimal(base["_mes_nac"], base["_anio_nac"], fecha_valor)
         tfge = tfge_ckid_u25(base["_sexo"], edad_val, base["_talla_cm"], base["_creatinina"])
         caso["etapaActual"] = 3
@@ -339,13 +360,19 @@ def expandir_escenario(escenario_pct, casos_base, args, rng_visitas):
         })
         event_id += 1
 
-        # Paso 3 -> 4.
+        # Fecha ideal de clasificacion.
+        fecha_clas = sumar_dias_iso(fecha_valor, base["_jitter_clasificacion"])
+
+        if date.fromisoformat(fecha_clas) > hoy:
+            caso["fechaProximaCita"] = fecha_clas
+            casos_out.append(caso)
+            continue
+
         if base["_u_34"] < p:
             casos_out.append(caso)
             continue
 
         # Etapa 4: clasificacion.
-        fecha_clas = sumar_dias_iso(fecha_valor, base["_jitter_clasificacion"])
         cat_g = clasificar_tfg(tfge)
         cat_a = categoria_a(base["_cociente_alb"])
         caso["etapaActual"] = 4
@@ -380,8 +407,12 @@ def expandir_escenario(escenario_pct, casos_base, args, rng_visitas):
     # Visitas de campo para algunos casos abiertos y con retraso.
     # Estrategia: si el ultimo resultado tiene >42 dias (rojo), con prob 30 %
     # agregamos 1 o 2 visitas no_localizada; 2 visitas pasan a sin_seguimiento.
+    # Los casos que estan esperando una cita futura no pueden estar
+    # "sin_seguimiento" todavia aunque el ultimo resultado sea viejo.
     for caso in casos_out:
         if caso["estado"] != "en_seguimiento":
+            continue
+        if caso.get("fechaProximaCita") and date.fromisoformat(caso["fechaProximaCita"]) > hoy:
             continue
         resultados = [
             e for e in eventos_out
@@ -454,6 +485,19 @@ def resumen_escenario(casos, eventos, hoy_iso):
     for e in eventos:
         eventos_por_caso.setdefault(e["codigoCaso"], []).append(e)
 
+    hoy = date.fromisoformat(hoy_iso)
+
+    # Panel ejecutivo: cuatro grupos que suman el total de casos.
+    # Precedencia (primero que aplique):
+    #   1) completo_evaluacion: alta + vigilancia + referido.
+    #   2) perdido_o_retraso_alto: sin_seguimiento o semaforo rojo.
+    #   3) en_proceso_a_tiempo: en_seguimiento con cita futura o semaforo verde.
+    #   4) retraso_moderado: en_seguimiento con semaforo amarillo.
+    completo_eval = 0
+    en_proceso_a_tiempo = 0
+    perdido_o_rojo = 0
+    retraso_moderado = 0
+
     for c in casos:
         por_etapa[c["etapaActual"]] = por_etapa.get(c["etapaActual"], 0) + 1
         estados[c["estado"]] = estados.get(c["estado"], 0) + 1
@@ -462,6 +506,21 @@ def resumen_escenario(casos, eventos, hoy_iso):
             semaforo["sin_semaforo"] += 1
         else:
             semaforo[color] += 1
+
+        cita_futura = bool(
+            c.get("fechaProximaCita")
+            and date.fromisoformat(c["fechaProximaCita"]) > hoy
+        )
+        if c["estado"] in ("alta", "vigilancia", "referido"):
+            completo_eval += 1
+        elif c["estado"] == "sin_seguimiento" or color == "rojo":
+            perdido_o_rojo += 1
+        elif c["estado"] == "en_seguimiento" and (cita_futura or color == "verde"):
+            en_proceso_a_tiempo += 1
+        else:
+            # Resto: en_seguimiento con semaforo amarillo (sin cita futura;
+            # cita futura => verde). Cubre los casos restantes.
+            retraso_moderado += 1
 
     completados = sum(1 for c in casos if c["etapaActual"] >= 4 or c["estado"] == "alta")
     pct_completado = (completados / len(casos) * 100) if casos else 0.0
@@ -472,6 +531,7 @@ def resumen_escenario(casos, eventos, hoy_iso):
     llegaron_clasif = por_etapa[4]
     pct_clasif = (llegaron_clasif / confirmados * 100) if confirmados else 0.0
 
+    total = len(casos) or 1
     return {
         "casos": len(casos),
         "eventos": len(eventos),
@@ -486,6 +546,29 @@ def resumen_escenario(casos, eventos, hoy_iso):
         "semaforo_al_hoy": {
             **semaforo,
             "_nota": f"Semaforo evaluado a hoy={hoy_iso}. 'sin_semaforo' = casos cerrados (alta/referido).",
+        },
+        "grupos_al_hoy": {
+            "completo_evaluacion": {
+                "n": completo_eval,
+                "porcentaje": round(completo_eval / total * 100, 2),
+                "_definicion": "alta + vigilancia + referido",
+            },
+            "en_proceso_a_tiempo": {
+                "n": en_proceso_a_tiempo,
+                "porcentaje": round(en_proceso_a_tiempo / total * 100, 2),
+                "_definicion": "en_seguimiento con cita futura o semaforo verde",
+            },
+            "retraso_moderado": {
+                "n": retraso_moderado,
+                "porcentaje": round(retraso_moderado / total * 100, 2),
+                "_definicion": "en_seguimiento con semaforo amarillo",
+            },
+            "perdido_o_retraso_alto": {
+                "n": perdido_o_rojo,
+                "porcentaje": round(perdido_o_rojo / total * 100, 2),
+                "_definicion": "sin_seguimiento o semaforo rojo",
+            },
+            "_nota": "Los cuatro grupos son disjuntos y suman el total de casos.",
         },
         "confirmados": confirmados,
         "llegaron_a_clasificacion": llegaron_clasif,
@@ -567,6 +650,23 @@ def imprimir_resumen(salidas):
     for e, datos in salidas.items():
         s = datos["resumen"]["semaforo_al_hoy"]
         print(f"  {e:<10}{s['verde']:>7}{s['amarillo']:>10}{s['rojo']:>7}{s['sin_semaforo']:>10}")
+
+    print()
+    print(f"Grupos titular al {next(iter(salidas.values()))['hoy']} (n y % del total):")
+    print(f"  {'Escenario':<10}{'completo':>13}{'en proc tpo':>15}{'retr. mod.':>14}{'perdido/rojo':>15}")
+    for e, datos in salidas.items():
+        g = datos["resumen"]["grupos_al_hoy"]
+        ce = g["completo_evaluacion"]
+        ep = g["en_proceso_a_tiempo"]
+        rm = g["retraso_moderado"]
+        pr = g["perdido_o_retraso_alto"]
+        print(
+            f"  {e:<10}"
+            f"{ce['n']:>6}  {ce['porcentaje']:>4.1f}%"
+            f"{ep['n']:>6}  {ep['porcentaje']:>4.1f}%"
+            f"{rm['n']:>5}  {rm['porcentaje']:>4.1f}%"
+            f"{pr['n']:>6}  {pr['porcentaje']:>4.1f}%"
+        )
 
     print()
     print("Progreso en la ruta:")
