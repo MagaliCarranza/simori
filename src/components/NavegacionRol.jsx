@@ -4,11 +4,18 @@ import './navegacionRol.css'
 
 export const ETIQUETA_ROL = { captura: 'Captura', campo: 'Campo', supervision: 'Supervisión' }
 
-// Rutas por rol. La primera de cada rol es la "home" del rol: cuando el
-// usuario cambia de rol, App redirige a ella.
+// Pantallas "En construcción": no se muestran en el menú mientras esta
+// constante sea false. Siguen registradas en App (la dirección directa
+// funciona). Para publicar una, quita su `pendiente: true` o pon esto en true.
+const MOSTRAR_PANTALLAS_PENDIENTES = false
+
+const visible = (r) => MOSTRAR_PANTALLAS_PENDIENTES || !r.pendiente
+
+// Rutas por rol. La primera visible de cada rol es la "home" del rol: cuando
+// el usuario cambia de rol, App redirige a ella.
 export const RUTAS_POR_ROL = {
   captura: [
-    { to: '/registrar', texto: 'Registrar caso' },
+    { to: '/registrar', texto: 'Registrar caso', pendiente: true },
     { to: '/pendientes', texto: 'Pendientes' },
   ],
   campo: [
@@ -18,18 +25,18 @@ export const RUTAS_POR_ROL = {
   supervision: [
     { to: '/supervision/embudo', texto: 'Embudo' },
     { to: '/supervision/mapa', texto: 'Mapa' },
-    { to: '/supervision/pronostico', texto: 'Pronóstico' },
+    { to: '/supervision/pronostico', texto: 'Pronóstico', pendiente: true },
   ],
 }
 
 export const HOME_POR_ROL = Object.fromEntries(
-  Object.entries(RUTAS_POR_ROL).map(([rol, rutas]) => [rol, rutas[0].to]),
+  Object.entries(RUTAS_POR_ROL).map(([rol, rutas]) => [rol, rutas.filter(visible)[0].to]),
 )
 
 // Encabezado con nombre, etiqueta simulada, selector de usuario (rol) y
 // navegación por rol. Es el "shell" que envuelve a cada pantalla.
 export function NavegacionRol({ usuarios, usuarioId, onCambioUsuario, usuario }) {
-  const rutas = usuario ? RUTAS_POR_ROL[usuario.rol] ?? [] : []
+  const rutas = usuario ? (RUTAS_POR_ROL[usuario.rol] ?? []).filter(visible) : []
 
   return (
     <header className="nav-rol">
