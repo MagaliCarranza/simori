@@ -72,6 +72,18 @@
 
   --radio-tarjeta: 16px;
   --radio-pildora: 999px;
+
+  /* Alto del encabezado fijo (.nav-rol) más un respiro. Se usa como
+     scroll-margin-top para que un ancla no quede tapada. Celular y tableta:
+     2 renglones (102 px). Desde 900 px: 1 renglón (60 px). */
+  --alto-encabezado: 102px;
+  --respiro-ancla: 12px;
+}
+
+@media (min-width: 900px) {
+  :root {
+    --alto-encabezado: 60px;
+  }
 }
 
 .semaforo {
