@@ -1,0 +1,193 @@
+/* Secciones de Captura. Estructura sencilla con las variables de ui.css,
+   sin colores fijos. Mobile-first desde 360 px. */
+
+.captura,
+.captura__modo {
+  max-width: 960px;
+  margin-inline: auto;
+}
+
+.captura {
+  display: grid;
+  gap: 12px;
+  padding: 16px;
+}
+
+.captura__modo {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  padding: 16px 16px 0;
+}
+
+.captura__encabezado {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.captura__titulo {
+  margin: 0;
+  color: var(--color-primary);
+}
+
+.captura__sub,
+.captura__ayuda {
+  margin: 0;
+  color: var(--color-neutral);
+  font-size: 0.9rem;
+}
+
+.captura__filtros {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 8px;
+}
+
+.captura__filtros label {
+  display: grid;
+  gap: 4px;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--color-neutral);
+}
+
+.captura__conteo {
+  margin: 0;
+  font-size: 0.875rem;
+  color: var(--color-neutral);
+}
+
+.captura__lista {
+  display: grid;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.captura__caso {
+  display: grid;
+  gap: 6px;
+  padding: 12px 14px;
+  border: 1px solid var(--color-borde);
+  border-radius: var(--radio-tarjeta);
+  background: var(--color-superficie);
+}
+
+.captura__fila {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 6px 12px;
+}
+
+.captura__codigo {
+  font-weight: 800;
+  font-size: 1.05rem;
+  font-variant-numeric: tabular-nums;
+  color: var(--color-texto);
+}
+
+.captura__detalle {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 2px 16px;
+  margin: 0;
+  font-size: 0.9rem;
+  color: var(--color-neutral);
+}
+
+.captura__detalle div {
+  display: flex;
+  gap: 4px;
+}
+
+.captura__detalle dt {
+  font-weight: 600;
+}
+
+.captura__detalle dd {
+  margin: 0;
+}
+
+.captura__detalle-linea {
+  margin: 0;
+  font-size: 0.9rem;
+  color: var(--color-neutral);
+}
+
+/* Enlace a la ficha en turquesa (en coral se confundiría con el semáforo). */
+.captura__ficha {
+  justify-self: start;
+  display: inline-flex;
+  align-items: center;
+  min-height: 36px;
+  padding: 0 14px;
+  border: 1px solid var(--color-primary);
+  border-radius: var(--radio-pildora);
+  background: var(--color-superficie);
+  color: var(--color-primary);
+  font-weight: 600;
+  font-size: 0.9rem;
+  text-decoration: none;
+}
+
+.captura__grupo {
+  display: grid;
+  gap: 8px;
+  padding-top: 8px;
+  border-top: 1px solid var(--color-borde);
+}
+
+.captura__grupo-titulo {
+  margin: 0;
+  font-size: 1.05rem;
+  color: var(--color-primary);
+}
+
+.captura__grupo-conteo {
+  color: var(--color-neutral);
+  font-weight: 600;
+}
+
+.captura__vacio {
+  padding: 12px 14px;
+  border: 1px dashed var(--color-borde);
+  border-radius: var(--radio-tarjeta);
+  color: var(--color-neutral);
+}
+
+.captura__envio {
+  display: grid;
+  gap: 8px;
+  padding: 12px 14px;
+  border: 1px solid var(--color-borde);
+  border-radius: var(--radio-tarjeta);
+  background: var(--color-primary-suave);
+}
+
+.captura__envio-accion {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+
+.captura__estado {
+  padding: 0.15em 0.7em;
+  border: 1px solid var(--color-borde);
+  border-radius: var(--radio-pildora);
+  background: var(--color-fondo);
+  color: var(--color-neutral);
+  font-size: 0.8125rem;
+  font-weight: 700;
+}
+
+.captura__estado--enviado {
+  background: var(--color-primary-suave);
+  color: var(--color-primary);
+}

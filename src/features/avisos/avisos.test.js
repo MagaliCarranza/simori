@@ -1,7 +1,7 @@
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 import { crearDb } from '../../db/schema.js'
 import { avisosDelCaso, crearAviso, marcarEntregado } from './avisos.js'
-import { construirAviso, fechaLarga, motivoCita } from './mensaje.js'
+import { construirAviso, construirRecado, fechaLarga, motivoCita } from './mensaje.js'
 
 const HOY = '2026-11-14'
 const centro = { clues: 'PROV-AC-01', nombre: 'Centro de Salud Agua Caliente' }
@@ -66,6 +66,45 @@ describe('construirAviso', () => {
     const a = construirAviso({ fila: fila(), centro, hoyISO: HOY })
     expect(a.textoAudio).not.toContain('PON-AC-0001')
     expect(a.textoAudio).toContain('Su cita es el viernes 20 de noviembre de 2026')
+  })
+})
+
+describe('construirRecado', () => {
+  const escuela = { cct: '14DPR1710G', nombre: 'Emiliano Zapata' }
+
+  it('arma la hoja formal con código, escuela, centro, motivo y cita', () => {
+    const r = construirRecado({ fila: fila(), centro, escuela, hoyISO: HOY })
+    expect(r.codigoCaso).toBe('PON-AC-0001')
+    expect(r.escuela).toEqual({ cct: '14DPR1710G', nombre: 'Emiliano Zapata' })
+    expect(r.lugarCita).toBe('Centro de Salud Agua Caliente')
+    expect(r.motivo).toBe('repetir la prueba de orina')
+    expect(r.fechaCita).toBe('2026-11-20')
+    expect(r.fechaEmision).toBe(HOY)
+    expect(r.fechaEmisionLarga).toBe(fechaLarga(HOY))
+    const texto = r.cuerpo.join(' ')
+    expect(texto).toContain('tiene pendiente repetir la prueba de orina')
+    expect(texto).toContain('Su cita es el viernes 20 de noviembre de 2026 en Centro de Salud Agua Caliente.')
+    expect(texto).toMatch(/Aunque su niña o niño se vea sano/)
+  })
+
+  it('si la cita ya pasó o no hay cita, pide acordar una nueva fecha', () => {
+    for (const fechaProximaCita of ['2026-10-01', null]) {
+      const r = construirRecado({ fila: fila({ fechaProximaCita }), centro, escuela, hoyISO: HOY })
+      expect(r.fechaCita).toBeNull()
+      expect(r.cuerpo.join(' ')).toContain('Por favor acérquese a Centro de Salud Agua Caliente para acordar la fecha de su cita.')
+    }
+  })
+
+  it('sin escuela, el recado se arma igual pero escuela queda en null', () => {
+    const r = construirRecado({ fila: fila(), centro, escuela: undefined, hoyISO: HOY })
+    expect(r.escuela).toBeNull()
+    expect(r.codigoCaso).toBe('PON-AC-0001')
+  })
+
+  it('no usa palabras de diagnóstico', () => {
+    const r = construirRecado({ fila: fila({ siguientePaso: 'Clasificación' }), centro, escuela, hoyISO: HOY })
+    const texto = [r.saludo, ...r.cuerpo, r.cierre].join(' ')
+    expect(texto).not.toMatch(/enfermedad|diagn|insuficiencia|daño|grave|urgente|ERC|riñón/i)
   })
 })
 

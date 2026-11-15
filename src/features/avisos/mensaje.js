@@ -75,3 +75,32 @@ export function construirAviso({ fila, centro, hoyISO }) {
     textoAudio,
   }
 }
+
+// Recado escolar (HU06, canal 'recado'). Hoja formal para imprimir y entregar
+// a la familia a través de la escuela. Reutiliza motivoCita + fechaLarga.
+export function construirRecado({ fila, centro, escuela, hoyISO }) {
+  const lugarCita = centro?.nombre ?? 'su centro de salud'
+  const motivo = motivoCita(fila.siguientePaso)
+  const citaVigente = fila.fechaProximaCita && diasEntre(hoyISO, fila.fechaProximaCita) >= 0
+  const fechaCita = citaVigente ? fila.fechaProximaCita : null
+
+  const cita = fechaCita
+    ? `Su cita es el ${fechaLarga(fechaCita)} en ${lugarCita}.`
+    : `Por favor acérquese a ${lugarCita} para acordar la fecha de su cita.`
+  const cambio = fechaCita
+    ? 'Si no puede ir ese día, acérquese al centro de salud para cambiar la fecha.'
+    : 'Le atenderemos con gusto.'
+
+  return {
+    codigoCaso: fila.codigo,
+    fechaEmision: hoyISO,
+    fechaEmisionLarga: fechaLarga(hoyISO),
+    fechaCita,
+    lugarCita,
+    motivo,
+    escuela: escuela ? { nombre: escuela.nombre, cct: escuela.cct ?? null } : null,
+    saludo: 'Estimada familia:',
+    cuerpo: [`Su niño o niña tiene pendiente ${motivo}.`, cita, POR_QUE_IR, cambio],
+    cierre: 'Gracias por su atención.',
+  }
+}

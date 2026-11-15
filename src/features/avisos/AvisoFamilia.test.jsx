@@ -231,6 +231,22 @@ describe('Aviso a la familia (HU06)', () => {
     await waitFor(async () => expect((await db.avisos.get(aviso.id)).estado).toBe('entregado'))
   })
 
+  it('al elegir Recado escolar, la vista previa cambia a hoja formal con escuela, código, motivo y cita', async () => {
+    const a = await abrirAviso()
+    fireEvent.click(a.getByRole('button', { name: 'Recado escolar' }))
+
+    const hoja = a.getByRole('article', { name: /Recado escolar para la familia del código PON-AC-0001/ })
+    const h = within(hoja)
+    expect(h.getByRole('heading', { name: 'Recado escolar' })).toBeInTheDocument()
+    expect(h.getByText('Emiliano Zapata (14DPR1710G)')).toBeInTheDocument()
+    expect(h.getByText('Centro de Salud Agua Caliente')).toBeInTheDocument()
+    expect(h.getByText(/código PON-AC-0001/)).toBeInTheDocument()
+    expect(h.getByText(/tiene pendiente repetir la prueba de orina/)).toBeInTheDocument()
+    expect(h.getByText(/para acordar la fecha de su cita/)).toBeInTheDocument()
+    expect(h.getByText(/Datos simulados · SIMORI/)).toBeInTheDocument()
+    expect(h.queryByText(/Hola\. Le escribimos de/)).not.toBeInTheDocument()
+  })
+
   it('el recado escolar se imprime', async () => {
     const imprimir = vi.spyOn(window, 'print').mockImplementation(() => {})
     const a = await abrirAviso()

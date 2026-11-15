@@ -5,8 +5,10 @@ import { db } from './db/index.js'
 import { inicializar } from './db/seed.js'
 import { ListaAvisosPage } from './features/avisos/ListaAvisosPage.jsx'
 import { MisVisitasPage } from './features/campo/MisVisitasPage.jsx'
+import { GuardadosPage } from './features/captura/GuardadosPage.jsx'
+import { MuestrasLabPage } from './features/captura/MuestrasLabPage.jsx'
+import { TamizadosPage } from './features/captura/TamizadosPage.jsx'
 import { InicioPage } from './features/inicio/InicioPage.jsx'
-import { PendientesPage } from './features/pendientes/PendientesPage.jsx'
 import { RegistrarCasoPage } from './features/registro/RegistrarCasoPage.jsx'
 import { PronosticoPage } from './features/pronostico/PronosticoPage.jsx'
 import { FichaCasoPage } from './features/ruta/FichaCasoPage.jsx'
@@ -24,7 +26,8 @@ const HOY_DEMO = '2026-11-14'
 function rutasPermitidasDe(rol) {
   const rutas = RUTAS_POR_ROL[rol] ?? []
   const explicitas = rutas.map((r) => r.to)
-  if (rol === 'captura') return [...explicitas, '/caso'] // ficha es parte de captura
+  // La ficha es parte de captura; /pendientes solo redirige a /tamizados.
+  if (rol === 'captura') return [...explicitas, '/caso', '/pendientes']
   return explicitas
 }
 
@@ -116,7 +119,11 @@ function AplicacionInterna() {
 
           {/* Captura */}
           <Route path="/registrar" element={usuario ? <RegistrarCasoPage usuario={usuario} hoyISO={HOY_DEMO} /> : null} />
-          <Route path="/pendientes" element={usuario ? <PendientesPage usuario={usuario} hoyISO={HOY_DEMO} /> : null} />
+          <Route path="/tamizados" element={usuario ? <TamizadosPage usuario={usuario} hoyISO={HOY_DEMO} /> : null} />
+          <Route path="/muestras" element={usuario ? <MuestrasLabPage usuario={usuario} hoyISO={HOY_DEMO} /> : null} />
+          <Route path="/guardados" element={usuario ? <GuardadosPage /> : null} />
+          {/* Pendientes ahora vive en "Pacientes tamizados" (modo "Con retraso"). */}
+          <Route path="/pendientes" element={<Navigate to="/tamizados" replace />} />
           <Route path="/caso/:codigo" element={usuario ? <FichaCasoPage usuario={usuario} hoyISO={HOY_DEMO} /> : null} />
 
           {/* Campo */}

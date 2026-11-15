@@ -5,7 +5,9 @@ import {
   IconoAvisos,
   IconoCambiar,
   IconoEmbudo,
+  IconoGuardado,
   IconoMapa,
+  IconoMuestra,
   IconoPendientes,
   IconoPronostico,
   IconoRegistrar,
@@ -26,9 +28,14 @@ const visible = (r) => MOSTRAR_PANTALLAS_PENDIENTES || !r.pendiente
 // Rutas por rol. La primera visible de cada rol es la "home" del rol: cuando
 // el usuario cambia de rol, App redirige a ella.
 export const RUTAS_POR_ROL = {
+  // Pendientes vive dentro de "Pacientes tamizados" (/pendientes redirige ahí).
   captura: [
-    { to: '/registrar', texto: 'Registrar caso' },
-    { to: '/pendientes', texto: 'Pendientes' },
+    { to: '/registrar', texto: 'Nuevo tamizaje' },
+    { to: '/tamizados', texto: 'Pacientes tamizados' },
+    { to: '/muestras', texto: 'Muestras y lab' },
+    // En la barra se llama "Guardados" para que no ocupe 3 renglones; el
+    // título de la pantalla sigue siendo "Guardados en el equipo".
+    { to: '/guardados', texto: 'Guardados' },
   ],
   campo: [
     { to: '/visitas', texto: 'Mis visitas' },
@@ -48,7 +55,9 @@ export const HOME_POR_ROL = Object.fromEntries(
 // Ícono de cada sección (decorativo; el texto siempre lo acompaña).
 const ICONO_POR_RUTA = {
   '/registrar': IconoRegistrar,
-  '/pendientes': IconoPendientes,
+  '/tamizados': IconoPendientes,
+  '/muestras': IconoMuestra,
+  '/guardados': IconoGuardado,
   '/visitas': IconoVisitas,
   '/avisos': IconoAvisos,
   '/supervision/embudo': IconoEmbudo,

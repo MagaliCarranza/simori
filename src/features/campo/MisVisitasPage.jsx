@@ -26,6 +26,11 @@ export function MisVisitasPage({ usuario, hoyISO, db }) {
             Hola. Estas familias tienen una cita pendiente
             {centro ? ` en ${centro.nombre}` : ''}.
           </p>
+          <p className="pendientes__sub">
+            Para saber a qué casa ir, busca el código en la <strong>hoja de enlace del centro de salud</strong>. Si no
+            localizas a la familia, la escuela puede ayudarte a entregarle el aviso. No escribas nombres ni domicilios en
+            la app.
+          </p>
         </div>
         <EtiquetaSimulado />
       </header>
@@ -50,7 +55,14 @@ export function MisVisitasPage({ usuario, hoyISO, db }) {
               {visitas.map((f) => (
                 <CasoPendiente key={f.codigo} fila={f} escuela={escuelas.get(f.cct)}>
                   <RegistrarVisita codigoCaso={f.codigo} usuario={usuario} hoyISO={hoyISO} db={db} />
-                  <AvisoFamilia fila={f} centro={centro} usuario={usuario} hoyISO={hoyISO} db={db} />
+                  <AvisoFamilia
+                    fila={f}
+                    centro={centro}
+                    escuela={escuelas.get(f.cct)}
+                    usuario={usuario}
+                    hoyISO={hoyISO}
+                    db={db}
+                  />
                 </CasoPendiente>
               ))}
             </ul>

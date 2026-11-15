@@ -84,4 +84,22 @@ describe('Registrar caso positivo (HU01)', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Registrar otro caso' }))
     expect(await screen.findByRole('button', { name: 'Guardar caso' })).toBeInTheDocument()
   })
+
+  it('título "Nuevo tamizaje", "caso positivo" en el subtítulo y aviso de la hoja de enlace', async () => {
+    pintar()
+    expect(screen.getByRole('heading', { level: 2, name: 'Nuevo tamizaje' })).toBeInTheDocument()
+    expect(screen.getByText(/Registro de caso positivo/)).toBeInTheDocument()
+    expect(document.querySelector('.registro__privacidad')).toHaveTextContent('hoja de enlace en papel')
+    await screen.findByRole('option', { name: /Emiliano Zapata/ })
+  })
+
+  it('al guardar pide anotar el código en la hoja de enlace del centro de salud', async () => {
+    pintar()
+    await llenar()
+    fireEvent.click(screen.getByRole('button', { name: 'Guardar caso' }))
+    const estado = await screen.findByRole('status')
+    expect(estado).toHaveTextContent('Guardado en este equipo')
+    expect(estado).toHaveTextContent('Anota este código en la hoja de enlace del centro de salud')
+    expect(estado).toHaveTextContent('La app solo guarda el código.')
+  })
 })

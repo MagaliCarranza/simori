@@ -123,3 +123,19 @@ export const IconoSinConexion = () => (
     <path d="m10 13.5 1.5 1.5 3-3" />
   </Icono>
 )
+
+export const IconoMuestra = () => (
+  <Icono>
+    <path d="M9 3h6M10 3v12a2 2 0 0 0 4 0V3" />
+    <path d="M10 10h4" />
+    <path d="M6 21h12" />
+  </Icono>
+)
+
+export const IconoGuardado = () => (
+  <Icono>
+    <rect x="6" y="2.5" width="12" height="19" rx="2.5" />
+    <path d="M12 8v6M9.5 11.5 12 14l2.5-2.5" />
+    <path d="M11 18.5h2" />
+  </Icono>
+)

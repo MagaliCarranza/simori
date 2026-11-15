@@ -44,7 +44,7 @@
 
 .ficha__datos dd {
   margin: 0 0 6px;
-  color: #0f172a;
+  color: var(--color-texto);
   font-weight: 500;
 }
 
@@ -101,7 +101,7 @@
   border-radius: 10px;
   font: inherit;
   font-weight: 400;
-  color: #0f172a;
+  color: var(--color-texto);
   background: var(--color-superficie);
 }
 
@@ -185,7 +185,7 @@
   margin: 0;
   padding: 10px 14px;
   border-radius: 10px;
-  background: #e6efff;
+  background: var(--color-primary-suave);
   color: var(--color-primary);
   font-weight: 600;
 }

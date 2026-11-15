@@ -24,10 +24,16 @@ describe('NavegacionRol', () => {
     expect(screen.getByText('Datos simulados')).toBeInTheDocument()
   })
 
-  it('captura ve Registrar caso y Pendientes', () => {
+  it('captura ve 4 secciones: Nuevo tamizaje, Pacientes tamizados, Muestras y lab, Guardados', () => {
     montar(usuarios[0])
-    expect(screen.getByRole('link', { name: 'Registrar caso' })).toHaveAttribute('href', '/registrar')
-    expect(screen.getByRole('link', { name: 'Pendientes' })).toHaveAttribute('href', '/pendientes')
+    const menu = screen.getByRole('navigation')
+    expect([...menu.querySelectorAll('a')].map((l) => [l.textContent, l.getAttribute('href')])).toEqual([
+      ['Nuevo tamizaje', '/registrar'],
+      ['Pacientes tamizados', '/tamizados'],
+      ['Muestras y lab', '/muestras'],
+      ['Guardados', '/guardados'],
+    ])
+    expect(screen.queryByRole('link', { name: 'Pendientes' })).not.toBeInTheDocument()
     expect(screen.queryByRole('link', { name: 'Mis visitas' })).not.toBeInTheDocument()
   })
 

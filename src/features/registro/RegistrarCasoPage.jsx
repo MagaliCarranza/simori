@@ -75,14 +75,22 @@ export function RegistrarCasoPage({ usuario, hoyISO, db }) {
       <section className="registro" aria-labelledby={`${id}-titulo`}>
         <h2 id={`${id}-titulo`} className="registro__titulo">Caso registrado</h2>
         <div className="registro__exito" role="status">
+          <p className="registro__guardado">Guardado en este equipo</p>
           <p>
             Código del caso: <strong>{registrado.codigo}</strong>
+          </p>
+          <p>
+            Etapa del caso: <strong>1 de 5 (Tamizaje)</strong>
           </p>
           <p>
             Cita de confirmación (segunda muestra de orina):{' '}
             <strong>{formatearFecha(registrado.fechaProximaCita)}</strong>, 12 semanas después del tamizaje.
           </p>
-          <p className="registro__ayuda">Anota el código en el expediente del centro de salud; la app no guarda nombres.</p>
+          <p className="registro__ayuda">
+            <strong>Anota este código en la hoja de enlace del centro de salud</strong>, junto con el nombre de la madre,
+            el padre o el tutor y su domicilio. Esa hoja es de papel, se queda en el centro de salud y sirve para
+            localizar a la familia. La app solo guarda el código.
+          </p>
         </div>
         <div className="registro__acciones">
           <Link to={`/caso/${registrado.codigo}`} className="boton boton--primario registro__enlace">
@@ -99,15 +107,21 @@ export function RegistrarCasoPage({ usuario, hoyISO, db }) {
   return (
     <section className="registro" aria-labelledby={`${id}-titulo`}>
       <header className="registro__encabezado">
-        <h2 id={`${id}-titulo`} className="registro__titulo">Registrar caso positivo</h2>
+        <h2 id={`${id}-titulo`} className="registro__titulo">Nuevo tamizaje</h2>
         <EtiquetaSimulado />
       </header>
-      <p className="registro__ayuda">
-        Registra a la niña o el niño con tamizaje positivo. No escribas nombres, CURP ni domicilios: el sistema asigna
-        un código.
+      <p className="registro__ayuda">Registro de caso positivo: tamizaje con tira reactiva en la comunidad o la escuela.</p>
+      <p className="registro__privacidad">
+        <strong>Privacidad:</strong> no escribas nombres, CURP ni domicilios. Cada niña o niño se identifica solo con el
+        código que asigna el sistema. Los datos para localizar a la familia van en la{' '}
+        <strong>hoja de enlace en papel</strong> que guarda el centro de salud.
       </p>
 
       <form className="registro__form" onSubmit={guardar} aria-label="Registrar caso positivo" noValidate>
+        <h3 className="registro__paso">
+          <span className="registro__paso-numero" aria-hidden="true">1</span> Niña o niño y escuela
+        </h3>
+        <p className="registro__ayuda">El código se genera al guardar.</p>
         <label className="registro__campo" htmlFor={`${id}-escuela`}>
           Escuela
           <select id={`${id}-escuela`} value={form.cct} onChange={(e) => cambiar({ cct: e.target.value })}>
@@ -131,24 +145,6 @@ export function RegistrarCasoPage({ usuario, hoyISO, db }) {
             onChange={(e) => cambiar({ fechaTamizaje: e.target.value })}
           />
         </label>
-
-        <fieldset className="registro__grupo">
-          <legend>Resultado de la tira (mg/L)</legend>
-          <div className="registro__opciones registro__opciones--cuatro">
-            {VALORES_TIRA.map((v) => (
-              <button
-                key={v}
-                type="button"
-                className="boton boton--opcion"
-                aria-pressed={form.tiraMgL === v}
-                onClick={() => cambiar({ tiraMgL: v })}
-              >
-                {v}
-              </button>
-            ))}
-          </div>
-          <span className="registro__ayuda">Positivo: 20 mg/L o más.</span>
-        </fieldset>
 
         <fieldset className="registro__grupo">
           <legend>Sexo</legend>
@@ -199,6 +195,30 @@ export function RegistrarCasoPage({ usuario, hoyISO, db }) {
           </div>
         </fieldset>
 
+        <h3 className="registro__paso">
+          <span className="registro__paso-numero" aria-hidden="true">2</span> Resultado de la tira
+        </h3>
+        <fieldset className="registro__grupo">
+          <legend>Resultado de la tira (mg/L)</legend>
+          <div className="registro__opciones registro__opciones--cuatro">
+            {VALORES_TIRA.map((v) => (
+              <button
+                key={v}
+                type="button"
+                className="boton boton--opcion"
+                aria-pressed={form.tiraMgL === v}
+                onClick={() => cambiar({ tiraMgL: v })}
+              >
+                {v}
+              </button>
+            ))}
+          </div>
+          <span className="registro__ayuda">Positivo: 20 mg/L o más.</span>
+        </fieldset>
+
+        <h3 className="registro__paso">
+          <span className="registro__paso-numero" aria-hidden="true">3</span> Consentimiento
+        </h3>
         <fieldset className="registro__grupo">
           <legend>Consentimiento</legend>
           <label className="registro__check">
