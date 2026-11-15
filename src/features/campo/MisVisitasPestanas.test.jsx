@@ -68,7 +68,7 @@ describe('Mis visitas: semana, pestañas y tarjeta (HU04)', () => {
     fireEvent.click(pestanas.getByRole('button', { name: 'Urgentes (1)' }))
     expect(codigos(container)).toEqual(['PON-AC-0001'])
 
-    fireEvent.click(pestanas.getByRole('button', { name: 'Completadas (1)' }))
+    fireEvent.click(pestanas.getByRole('button', { name: 'Localizadas (1)' }))
     expect(codigos(container)).toEqual(['PON-AC-0003'])
 
     fireEvent.click(pestanas.getByRole('button', { name: 'Por localidad' }))

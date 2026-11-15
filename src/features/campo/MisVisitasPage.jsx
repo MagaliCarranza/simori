@@ -7,7 +7,7 @@ import { filtrarPendientes } from '../pendientes/pendientes.js'
 import { usePendientesDelCentro } from '../pendientes/usePendientesDelCentro.js'
 import { AvisoFamilia } from '../avisos/AvisoFamilia.jsx'
 import {
-  completadasDeLaSemana,
+  localizadasDeLaSemana,
   leToca,
   localidadDe,
   porLocalidad,
@@ -23,11 +23,11 @@ const PESTANAS = [
   { valor: 'todas', texto: 'Todas' },
   { valor: 'urgentes', texto: 'Urgentes' },
   { valor: 'localidad', texto: 'Por localidad' },
-  { valor: 'completadas', texto: 'Completadas' },
+  { valor: 'localizadas', texto: 'Localizadas' },
 ]
 
 // Visitas registradas y localidades del centro, para el resumen de la semana,
-// la pestaña "Completadas" y la localidad de cada tarjeta. Solo lectura.
+// la pestaña "Localizadas" y la localidad de cada tarjeta. Solo lectura.
 function useVisitasDelCentro({ clues, db }) {
   const [datos, setDatos] = useState({ visitas: [], localidades: new Map() })
   useEffect(() => {
@@ -60,8 +60,8 @@ export function MisVisitasPage({ usuario, hoyISO, db }) {
 
   const visitas = useMemo(() => filtrarPendientes(filas), [filas])
   const listaUrgentes = useMemo(() => urgentes(visitas), [visitas])
-  const completadas = useMemo(
-    () => completadasDeLaSemana({ filas, visitas: eventosVisita, hoyISO }),
+  const localizadas = useMemo(
+    () => localizadasDeLaSemana({ filas, visitas: eventosVisita, hoyISO }),
     [filas, eventosVisita, hoyISO],
   )
   const semana = useMemo(
@@ -74,7 +74,7 @@ export function MisVisitasPage({ usuario, hoyISO, db }) {
     todas: visitas.length,
     urgentes: urgentesN,
     localidad: null,
-    completadas: completadas.length,
+    localizadas: localizadas.length,
   }
 
   const tarjeta = (f) => {
@@ -130,7 +130,7 @@ export function MisVisitasPage({ usuario, hoyISO, db }) {
 
       {!cargando &&
         !error &&
-        (visitas.length === 0 && completadas.length === 0 ? (
+        (visitas.length === 0 && localizadas.length === 0 ? (
           <div className="pendientes__vacio">
             <strong>No tienes visitas pendientes</strong>
             Todas las familias de tu centro están al día.
@@ -189,8 +189,8 @@ export function MisVisitasPage({ usuario, hoyISO, db }) {
                 ))
               ))}
 
-            {pestana === 'completadas' &&
-              listaOVacio(completadas, 'Esta semana todavía no hay familias localizadas.')}
+            {pestana === 'localizadas' &&
+              listaOVacio(localizadas, 'Esta semana todavía no hay familias localizadas.')}
           </>
         ))}
     </section>

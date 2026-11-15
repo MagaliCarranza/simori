@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import {
-  completadasDeLaSemana,
+  localizadasDeLaSemana,
   enSemana,
   leToca,
   porLocalidad,
@@ -59,10 +59,10 @@ describe('pestañas', () => {
     expect(urgentes([fila('A'), fila('B', { semaforo: { color: 'rojo' } })]).map((f) => f.codigo)).toEqual(['B'])
   })
 
-  it('Completadas: casos con visita localizada esta semana', () => {
+  it('Localizadas: casos con visita localizada esta semana', () => {
     const filas = [fila('A'), fila('B'), fila('C')]
     const visitas = [visita('A', '2026-11-10', 'localizada'), visita('B', '2026-11-11'), visita('C', '2026-11-01', 'localizada')]
-    expect(completadasDeLaSemana({ filas, visitas, hoyISO: HOY }).map((f) => f.codigo)).toEqual(['A'])
+    expect(localizadasDeLaSemana({ filas, visitas, hoyISO: HOY }).map((f) => f.codigo)).toEqual(['A'])
   })
 
   it('Por localidad: agrupa por la localidad de la escuela, en orden alfabético y sin registrar al final', () => {

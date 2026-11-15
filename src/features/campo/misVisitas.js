@@ -1,5 +1,5 @@
 // M6 · Mis visitas (HU04, HU05): lógica pura de la pantalla. Resumen de la
-// semana, pestañas (Urgentes, Por localidad, Completadas) y "Le toca: …".
+// semana, pestañas (Urgentes, Por localidad, Localizadas) y "Le toca: …".
 // Sin React ni Dexie. No cambia cómo se registra una visita ni la regla de
 // "sin seguimiento" (eso vive en visitas.js, seguimiento.js y src/domain/).
 
@@ -65,7 +65,7 @@ export function resumenSemana({ visitas, porVisitar, hoyISO }) {
 }
 
 // Casos activos del centro con al menos una visita "localizada" esta semana.
-export function completadasDeLaSemana({ filas, visitas, hoyISO }) {
+export function localizadasDeLaSemana({ filas, visitas, hoyISO }) {
   const semana = semanaDe(hoyISO)
   const localizadas = new Set(
     visitas
