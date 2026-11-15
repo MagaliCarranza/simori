@@ -5,7 +5,7 @@ import { EtiquetaSimulado } from '../../components/EtiquetaSimulado.jsx'
 import { db as dbDefault } from '../../db/index.js'
 import { formatearFecha } from '../pendientes/formato.js'
 import { avisosDelCaso, crearAviso, marcarEntregado } from './avisos.js'
-import { construirAviso } from './mensaje.js'
+import { construirAviso, construirRecado } from './mensaje.js'
 import { useLectorVoz } from './useLectorVoz.js'
 import './avisos.css'
 
@@ -28,7 +28,7 @@ const CANALES = [
 const NOMBRE_CANAL = Object.fromEntries(CANALES.map((c) => [c.valor, c.texto]))
 
 // HU06 · Aviso para la familia (rol campo): vista previa, audio, canal y entrega.
-export function AvisoFamilia({ fila, centro, usuario, hoyISO, db = dbDefault }) {
+export function AvisoFamilia({ fila, centro, escuela, usuario, hoyISO, db = dbDefault }) {
   const [abierto, setAbierto] = useState(false)
   const [canal, setCanal] = useState('')
   const [mensaje, setMensaje] = useState('')
@@ -39,6 +39,10 @@ export function AvisoFamilia({ fila, centro, usuario, hoyISO, db = dbDefault }) 
   const voz = useLectorVoz()
 
   const aviso = useMemo(() => construirAviso({ fila, centro, hoyISO }), [fila, centro, hoyISO])
+  const recado = useMemo(
+    () => construirRecado({ fila, centro, escuela, hoyISO }),
+    [fila, centro, escuela, hoyISO],
+  )
 
   useEffect(() => {
     if (!abierto) return undefined
@@ -107,18 +111,73 @@ export function AvisoFamilia({ fila, centro, usuario, hoyISO, db = dbDefault }) 
 
   const accion = CANALES.find((c) => c.valor === canal)?.accion ?? 'Registrar aviso'
 
+  const esRecado = canal === 'recado'
+
   return (
     <section className="aviso aviso--abierto" aria-label={`Aviso para la familia de ${fila.codigo}`}>
       <div className="aviso__cabecera">
-        <strong>Vista previa del aviso</strong>
+        <strong>{esRecado ? 'Vista previa del recado' : 'Vista previa del aviso'}</strong>
         <EtiquetaSimulado />
       </div>
 
-      <div className={`aviso__burbuja${imprimiendo ? ' aviso-imprimible' : ''}`}>
-        {aviso.parrafos.map((p) => (
-          <p key={p}>{p}</p>
-        ))}
-      </div>
+      {esRecado ? (
+        <article
+          className={`recado${imprimiendo ? ' aviso-imprimible' : ''}`}
+          aria-label={`Recado escolar para la familia del código ${recado.codigoCaso}`}
+        >
+          <header className="recado__cabecera">
+            <h3 className="recado__titulo">Recado escolar</h3>
+            <p className="recado__fecha">{recado.fechaEmisionLarga}</p>
+          </header>
+
+          <dl className="recado__meta">
+            <div>
+              <dt>Para</dt>
+              <dd>Familia del niño o niña con código {recado.codigoCaso}</dd>
+            </div>
+            {recado.escuela && (
+              <div>
+                <dt>Escuela</dt>
+                <dd>
+                  {recado.escuela.nombre}
+                  {recado.escuela.cct && ` (${recado.escuela.cct})`}
+                </dd>
+              </div>
+            )}
+            <div>
+              <dt>De parte de</dt>
+              <dd>{recado.lugarCita}</dd>
+            </div>
+          </dl>
+
+          <div className="recado__cuerpo">
+            <p className="recado__saludo">{recado.saludo}</p>
+            {recado.cuerpo.map((p) => (
+              <p key={p}>{p}</p>
+            ))}
+            <p className="recado__cierre">{recado.cierre}</p>
+          </div>
+
+          <div className="recado__firmas" aria-hidden="true">
+            <div>
+              <span className="recado__linea" />
+              <span className="recado__firma-texto">Firma del personal de salud</span>
+            </div>
+            <div>
+              <span className="recado__linea" />
+              <span className="recado__firma-texto">Recibido por (familia)</span>
+            </div>
+          </div>
+
+          <footer className="recado__pie">Datos simulados · SIMORI, prototipo de seguimiento</footer>
+        </article>
+      ) : (
+        <div className="aviso__burbuja">
+          {aviso.parrafos.map((p) => (
+            <p key={p}>{p}</p>
+          ))}
+        </div>
+      )}
 
       <div className="aviso__audio">
         {voz.soportado ? (
