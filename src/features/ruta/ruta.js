@@ -347,3 +347,76 @@ export function describirEvento(e) {
 export function lineaDeTiempo(eventos) {
   return ordenarEventos(eventos).map((e) => ({ ...e, descripcion: describirEvento(e) }))
 }
+
+// Ruta del caso: las 5 etapas con su estado, fecha y resultado registrado,
+// para la línea de tiempo de la ficha. Cada etapa lleva texto además de
+// color (RNF de accesibilidad). Estados: 'hecha', 'en_curso', 'pendiente'
+// o 'no_aplica' (después de un alta en la confirmación). Solo describe lo
+// registrado: no interpreta ni diagnostica.
+export const NOMBRE_ETAPA_SALIDA = 'Salida'
+
+export const TEXTO_ESTADO_ETAPA = {
+  hecha: 'Registrada',
+  en_curso: 'En curso',
+  pendiente: 'Pendiente',
+  no_aplica: 'No aplica',
+}
+
+function resumenResultado(r) {
+  if (r.etapa <= 2) return `Tira ${r.tiraMgL} mg/L`
+  if (r.etapa === 3) return r.tfge != null ? `Filtración estimada (TFGe) ${r.tfge}` : 'Creatinina, talla y peso registrados'
+  return `Categorías ${r.categoriaG ?? 'sin TFGe'} ${r.categoriaA ?? ''}`.trim()
+}
+
+export function etapasDeLaRuta(caso, eventos) {
+  const ordenados = ordenarEventos(eventos)
+  const alta = ordenados.find((e) => e.tipo === 'alta')
+  const referencia = ordenados.find((e) => e.tipo === 'referencia')
+  const enVigilancia = caso.estado === 'vigilancia' || caso.estadoPrevio === 'vigilancia'
+  const siguiente = etapaPorRegistrar(caso)
+  const etapas = []
+
+  for (let etapa = 1; etapa <= 4; etapa++) {
+    const r = ultimoResultado(eventos, etapa)
+    if (r) {
+      const noConfirmado = etapa === 2 && alta
+      etapas.push({
+        etapa,
+        nombre: NOMBRES_ETAPA[etapa],
+        estado: 'hecha',
+        fecha: r.fecha,
+        detalle: noConfirmado ? `${resumenResultado(r)}: no se confirmó; el caso se cerró con alta` : resumenResultado(r),
+      })
+    } else if (alta) {
+      etapas.push({ etapa, nombre: NOMBRES_ETAPA[etapa], estado: 'no_aplica', fecha: null, detalle: 'El caso se cerró con alta en la confirmación' })
+    } else if (etapa === siguiente) {
+      etapas.push({
+        etapa,
+        nombre: NOMBRES_ETAPA[etapa],
+        estado: 'en_curso',
+        fecha: caso.fechaProximaCita ?? null,
+        detalle: caso.fechaProximaCita ? 'Cita agendada' : 'Sin cita agendada',
+      })
+    } else {
+      etapas.push({ etapa, nombre: NOMBRES_ETAPA[etapa], estado: 'pendiente', fecha: null, detalle: null })
+    }
+  }
+
+  let salida
+  if (alta) {
+    salida = { estado: 'no_aplica', fecha: null, detalle: 'El caso se cerró con alta en la confirmación' }
+  } else if (referencia) {
+    salida = { estado: 'hecha', fecha: referencia.fecha, detalle: 'Referencia registrada' }
+  } else if (enVigilancia) {
+    const clasificacion = ultimoResultado(eventos, 4)
+    salida = {
+      estado: 'hecha',
+      fecha: clasificacion?.fecha ?? null,
+      detalle: caso.fechaProximaCita ? 'Vigilancia periódica' : 'Vigilancia periódica, sin revisión agendada',
+    }
+  } else {
+    salida = { estado: 'pendiente', fecha: null, detalle: null }
+  }
+  etapas.push({ etapa: 5, nombre: NOMBRE_ETAPA_SALIDA, ...salida })
+  return etapas
+}

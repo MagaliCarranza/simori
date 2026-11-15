@@ -7,6 +7,7 @@
   width: 100%;
   max-width: 720px;
   margin-inline: auto;
+  padding: 16px;
 }
 
 .ficha__encabezado {
@@ -68,6 +69,9 @@
 }
 
 .ficha__seccion {
+  /* Al bajar a una sección (botón de "Próxima cita"), el encabezado fijo no
+     la tapa. */
+  scroll-margin-top: calc(var(--alto-encabezado) + var(--respiro-ancla));
   padding: 16px;
   border: 1px solid var(--color-borde);
   border-radius: var(--radio-tarjeta);
@@ -248,4 +252,131 @@
 .ficha__volver:focus-visible {
   outline: 3px solid var(--color-secondary);
   outline-offset: 2px;
+}
+
+/* Ruta del caso: línea de tiempo vertical de las 5 etapas. El estado va
+   siempre en texto ("Registrada", "En curso", "Pendiente", "No aplica");
+   el color solo lo refuerza. */
+.ficha__ruta {
+  display: grid;
+  gap: 0;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.ficha__ruta-etapa {
+  position: relative;
+  display: grid;
+  grid-template-columns: 32px minmax(0, 1fr);
+  gap: 12px;
+  padding-bottom: 14px;
+}
+
+.ficha__ruta-etapa:last-child {
+  padding-bottom: 0;
+}
+
+/* Línea que une las marcas. */
+.ficha__ruta-etapa:not(:last-child)::before {
+  content: '';
+  position: absolute;
+  top: 32px;
+  bottom: 0;
+  left: 15px;
+  width: 2px;
+  background: var(--color-borde);
+}
+
+.ficha__ruta-marca {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border: 2px solid var(--color-borde);
+  border-radius: 50%;
+  background: var(--color-superficie);
+  color: var(--color-neutral);
+  font-weight: 800;
+  font-size: 0.9rem;
+}
+
+.ficha__ruta-texto {
+  display: grid;
+  gap: 2px;
+  min-width: 0;
+  padding-top: 4px;
+}
+
+.ficha__ruta-nombre {
+  font-weight: 700;
+  color: var(--color-texto);
+}
+
+.ficha__ruta-estado {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--color-neutral);
+}
+
+.ficha__ruta-detalle {
+  font-size: 0.875rem;
+  color: var(--color-neutral);
+  overflow-wrap: anywhere;
+}
+
+.ficha__ruta-etapa--hecha .ficha__ruta-marca {
+  border-color: var(--color-primary);
+  background: var(--color-primary);
+  color: var(--color-superficie);
+}
+
+.ficha__ruta-etapa--hecha:not(:last-child)::before {
+  background: var(--color-primary);
+}
+
+.ficha__ruta-etapa--en_curso .ficha__ruta-marca {
+  border-color: var(--color-primary);
+  background: var(--color-primary-suave);
+  color: var(--color-primary);
+}
+
+.ficha__ruta-etapa--en_curso .ficha__ruta-estado {
+  color: var(--color-primary);
+  font-weight: 800;
+}
+
+.ficha__ruta-etapa--no_aplica .ficha__ruta-marca {
+  border-style: dashed;
+}
+
+.ficha__ruta-etapa--no_aplica .ficha__ruta-nombre {
+  color: var(--color-neutral);
+}
+
+/* Próxima cita. */
+.ficha__cita {
+  display: grid;
+  gap: 8px;
+  justify-items: start;
+}
+
+.ficha__cita h3 {
+  margin: 0;
+}
+
+.ficha__cita-fecha {
+  margin: 0;
+  font-size: 1.15rem;
+  font-weight: 800;
+  color: var(--color-primary);
+}
+
+.ficha__recordatorio {
+  margin: 4px 0 0;
+  padding-top: 8px;
+  border-top: 1px solid var(--color-borde);
+  font-size: 0.85rem;
+  color: var(--color-neutral);
 }

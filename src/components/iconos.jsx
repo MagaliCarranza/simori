@@ -72,6 +72,16 @@ export const IconoPronostico = () => (
   </Icono>
 )
 
+// Tres columnas de distinta altura: comparar escenarios.
+export const IconoEscenarios = () => (
+  <Icono>
+    <path d="M4 20h16" />
+    <rect x="5" y="6" width="3.5" height="14" rx="1" />
+    <rect x="10.25" y="10" width="3.5" height="10" rx="1" />
+    <rect x="15.5" y="14" width="3.5" height="6" rx="1" />
+  </Icono>
+)
+
 export const IconoCambiar = () => (
   <Icono>
     <path d="M7 4 3 8l4 4" />

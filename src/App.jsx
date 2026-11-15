@@ -9,6 +9,7 @@ import { GuardadosPage } from './features/captura/GuardadosPage.jsx'
 import { MuestrasLabPage } from './features/captura/MuestrasLabPage.jsx'
 import { TamizadosPage } from './features/captura/TamizadosPage.jsx'
 import { InicioPage } from './features/inicio/InicioPage.jsx'
+import { ComparaEscenariosPage } from './features/escenarios/ComparaEscenariosPage.jsx'
 import { RegistrarCasoPage } from './features/registro/RegistrarCasoPage.jsx'
 import { PronosticoPage } from './features/pronostico/PronosticoPage.jsx'
 import { FichaCasoPage } from './features/ruta/FichaCasoPage.jsx'
@@ -143,6 +144,7 @@ function AplicacionInterna() {
             }
           />
           <Route path="/supervision/pronostico" element={usuario ? <PronosticoPage usuario={usuario} hoyISO={HOY_DEMO} /> : null} />
+          <Route path="/supervision/escenarios" element={usuario ? <ComparaEscenariosPage hoyISO={HOY_DEMO} /> : null} />
 
           <Route path="*" element={<Navigate to="/" replace />} />
         </Route>

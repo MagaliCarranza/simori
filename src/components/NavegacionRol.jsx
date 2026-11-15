@@ -5,6 +5,7 @@ import {
   IconoAvisos,
   IconoCambiar,
   IconoEmbudo,
+  IconoEscenarios,
   IconoGuardado,
   IconoMapa,
   IconoMuestra,
@@ -45,6 +46,7 @@ export const RUTAS_POR_ROL = {
     { to: '/supervision/embudo', texto: 'Embudo' },
     { to: '/supervision/mapa', texto: 'Mapa' },
     { to: '/supervision/pronostico', texto: 'Pronóstico' },
+    { to: '/supervision/escenarios', texto: 'Escenarios' },
   ],
 }
 
@@ -63,6 +65,7 @@ const ICONO_POR_RUTA = {
   '/supervision/embudo': IconoEmbudo,
   '/supervision/mapa': IconoMapa,
   '/supervision/pronostico': IconoPronostico,
+  '/supervision/escenarios': IconoEscenarios,
 }
 
 // Marco de la app: encabezado compacto (logo, chip del rol y el selector de

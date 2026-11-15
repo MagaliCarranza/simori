@@ -14,15 +14,21 @@ import {
   calcularClasificacion,
   calcularValoracion,
   etapaPorRegistrar,
+  etapasDeLaRuta,
   lineaDeTiempo,
   NOMBRES_ESTADO,
   NOMBRES_ETAPA,
   registrarResultado,
+  TEXTO_ESTADO_ETAPA,
   ultimoResultado,
   VALORES_TIRA,
 } from './ruta.js'
 
 const AVISO_NO_DIAGNOSTICA = 'Dato de apoyo: la herramienta no diagnostica. La clasificación la confirma el personal de salud.'
+const RECORDATORIO = 'La herramienta organiza el seguimiento; las decisiones clínicas son del personal de salud.'
+// Ancla del formulario de resultado (el botón de "Próxima cita" baja aquí).
+const ID_FORM_RESULTADO = 'registrar-resultado'
+
 const TEXTO_SALIDA = {
   referido: 'Referir a nefrología pediátrica',
   vigilancia: 'Vigilancia periódica (revisión en 6 meses)',
@@ -113,8 +119,10 @@ function RegistrarResultado({ caso, nino, eventos, usuario, hoyISO, db, onGuarda
   if (etapa == null) return null
 
   return (
-    <section className="ficha__seccion" aria-labelledby={`${id}-titulo`}>
-      <h3 id={`${id}-titulo`}>Registrar resultado: {NOMBRES_ETAPA[etapa]}</h3>
+    <section id={ID_FORM_RESULTADO} className="ficha__seccion" aria-labelledby={`${id}-titulo`}>
+      <h3 id={`${id}-titulo`} tabIndex={-1}>
+        Registrar resultado: {NOMBRES_ETAPA[etapa]}
+      </h3>
       <form className="ficha__form" onSubmit={guardar} aria-label={`Registrar ${NOMBRES_ETAPA[etapa]}`} noValidate>
         <label className="ficha__campo" htmlFor={`${id}-fecha`}>
           Fecha del resultado
@@ -202,7 +210,69 @@ function RegistrarResultado({ caso, nino, eventos, usuario, hoyISO, db, onGuarda
         <button type="submit" className="boton boton--primario" disabled={guardando}>
           {guardando ? 'Guardando…' : 'Guardar resultado'}
         </button>
+        <p className="ficha__recordatorio">{RECORDATORIO}</p>
       </form>
+    </section>
+  )
+}
+
+// Línea de tiempo de las 5 etapas (docs/04): etapa, fecha, resultado
+// registrado y cuál está en curso, con texto además de color.
+function RutaDelCaso({ caso, eventos }) {
+  const etapas = etapasDeLaRuta(caso, eventos)
+  return (
+    <section className="ficha__seccion" aria-labelledby="titulo-ruta">
+      <h3 id="titulo-ruta">Ruta del caso</h3>
+      <ol className="ficha__ruta">
+        {etapas.map((e) => (
+          <li key={e.etapa} className={`ficha__ruta-etapa ficha__ruta-etapa--${e.estado}`}>
+            <span className="ficha__ruta-marca" aria-hidden="true">
+              {e.estado === 'hecha' ? '✓' : e.etapa}
+            </span>
+            <div className="ficha__ruta-texto">
+              <span className="ficha__ruta-nombre">
+                {e.etapa}. {e.nombre}
+              </span>
+              <span className="ficha__ruta-estado">
+                {TEXTO_ESTADO_ETAPA[e.estado]}
+                {e.fecha ? ` · ${formatearFecha(e.fecha)}` : ''}
+              </span>
+              {e.detalle && <span className="ficha__ruta-detalle">{e.detalle}</span>}
+            </div>
+          </li>
+        ))}
+      </ol>
+    </section>
+  )
+}
+
+// Próxima cita, separada de los datos del caso, con un botón que baja al
+// formulario del resultado cuando hay una etapa por registrar.
+function ProximaCita({ caso }) {
+  const etapa = etapaPorRegistrar(caso)
+  const enVigilancia = caso.estado === 'vigilancia'
+  if (etapa == null && !enVigilancia) return null
+
+  const irAlFormulario = () => {
+    const seccion = document.getElementById(ID_FORM_RESULTADO)
+    seccion?.scrollIntoView?.({ behavior: 'smooth', block: 'start' })
+    seccion?.querySelector('h3')?.focus({ preventScroll: true })
+  }
+
+  return (
+    <section className="ficha__seccion ficha__cita" aria-labelledby="titulo-proxima-cita">
+      <h3 id="titulo-proxima-cita">Próxima cita</h3>
+      <p className="ficha__cita-fecha">
+        {caso.fechaProximaCita ? formatearFecha(caso.fechaProximaCita) : 'Sin cita agendada'}
+      </p>
+      <p className="ficha__ayuda">
+        {etapa != null ? `Le toca: ${NOMBRES_ETAPA[etapa].toLowerCase()}.` : 'Le toca: revisión de vigilancia periódica.'}
+      </p>
+      {etapa != null && (
+        <button type="button" className="boton boton--primario" onClick={irAlFormulario}>
+          Registrar resultado de {NOMBRES_ETAPA[etapa].toLowerCase()}
+        </button>
+      )}
     </section>
   )
 }
@@ -298,8 +368,6 @@ export function FichaCasoPage({ usuario, hoyISO, db, codigo: codigoProp }) {
         <dd>
           {caso.etapaActual}. {NOMBRES_ETAPA[caso.etapaActual] ?? ''}
         </dd>
-        <dt>Próxima cita</dt>
-        <dd>{caso.fechaProximaCita ? formatearFecha(caso.fechaProximaCita) : 'Sin cita agendada'}</dd>
         <dt>Escuela</dt>
         <dd>
           {escuela?.nombre ?? caso.cct}
@@ -312,6 +380,9 @@ export function FichaCasoPage({ usuario, hoyISO, db, codigo: codigoProp }) {
         <dt>Tamizaje</dt>
         <dd>{formatearFecha(caso.fechaTamizaje)}</dd>
       </dl>
+
+      <RutaDelCaso caso={caso} eventos={eventos} />
+      <ProximaCita caso={caso} />
 
       {aviso && (
         <p className="ficha__mensaje" role="status">
