@@ -144,7 +144,7 @@ function AplicacionInterna() {
             }
           />
           <Route path="/supervision/pronostico" element={usuario ? <PronosticoPage usuario={usuario} hoyISO={HOY_DEMO} /> : null} />
-          <Route path="/supervision/escenarios" element={usuario ? <ComparaEscenariosPage /> : null} />
+          <Route path="/supervision/escenarios" element={usuario ? <ComparaEscenariosPage hoyISO={HOY_DEMO} /> : null} />
 
           <Route path="*" element={<Navigate to="/" replace />} />
         </Route>

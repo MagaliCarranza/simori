@@ -50,4 +50,26 @@ describe('Comparar escenarios (HU10)', () => {
     render(<ComparaEscenariosPage fetchImpl={vi.fn(async () => ({ ok: false }))} />)
     expect(await screen.findByRole('alert')).toHaveTextContent('No se pudieron leer los escenarios')
   })
+
+  it('con la fecha muestra el desglose, el % de pérdida, la aclaración del % y la nota del embudo', async () => {
+    render(<ComparaEscenariosPage hoyISO="2026-11-14" fetchImpl={fetchFalso()} />)
+    const col = within(await screen.findByRole('article', { name: 'Pérdida de 11 % en cada paso' }))
+    expect(col.getByText('De 10 positivos:')).toBeInTheDocument()
+    const lista = within(col.getByRole('list', { name: 'Desglose con pérdida de 11 %' }))
+    // 8 llegaron a clasificación pero siguen en seguimiento (sin evento de salida): no cuentan como completados.
+    expect(lista.getByText(/completaron su evaluación/)).toBeInTheDocument()
+    expect(lista.getByText(/siguen a tiempo \(aún no les toca su cita\)/)).toBeInTheDocument()
+    expect(lista.getByText(/van con retraso/)).toBeInTheDocument()
+    expect(lista.getByText(/sin seguimiento/)).toBeInTheDocument()
+    expect(col.getByText(/Cuenta a todos los positivos, incluidos los que aún esperan su cita/)).toBeInTheDocument()
+    expect(
+      col.getByText('El embudo baja también por las altas en la confirmación y por los casos a los que aún no les toca su cita.'),
+    ).toBeInTheDocument()
+  })
+
+  it('sin la fecha no muestra el desglose', async () => {
+    render(<ComparaEscenariosPage fetchImpl={fetchFalso()} />)
+    const col = within(await screen.findByRole('article', { name: 'Pérdida de 11 % en cada paso' }))
+    expect(col.queryByText(/positivos:/)).not.toBeInTheDocument()
+  })
 })

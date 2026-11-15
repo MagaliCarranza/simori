@@ -189,6 +189,42 @@
   color: var(--color-neutral);
 }
 
+.comparar__nota {
+  margin: 0;
+  font-size: 0.8125rem;
+  color: var(--color-neutral);
+}
+
+.comparar__desglose {
+  display: grid;
+  gap: 6px;
+  padding: 12px;
+  border-radius: 12px;
+  background: var(--color-fondo);
+  font-size: 0.9rem;
+}
+
+.comparar__desglose-titulo,
+.comparar__perdida {
+  margin: 0;
+  font-weight: 700;
+}
+
+.comparar__desglose ul {
+  display: grid;
+  gap: 2px;
+  margin: 0;
+  padding-left: 1.1em;
+}
+
+.comparar__desglose strong {
+  font-variant-numeric: tabular-nums;
+}
+
+.comparar__perdida strong {
+  color: var(--color-primary);
+}
+
 .comparar__pie {
   display: flex;
   flex-wrap: wrap;

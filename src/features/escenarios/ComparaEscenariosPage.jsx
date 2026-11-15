@@ -9,24 +9,24 @@ import { FRASE_CIERRE, NUMEROS_ESCENARIO, resumenEscenario } from './comparar.js
 import { etiquetaEscenario } from './escenarios.js'
 import './escenarios.css'
 
-async function leerEscenario(numero, fetchImpl) {
+async function leerEscenario(numero, fetchImpl, hoyISO) {
   const respuesta = await fetchImpl(`/data/casos_${numero}.json`)
   if (!respuesta || !respuesta.ok) throw new Error(`escenario-${numero}`)
-  return resumenEscenario(numero, await respuesta.json())
+  return resumenEscenario(numero, await respuesta.json(), hoyISO)
 }
 
-export function ComparaEscenariosPage({ fetchImpl = fetch }) {
+export function ComparaEscenariosPage({ hoyISO, fetchImpl = fetch }) {
   const [datos, setDatos] = useState({ cargando: true, error: false, escenarios: [] })
 
   useEffect(() => {
     let vigente = true
-    Promise.all(NUMEROS_ESCENARIO.map((n) => leerEscenario(n, fetchImpl)))
+    Promise.all(NUMEROS_ESCENARIO.map((n) => leerEscenario(n, fetchImpl, hoyISO)))
       .then((escenarios) => vigente && setDatos({ cargando: false, error: false, escenarios }))
       .catch(() => vigente && setDatos({ cargando: false, error: true, escenarios: [] }))
     return () => {
       vigente = false
     }
-  }, [fetchImpl])
+  }, [fetchImpl, hoyISO])
 
   return (
     <section className="comparar" aria-labelledby="titulo-comparar">
@@ -80,19 +80,54 @@ export function ComparaEscenariosPage({ fetchImpl = fetch }) {
                     </li>
                   ))}
                 </ol>
+                <p className="comparar__nota">
+                  El embudo baja también por las altas en la confirmación y por los casos a los que aún no les toca su
+                  cita.
+                </p>
 
                 <p className="comparar__final">
                   {e.porcentajeFinal != null ? (
                     <>
                       <strong className="comparar__final-numero">{e.porcentajeFinal} %</strong> completa su evaluación
                       <span className="comparar__final-detalle">
-                        De cada 100 positivos, {e.porcentajeFinal} terminan su evaluación: llegan a clasificación o salen con alta en la confirmación ({e.completados} casos).
+                        De cada 100 positivos, {e.porcentajeFinal} terminan su evaluación: llegan a clasificación o salen
+                        con alta en la confirmación.
+                      </span>
+                      <span className="comparar__final-detalle">
+                        Cuenta a todos los positivos, incluidos los que aún esperan su cita. Es el mismo indicador del
+                        Embudo.
                       </span>
                     </>
                   ) : (
                     'No se muestra el porcentaje: revelaría grupos de menos de 5 casos.'
                   )}
                 </p>
+
+                {e.desglose && (
+                  <div className="comparar__desglose">
+                    <p className="comparar__desglose-titulo">De {e.desglose.total} positivos:</p>
+                    <ul aria-label={`Desglose con pérdida de ${etiquetaEscenario(e.numero)}`}>
+                      <li>
+                        <strong>{e.desglose.completados}</strong> completaron su evaluación
+                      </li>
+                      <li>
+                        <strong>{e.desglose.aTiempo}</strong> siguen a tiempo (aún no les toca su cita)
+                      </li>
+                      <li>
+                        <strong>{e.desglose.conRetraso}</strong> van con retraso
+                      </li>
+                      <li>
+                        <strong>{e.desglose.sinSeguimiento}</strong> sin seguimiento
+                      </li>
+                    </ul>
+                    {e.desglose.porcentajePerdida != null && (
+                      <p className="comparar__perdida">
+                        De los casos que ya debían haber avanzado, se perdió el{' '}
+                        <strong>{e.desglose.porcentajePerdida} %</strong>.
+                      </p>
+                    )}
+                  </div>
+                )}
               </article>
             ))}
           </div>
