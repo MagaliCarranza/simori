@@ -182,4 +182,14 @@ describe('MisVisitasPage (HU04)', () => {
     expect(document.body).toHaveTextContent('busca el código en la hoja de enlace del centro de salud')
     expect(document.body).toHaveTextContent('No escribas nombres ni domicilios en la app.')
   })
+
+  it('después de dos visitas sin localizar sugiere el recado en sobre cerrado a la escuela', async () => {
+    await sembrar([caso('PON-AC-0003', { fechaProximaCita: '2026-12-01' })])
+    render(<MisVisitasPage usuario={campo} hoyISO={HOY} db={db} />)
+    await screen.findByText('No tienes visitas pendientes')
+    expect(document.body).toHaveTextContent(
+      'Si no localizas a la familia después de dos visitas, puedes dejar un recado en sobre cerrado en la escuela, dirigido al tutor.',
+    )
+    expect(document.body).not.toHaveTextContent('la escuela puede ayudarte a entregarle el aviso')
+  })
 })

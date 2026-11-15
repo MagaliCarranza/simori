@@ -28,8 +28,8 @@ export function MisVisitasPage({ usuario, hoyISO, db }) {
           </p>
           <p className="pendientes__sub">
             Para saber a qué casa ir, busca el código en la <strong>hoja de enlace del centro de salud</strong>. Si no
-            localizas a la familia, la escuela puede ayudarte a entregarle el aviso. No escribas nombres ni domicilios en
-            la app.
+            localizas a la familia después de dos visitas, puedes dejar un recado en sobre cerrado en la escuela,
+            dirigido al tutor. No escribas nombres ni domicilios en la app.
           </p>
         </div>
         <EtiquetaSimulado />
