@@ -4,6 +4,8 @@
   width: 100%;
   max-width: 560px;
   margin-inline: auto;
+  /* Mismo margen lateral que las otras secciones (16 px). */
+  padding: 16px;
 }
 
 .registro__encabezado {
@@ -121,4 +123,49 @@
   display: inline-flex;
   align-items: center;
   text-decoration: none;
+}
+
+/* Estructura en 3 pasos numerados (vistas UI-SIMORI), sin decoración extra. */
+.registro__paso {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 8px 0 0;
+  padding-top: 12px;
+  border-top: 1px solid var(--color-borde);
+  font-size: 1.05rem;
+  color: var(--color-primary);
+}
+
+.registro__paso:first-child {
+  margin-top: 0;
+  padding-top: 0;
+  border-top: 0;
+}
+
+.registro__paso-numero {
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: var(--color-primary-suave);
+  color: var(--color-primary);
+  font-size: 0.9rem;
+  font-weight: 800;
+}
+
+.registro__privacidad {
+  margin: 0;
+  padding: 10px 14px;
+  border: 1px solid var(--color-borde);
+  border-radius: var(--radio-tarjeta);
+  background: var(--color-primary-suave);
+  color: var(--color-texto);
+  font-size: 0.9rem;
+}
+
+.registro__guardado {
+  font-weight: 800;
 }

@@ -270,7 +270,7 @@ export function FichaCasoPage({ usuario, hoyISO, db, codigo: codigoProp }) {
     return (
       <section className="ficha">
         <p role="alert">No se encontró el caso {codigo} en tu centro de salud.</p>
-        <Link to="/pendientes" className="ficha__volver">← Volver a pendientes</Link>
+        <Link to="/tamizados" className="ficha__volver">← Volver a pacientes tamizados</Link>
       </section>
     )
   }
@@ -332,7 +332,7 @@ export function FichaCasoPage({ usuario, hoyISO, db, codigo: codigoProp }) {
         </ol>
       </section>
 
-      <Link to="/pendientes" className="ficha__volver">← Volver a pendientes</Link>
+      <Link to="/tamizados" className="ficha__volver">← Volver a pacientes tamizados</Link>
     </section>
   )
 }
