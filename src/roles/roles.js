@@ -5,9 +5,9 @@ export const ROLES = [
   {
     rol: 'captura',
     etiqueta: 'Clínica',
-    pie: 'Pendientes y citas',
+    pie: 'Tamizaje y seguimiento',
     nombre: 'Enfermería del centro de salud',
-    descripcion: 'Revisa qué niñas y niños tienen citas pendientes o con retraso.',
+    descripcion: 'Registra casos positivos y revisa citas, muestras y lo guardado en el equipo.',
   },
   {
     rol: 'campo',
