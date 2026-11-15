@@ -127,22 +127,194 @@
   color: var(--estado-entregado);
 }
 
-/* Recado escolar: al imprimir solo sale la vista previa del caso elegido. */
+/* Recado escolar: hoja formal, minimalista, lista para imprimir. */
+.recado {
+  padding: 24px;
+  border: 1px solid var(--color-borde);
+  border-radius: 12px;
+  background: var(--color-superficie);
+  color: var(--color-texto);
+  line-height: 1.55;
+}
+
+.recado__cabecera {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 8px;
+  margin-bottom: 14px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid var(--color-borde);
+}
+
+.recado__titulo {
+  margin: 0;
+  font-size: 1.15rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.recado__fecha {
+  margin: 0;
+  color: var(--color-neutral);
+  font-size: 0.9rem;
+}
+
+.recado__meta {
+  margin: 0 0 18px;
+  padding: 0;
+  display: grid;
+  gap: 6px;
+  font-size: 0.95rem;
+}
+
+.recado__meta > div {
+  display: grid;
+  grid-template-columns: 7rem 1fr;
+  gap: 8px;
+}
+
+.recado__meta dt {
+  margin: 0;
+  color: var(--color-neutral);
+  font-weight: 600;
+}
+
+.recado__meta dd {
+  margin: 0;
+  color: var(--color-texto);
+}
+
+.recado__cuerpo p {
+  margin: 0 0 10px;
+}
+
+.recado__cuerpo p:last-child {
+  margin-bottom: 0;
+}
+
+.recado__saludo {
+  font-weight: 600;
+}
+
+.recado__cierre {
+  margin-top: 14px;
+}
+
+.recado__firmas {
+  margin-top: 56px;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 24px;
+}
+
+.recado__firmas > div {
+  display: grid;
+  gap: 4px;
+  padding-top: 40px; /* espacio para escribir la firma sobre la línea */
+}
+
+.recado__linea {
+  display: block;
+  height: 1px;
+  background: var(--color-texto);
+  opacity: 0.55;
+}
+
+.recado__firma-texto {
+  font-size: 0.85rem;
+  color: var(--color-neutral);
+}
+
+.recado__pie {
+  margin-top: 22px;
+  padding-top: 10px;
+  border-top: 1px solid var(--color-borde);
+  color: var(--color-neutral);
+  font-size: 0.8rem;
+  text-align: center;
+}
+
+/* Impresión del recado: solo la hoja activa, en blanco y negro, sin páginas
+   vacías. Oculta todo y vuelve a mostrar únicamente la cadena de ancestros
+   del recado (vía :has) y su contenido. Así el alto del documento colapsa
+   al del recado y no se generan páginas en blanco. */
 @media print {
   body * {
-    visibility: hidden;
+    display: none !important;
+  }
+
+  html,
+  body,
+  body :has(.aviso-imprimible) {
+    display: block !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    background: #fff !important;
+    box-shadow: none !important;
+    border: 0 !important;
   }
 
   .aviso-imprimible,
   .aviso-imprimible * {
-    visibility: visible;
+    display: revert !important;
   }
 
   .aviso-imprimible {
-    position: absolute;
-    inset: 0 0 auto 0;
-    padding: 24px;
-    background: var(--color-superficie);
-    font-size: 14pt;
+    margin: 0 !important;
+    padding: 18mm 20mm !important;
+    border: 0 !important;
+    border-radius: 0 !important;
+    background: #fff !important;
+    color: #000 !important;
+    font-size: 12pt;
+    line-height: 1.6;
   }
+
+  .aviso-imprimible .recado__cabecera,
+  .aviso-imprimible .recado__pie {
+    border-color: #000;
+  }
+
+  .aviso-imprimible .recado__titulo,
+  .aviso-imprimible .recado__saludo,
+  .aviso-imprimible .recado__cierre,
+  .aviso-imprimible .recado__cuerpo p,
+  .aviso-imprimible .recado__meta dd {
+    color: #000;
+  }
+
+  .aviso-imprimible .recado__fecha,
+  .aviso-imprimible .recado__meta dt,
+  .aviso-imprimible .recado__firma-texto,
+  .aviso-imprimible .recado__pie {
+    color: #333;
+  }
+
+  .aviso-imprimible .recado__linea {
+    background: #000;
+    opacity: 1;
+  }
+
+  /* `display: revert` regresa los hijos a su default UA (block), lo que rompe
+     los grids/flex. Restaurar explícitamente los contenedores de layout. */
+  .aviso-imprimible .recado__cabecera {
+    display: flex !important;
+  }
+
+  .aviso-imprimible .recado__meta,
+  .aviso-imprimible .recado__meta > div,
+  .aviso-imprimible .recado__firmas,
+  .aviso-imprimible .recado__firmas > div {
+    display: grid !important;
+  }
+}
+
+/* margin: 0 hace que Chrome/Edge no agreguen URL/fecha/página en el encabezado
+   del recado. Los márgenes de impresión los pone el padding de .aviso-imprimible. */
+@page {
+  size: A4;
+  margin: 0;
 }

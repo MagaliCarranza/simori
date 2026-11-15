@@ -30,7 +30,7 @@ function filaDeCaso(caso) {
 // aviso y marcarlo como entregado desde su historial interno. Esta pantalla
 // solo lista y navega; no modifica la lógica de AvisoFamilia.
 export function ListaAvisosPage({ usuario, hoyISO, db = dbDefault }) {
-  const [datos, setDatos] = useState({ avisos: [], casos: new Map(), centro: null })
+  const [datos, setDatos] = useState({ avisos: [], casos: new Map(), escuelas: new Map(), centro: null })
   const [cargando, setCargando] = useState(true)
   const [error, setError] = useState(null)
 
@@ -47,10 +47,13 @@ export function ListaAvisosPage({ usuario, hoyISO, db = dbDefault }) {
         db.avisos.toArray(),
       ])
       const casosPorCodigo = new Map(casos.map((c) => [c.codigo, c]))
+      const ccts = [...new Set(casos.map((c) => c.cct).filter(Boolean))]
+      const escuelas = ccts.length ? await db.escuelas.where('cct').anyOf(ccts).toArray() : []
+      const escuelasPorCct = new Map(escuelas.map((e) => [e.cct, e]))
       const avisos = todos
         .filter((a) => casosPorCodigo.has(a.codigoCaso))
         .sort((a, b) => (b.fecha === a.fecha ? b.id - a.id : b.fecha < a.fecha ? -1 : 1))
-      return { avisos, casos: casosPorCodigo, centro: centros[0] ?? null }
+      return { avisos, casos: casosPorCodigo, escuelas: escuelasPorCct, centro: centros[0] ?? null }
     }).subscribe({
       next: (d) => {
         if (!vigente) return
@@ -69,7 +72,7 @@ export function ListaAvisosPage({ usuario, hoyISO, db = dbDefault }) {
     }
   }, [usuario?.clues, db])
 
-  const { avisos, casos, centro } = datos
+  const { avisos, casos, escuelas, centro } = datos
   const pendientes = avisos.filter((a) => a.estado === 'pendiente').length
 
   return (
@@ -119,6 +122,7 @@ export function ListaAvisosPage({ usuario, hoyISO, db = dbDefault }) {
                     <AvisoFamilia
                       fila={filaDeCaso(caso)}
                       centro={centro}
+                      escuela={escuelas.get(caso.cct)}
                       usuario={usuario}
                       hoyISO={hoyISO}
                       db={db}

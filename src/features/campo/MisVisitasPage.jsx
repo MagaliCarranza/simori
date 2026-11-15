@@ -55,7 +55,14 @@ export function MisVisitasPage({ usuario, hoyISO, db }) {
               {visitas.map((f) => (
                 <CasoPendiente key={f.codigo} fila={f} escuela={escuelas.get(f.cct)}>
                   <RegistrarVisita codigoCaso={f.codigo} usuario={usuario} hoyISO={hoyISO} db={db} />
-                  <AvisoFamilia fila={f} centro={centro} usuario={usuario} hoyISO={hoyISO} db={db} />
+                  <AvisoFamilia
+                    fila={f}
+                    centro={centro}
+                    escuela={escuelas.get(f.cct)}
+                    usuario={usuario}
+                    hoyISO={hoyISO}
+                    db={db}
+                  />
                 </CasoPendiente>
               ))}
             </ul>
