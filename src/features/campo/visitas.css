@@ -85,3 +85,67 @@
   border-color: var(--semaforo-rojo);
   color: var(--semaforo-rojo);
 }
+
+/* Mis visitas: avance de la semana, pestañas y datos extra de la tarjeta. */
+.visitas__semana {
+  display: grid;
+  gap: 2px;
+  margin-bottom: 12px;
+  padding: 12px 14px;
+  border-radius: var(--radio-tarjeta);
+  background: var(--color-primary-suave);
+}
+
+.visitas__semana-titulo {
+  margin: 0;
+  font-weight: 700;
+  color: var(--color-primary);
+}
+
+.visitas__semana-cifras {
+  margin: 0;
+  font-size: 0.9rem;
+  color: var(--color-texto);
+}
+
+/* Celular: 2 × 2. Desde 600 px: en una fila. */
+.visitas__pestanas {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+@media (min-width: 600px) {
+  .visitas__pestanas {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+}
+
+.visitas__grupo {
+  display: grid;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+.visitas__grupo-titulo {
+  margin: 0;
+  font-size: 1.05rem;
+  color: var(--color-primary);
+}
+
+.visitas__grupo-titulo span {
+  color: var(--color-neutral);
+  font-weight: 600;
+}
+
+.visita__le-toca {
+  margin: 0;
+  font-weight: 600;
+  color: var(--color-texto);
+}
+
+.visita__localidad {
+  font-weight: 400;
+  color: var(--color-neutral);
+}
