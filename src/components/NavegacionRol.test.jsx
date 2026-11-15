@@ -53,6 +53,13 @@ describe('NavegacionRol', () => {
     expect(screen.queryByRole('link', { name: /Ficha/ })).not.toBeInTheDocument()
   })
 
+  it('supervisión ve también Escenarios, después de Pronóstico', () => {
+    montar(usuarios[2])
+    const enlaces = screen.getAllByRole('link').map((l) => l.getAttribute('href'))
+    expect(screen.getByRole('link', { name: 'Escenarios' })).toHaveAttribute('href', '/supervision/escenarios')
+    expect(enlaces.indexOf('/supervision/escenarios')).toBe(enlaces.indexOf('/supervision/pronostico') + 1)
+  })
+
   it('el chip del rol lleva al inicio para cambiarlo, con texto accesible', () => {
     montar(usuarios[1])
     const chip = screen.getByRole('link', { name: 'Cambiar de rol (actual: Visitas de campo)' })
