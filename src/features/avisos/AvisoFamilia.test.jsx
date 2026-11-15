@@ -247,6 +247,27 @@ describe('Aviso a la familia (HU06)', () => {
     expect(h.queryByText(/Hola\. Le escribimos de/)).not.toBeInTheDocument()
   })
 
+  it('la hoja del recado indica que se entrega en sobre cerrado', async () => {
+    const a = await abrirAviso()
+    fireEvent.click(a.getByRole('button', { name: 'Recado escolar' }))
+    const hoja = within(a.getByRole('article', { name: /Recado escolar/ }))
+    expect(hoja.getByText('Entregar en sobre cerrado.')).toBeInTheDocument()
+  })
+
+  it('recuerda que las decisiones clínicas son del personal de salud', async () => {
+    const a = await abrirAviso()
+    expect(
+      a.getByText('La herramienta organiza el seguimiento; las decisiones clínicas son del personal de salud.'),
+    ).toBeInTheDocument()
+  })
+
+  it('con WhatsApp o SMS aclara que el envío es simulado', async () => {
+    const a = await abrirAviso()
+    expect(a.queryByText(/Envío simulado en el prototipo/)).not.toBeInTheDocument()
+    fireEvent.click(a.getByRole('button', { name: 'WhatsApp o SMS (simulado)' }))
+    expect(a.getByText('Envío simulado en el prototipo: no se manda nada real.')).toBeInTheDocument()
+  })
+
   it('el recado escolar se imprime', async () => {
     const imprimir = vi.spyOn(window, 'print').mockImplementation(() => {})
     const a = await abrirAviso()
