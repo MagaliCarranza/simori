@@ -46,18 +46,17 @@ export function PronosticoPage({ hoyISO, usuario, db }) {
             <span className="pronostico__escenario-ayuda">Se cambia en el selector del encabezado.</span>
           </div>
 
-          <p className="pronostico__regla">
-            <strong>Cómo se calcula:</strong> llegadas esperadas = citas programadas × (1 − {etiqueta}),
-            redondeado al entero más cercano. Es una cuenta con reglas fijas. Solo se cuentan los casos en
-            seguimiento o en vigilancia con cita en estas semanas.
-          </p>
-
           {pronostico.centros.length === 0 ? (
             <p>No hay centros de salud con citas en estas semanas.</p>
           ) : (
             pronostico.centros.map((centro) => (
               <section key={centro.clues} className="supervision__tarjeta pronostico__centro">
-                <div className="supervision__tabla-envoltura">
+                <div
+                  className="supervision__tabla-envoltura"
+                  role="region"
+                  aria-label={`Tabla del centro de salud ${centro.clues}`}
+                  tabIndex={0}
+                >
                   <table className="supervision__tabla">
                     <caption className="pronostico__caption">Centro de salud {centro.clues}</caption>
                     <thead>
@@ -93,6 +92,13 @@ export function PronosticoPage({ hoyISO, usuario, db }) {
               </section>
             ))
           )}
+
+          {/* La regla va después de las tablas: a 360 px las cifras quedan arriba. */}
+          <p className="pronostico__regla">
+            <strong>Cómo se calcula:</strong> llegadas esperadas = citas programadas × (1 − {etiqueta}),
+            redondeado al entero más cercano. Es una cuenta con reglas fijas. Solo se cuentan los casos en
+            seguimiento o en vigilancia con cita en estas semanas.
+          </p>
         </>
       )}
     </section>
