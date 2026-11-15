@@ -46,53 +46,77 @@ export function PronosticoPage({ hoyISO, usuario, db }) {
             <span className="pronostico__escenario-ayuda">Se cambia en el selector del encabezado.</span>
           </div>
 
+          {pronostico.centros.length === 0 ? (
+            <p>No hay centros de salud con citas en estas semanas.</p>
+          ) : (
+            <>
+              {/* En celular no hay "pasar el mouse": el aviso sustituye a las ayudas de las columnas. */}
+              <p className="supervision__nota supervision__deslizar">
+                Desliza la tabla a los lados para ver todas las columnas.
+              </p>
+              {pronostico.centros.map((centro) => (
+                <section key={centro.clues} className="supervision__tarjeta pronostico__centro">
+                  <div
+                    className="supervision__tabla-envoltura"
+                    role="region"
+                    aria-label={`Tabla del centro de salud ${centro.clues}`}
+                    tabIndex={0}
+                  >
+                    <table className="supervision__tabla">
+                      <caption className="pronostico__caption">Centro de salud {centro.clues}</caption>
+                      <thead>
+                        <tr>
+                          <th scope="col" title="Semana del pronóstico, con sus fechas de inicio y fin">
+                            Semana
+                          </th>
+                          <th
+                            scope="col"
+                            title="Citas de casos en seguimiento o en vigilancia que caen en esa semana"
+                          >
+                            Citas programadas
+                          </th>
+                          <th
+                            scope="col"
+                            title={`Citas programadas × (1 − ${etiqueta}), redondeado al entero más cercano`}
+                          >
+                            Llegadas esperadas
+                          </th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {centro.semanas.map((s) => (
+                          <tr key={s.numero}>
+                            <th scope="row">
+                              {s.numero}
+                              <span className="pronostico__fechas">
+                                {diaMes(s.inicio)} – {diaMes(s.fin)}
+                              </span>
+                            </th>
+                            <td>{s.citas}</td>
+                            <td>{s.llegadas}</td>
+                          </tr>
+                        ))}
+                      </tbody>
+                      <tfoot>
+                        <tr>
+                          <th scope="row">Total</th>
+                          <td>{centro.totalCitas}</td>
+                          <td>{centro.totalLlegadas}</td>
+                        </tr>
+                      </tfoot>
+                    </table>
+                  </div>
+                </section>
+              ))}
+            </>
+          )}
+
+          {/* La regla va después de las tablas: a 360 px las cifras quedan arriba. */}
           <p className="pronostico__regla">
             <strong>Cómo se calcula:</strong> llegadas esperadas = citas programadas × (1 − {etiqueta}),
             redondeado al entero más cercano. Es una cuenta con reglas fijas. Solo se cuentan los casos en
             seguimiento o en vigilancia con cita en estas semanas.
           </p>
-
-          {pronostico.centros.length === 0 ? (
-            <p>No hay centros de salud con citas en estas semanas.</p>
-          ) : (
-            pronostico.centros.map((centro) => (
-              <section key={centro.clues} className="supervision__tarjeta pronostico__centro">
-                <div className="supervision__tabla-envoltura">
-                  <table className="supervision__tabla">
-                    <caption className="pronostico__caption">Centro de salud {centro.clues}</caption>
-                    <thead>
-                      <tr>
-                        <th scope="col">Semana</th>
-                        <th scope="col">Citas programadas</th>
-                        <th scope="col">Llegadas esperadas</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {centro.semanas.map((s) => (
-                        <tr key={s.numero}>
-                          <th scope="row">
-                            {s.numero}
-                            <span className="pronostico__fechas">
-                              {diaMes(s.inicio)} – {diaMes(s.fin)}
-                            </span>
-                          </th>
-                          <td>{s.citas}</td>
-                          <td>{s.llegadas}</td>
-                        </tr>
-                      ))}
-                    </tbody>
-                    <tfoot>
-                      <tr>
-                        <th scope="row">Total</th>
-                        <td>{centro.totalCitas}</td>
-                        <td>{centro.totalLlegadas}</td>
-                      </tr>
-                    </tfoot>
-                  </table>
-                </div>
-              </section>
-            ))
-          )}
         </>
       )}
     </section>
