@@ -169,6 +169,8 @@ export function AvisoFamilia({ fila, centro, escuela, usuario, hoyISO, db = dbDe
             </div>
           </div>
 
+          <p className="recado__entrega">Entregar en sobre cerrado.</p>
+
           <footer className="recado__pie">Datos simulados · SIMORI, prototipo de seguimiento</footer>
         </article>
       ) : (
@@ -241,6 +243,7 @@ export function AvisoFamilia({ fila, centro, escuela, usuario, hoyISO, db = dbDe
           Cerrar
         </button>
       </div>
+      {canal === 'mensaje' && <p className="aviso__nota">Envío simulado en el prototipo: no se manda nada real.</p>}
 
       {avisos.length > 0 && (
         <div className="aviso__historial">
@@ -262,6 +265,10 @@ export function AvisoFamilia({ fila, centro, escuela, usuario, hoyISO, db = dbDe
           </ul>
         </div>
       )}
+
+      <p className="aviso__nota aviso__recordatorio">
+        La herramienta organiza el seguimiento; las decisiones clínicas son del personal de salud.
+      </p>
     </section>
   )
 }

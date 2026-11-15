@@ -79,6 +79,12 @@
   font-size: 0.9rem;
 }
 
+.aviso__recordatorio {
+  padding-top: 8px;
+  border-top: 1px solid var(--color-borde);
+  font-size: 0.85rem;
+}
+
 .aviso__acciones {
   display: flex;
   flex-wrap: wrap;
@@ -225,6 +231,13 @@
 
 .recado__firma-texto {
   font-size: 0.85rem;
+  color: var(--color-neutral);
+}
+
+.recado__entrega {
+  margin: 16px 0 0;
+  font-size: 0.85rem;
+  font-weight: 700;
   color: var(--color-neutral);
 }
 
