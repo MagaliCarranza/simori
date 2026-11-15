@@ -149,37 +149,42 @@ export function SupervisionPage({ hoyISO, usuario, db }) {
             {porLocalidad.length === 0 ? (
               <p>No hay casos con los filtros elegidos.</p>
             ) : (
-              <div className="supervision__tabla-envoltura">
-                <table className="supervision__tabla">
-                  <thead>
-                    <tr>
-                      <th scope="col">Localidad</th>
-                      <th scope="col">Positivos</th>
-                      <th scope="col">Evaluación completa</th>
-                      {SALIDAS_VISIBLES.slice(0, 4).map(([clave, titulo]) => (
-                        <th key={clave} scope="col">
-                          {titulo}
-                        </th>
-                      ))}
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {porLocalidad.map((g) => (
-                      <tr key={g.clave}>
-                        <th scope="row">{g.nombre}</th>
-                        <td>{g.total}</td>
-                        <td>{porcentaje(g.completado) ?? 'No disponible'}</td>
-                        {SALIDAS_VISIBLES.slice(0, 4).map(([clave]) => (
-                          <td key={clave}>{g.salidas[clave]}</td>
+              <>
+                <p className="supervision__nota supervision__deslizar">
+                  Desliza la tabla a los lados para ver todas las columnas.
+                </p>
+                <div className="supervision__tabla-envoltura" role="region" aria-label="Tabla por localidad" tabIndex={0}>
+                  <table className="supervision__tabla">
+                    <thead>
+                      <tr>
+                        <th scope="col">Localidad</th>
+                        <th scope="col">Positivos</th>
+                        <th scope="col">Evaluación completa</th>
+                        {SALIDAS_VISIBLES.slice(0, 4).map(([clave, titulo]) => (
+                          <th key={clave} scope="col">
+                            {titulo}
+                          </th>
                         ))}
                       </tr>
-                    ))}
-                  </tbody>
-                </table>
+                    </thead>
+                    <tbody>
+                      {porLocalidad.map((g) => (
+                        <tr key={g.clave}>
+                          <th scope="row">{g.nombre}</th>
+                          <td>{g.total}</td>
+                          <td>{porcentaje(g.completado) ?? 'No disponible'}</td>
+                          {SALIDAS_VISIBLES.slice(0, 4).map(([clave]) => (
+                            <td key={clave}>{g.salidas[clave]}</td>
+                          ))}
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
                 <p className="supervision__nota">
                   Se protegen las cifras menores de 5 y las que permitirían calcularlas.
                 </p>
-              </div>
+              </>
             )}
           </section>
         </>
