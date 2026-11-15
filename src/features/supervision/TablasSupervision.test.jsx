@@ -64,4 +64,15 @@ describe('tablas de Supervisión a 360 px', () => {
     const regla = screen.getByText(/Cómo se calcula:/).closest('p')
     expect(region.compareDocumentPosition(regla) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy()
   })
+
+  it('en Pronóstico las columnas tienen ayuda al pasar el mouse y en celular se avisa que la tabla se desliza', async () => {
+    render(<PronosticoPage hoyISO={HOY} usuario={supervisor} db={db} />)
+    await screen.findByRole('region', { name: `Tabla del centro de salud ${CLUES}` })
+    const encabezado = (nombre) => screen.getByRole('columnheader', { name: nombre })
+    expect(encabezado('Semana')).toHaveAttribute('title')
+    expect(encabezado('Citas programadas')).toHaveAttribute('title', expect.stringMatching(/seguimiento o en vigilancia/))
+    expect(encabezado('Llegadas esperadas')).toHaveAttribute('title', expect.stringMatching(/× \(1 − 30 %\)/))
+    const aviso = screen.getByText('Desliza la tabla a los lados para ver todas las columnas.')
+    expect(aviso).toHaveClass('supervision__deslizar')
+  })
 })
