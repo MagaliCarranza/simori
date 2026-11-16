@@ -7,6 +7,11 @@
 //   no vienen en el escenario), junto con sus niños, eventos y avisos.
 // - inicializar: si la DB todavía no tiene escenario activo, carga catálogos
 //   y el escenario default (11 %). Pensada para llamar al arrancar la app.
+//   Si ya estaba inicializada, programa actualizarCatalogos en segundo plano
+//   (no la espera).
+// - actualizarCatalogos: vuelve a descargar los catálogos y, si su contenido
+//   cambió (hash en meta.versionCatalogos), los reemplaza. Nunca toca casos,
+//   niños, eventos, avisos ni bitácora. Sin red o con error, no escribe nada.
 
 import { db as dbDefault } from './index.js'
 
@@ -17,6 +22,43 @@ const RUTA_USUARIOS = '/data/usuarios_demo.json'
 const ruta_casos = (n) => `/data/casos_${n}.json`
 
 const ESCENARIO_DEFAULT = 11
+
+// Tiempo máximo por descarga al actualizar catálogos.
+const LIMITE_DESCARGA_MS = 5000
+const CLAVE_VERSION = 'versionCatalogos'
+
+// Hash FNV-1a de 32 bits: solo sirve para notar que el contenido cambió.
+function hashTexto(texto) {
+  let h = 0x811c9dc5
+  for (let i = 0; i < texto.length; i++) {
+    h ^= texto.charCodeAt(i)
+    h = Math.imul(h, 0x01000193)
+  }
+  return (h >>> 0).toString(16).padStart(8, '0')
+}
+
+const versionDe = ({ localidades, escuelas, centrosSalud, usuarios }) =>
+  hashTexto(JSON.stringify([localidades, escuelas, centrosSalud, usuarios]))
+
+// Descarga un JSON con límite de tiempo. Si se pasa, cancela la petición y
+// rechaza aunque el fetch nunca responda.
+function descargarJson(ruta, fetchImpl, limiteMs) {
+  const control = new AbortController()
+  return new Promise((resolve, reject) => {
+    const reloj = setTimeout(() => {
+      control.abort()
+      reject(new Error(`Tiempo agotado: ${ruta}`))
+    }, limiteMs)
+    Promise.resolve()
+      .then(() => fetchImpl(ruta, { signal: control.signal }))
+      .then((r) => {
+        if (!r || r.ok === false) throw new Error(`No se pudo descargar ${ruta}`)
+        return r.json()
+      })
+      .then(resolve, reject)
+      .finally(() => clearTimeout(reloj))
+  })
+}
 
 export async function cargarCatalogos(datos, db = dbDefault) {
   await db.transaction(
@@ -98,9 +140,75 @@ export async function escenarioActivo(db = dbDefault) {
   return entrada ? entrada.valor : null
 }
 
+// Reemplaza los catálogos si su contenido cambió. Devuelve 'actualizado',
+// 'igual' o 'sin-cambios-por-error' y nunca lanza: sin red, con una descarga
+// que tarda más de limiteMs o con un JSON inválido, no escribe nada.
+// Borra centros y escuelas que ya no vienen en el JSON (p. ej. los PROV-*
+// viejos) solo si ningún caso guardado en el equipo los usa.
+export async function actualizarCatalogos({
+  fetchImpl = fetch,
+  db = dbDefault,
+  limiteMs = LIMITE_DESCARGA_MS,
+} = {}) {
+  try {
+    const [localidades, escuelas, centrosSalud, usuarios] = await Promise.all(
+      [RUTA_LOCALIDADES, RUTA_ESCUELAS, RUTA_CENTROS, RUTA_USUARIOS].map((ruta) =>
+        descargarJson(ruta, fetchImpl, limiteMs),
+      ),
+    )
+    if (![localidades, escuelas, centrosSalud, usuarios].every(Array.isArray)) {
+      return 'sin-cambios-por-error'
+    }
+    const version = versionDe({ localidades, escuelas, centrosSalud, usuarios })
+    const guardada = await db.meta.get(CLAVE_VERSION)
+    if (guardada?.valor === version) return 'igual'
+
+    // Lectura previa (fuera de la transacción, que solo abre catálogos y meta).
+    const casos = await db.casos.toArray()
+    const cctUsados = new Set(casos.map((c) => c.cct))
+    const cluesUsados = new Set(casos.map((c) => c.clues))
+    const cctNuevos = new Set(escuelas.map((e) => e.cct))
+    const cluesNuevos = new Set(centrosSalud.map((c) => c.clues))
+
+    await db.transaction('rw', db.localidades, db.escuelas, db.centrosSalud, db.usuarios, db.meta, async () => {
+      await db.localidades.bulkPut(localidades)
+      await db.escuelas.bulkPut(escuelas)
+      await db.centrosSalud.bulkPut(centrosSalud)
+      await db.usuarios.bulkPut(usuarios)
+      const escuelasHuerfanas = (await db.escuelas.toCollection().primaryKeys()).filter(
+        (cct) => !cctNuevos.has(cct) && !cctUsados.has(cct),
+      )
+      const centrosHuerfanos = (await db.centrosSalud.toCollection().primaryKeys()).filter(
+        (clues) => !cluesNuevos.has(clues) && !cluesUsados.has(clues),
+      )
+      await db.escuelas.bulkDelete(escuelasHuerfanas)
+      await db.centrosSalud.bulkDelete(centrosHuerfanos)
+      await db.meta.put({ clave: CLAVE_VERSION, valor: version })
+    })
+    return 'actualizado'
+  } catch {
+    return 'sin-cambios-por-error'
+  }
+}
+
 // Pensada para arrancar la PWA. fetchImpl se puede inyectar en pruebas.
-export async function inicializar({ fetchImpl = fetch, escenario = ESCENARIO_DEFAULT, db = dbDefault } = {}) {
-  if (await escenarioActivo(db)) return { yaInicializada: true }
+// Si la base ya estaba inicializada, resuelve de inmediato y deja la
+// actualización de catálogos para después (setTimeout 0), sin esperarla.
+// `actualizacion` es su promesa (nunca rechaza); la app no la usa.
+export async function inicializar({
+  fetchImpl = fetch,
+  escenario = ESCENARIO_DEFAULT,
+  db = dbDefault,
+  limiteDescargaMs = LIMITE_DESCARGA_MS,
+} = {}) {
+  if (await escenarioActivo(db)) {
+    const actualizacion = new Promise((resolve) => {
+      setTimeout(() => {
+        actualizarCatalogos({ fetchImpl, db, limiteMs: limiteDescargaMs }).then(resolve)
+      }, 0)
+    })
+    return { yaInicializada: true, actualizacion }
+  }
 
   const [localidades, escuelas, centrosSalud, usuarios] = await Promise.all([
     fetchImpl(RUTA_LOCALIDADES).then((r) => r.json()),
@@ -109,6 +217,7 @@ export async function inicializar({ fetchImpl = fetch, escenario = ESCENARIO_DEF
     fetchImpl(RUTA_USUARIOS).then((r) => r.json()),
   ])
   await cargarCatalogos({ localidades, escuelas, centrosSalud, usuarios }, db)
+  await db.meta.put({ clave: CLAVE_VERSION, valor: versionDe({ localidades, escuelas, centrosSalud, usuarios }) })
 
   const casosEscenario = await fetchImpl(ruta_casos(escenario)).then((r) => r.json())
   await cargarEscenario(

@@ -1,17 +1,24 @@
-// Mapa de la zona (M9: HU09, RF10, RNF03). Un punto por localidad en alcance
-// (las escuelas usan la coordenada de su localidad) y un cuadrado por centro de
-// salud que las atiende, en su coordenada CLUES. Solo cifras agregadas.
+// Mapa de la zona (M9: HU09, RF10, RNF03). Un punto por localidad en alcance,
+// un rombo por edificio escolar con ubicación propia (por CCT) y un cuadrado
+// por centro de salud que las atiende, en su coordenada CLUES. Solo cifras
+// agregadas.
 
-import { divIcon } from 'leaflet'
+import { divIcon, latLngBounds, point } from 'leaflet'
 import 'leaflet/dist/leaflet.css'
 import { useEffect, useMemo, useRef, useState } from 'react'
-import { CircleMarker, MapContainer, Marker, TileLayer, Tooltip } from 'react-leaflet'
+import { CircleMarker, MapContainer, Marker, TileLayer, Tooltip, useMapEvents } from 'react-leaflet'
 import { COLORES } from '../../components/colores.js'
 import { etiquetaPrioridad } from '../../domain/index.js'
 import { EtiquetaSimulado } from '../../components/EtiquetaSimulado.jsx'
 import { FILTROS_INICIALES } from '../supervision/filtros.js'
 import { useSupervision } from '../supervision/useSupervision.js'
-import { centrosEnMapa, panelesPorLocalidad, textoAgrupacion } from './panelLocalidad.js'
+import {
+  centrosEnMapa,
+  edificiosEscolares,
+  panelesPorLocalidad,
+  textoAgrupacion,
+  textoEdificio,
+} from './panelLocalidad.js'
 import '../supervision/supervision.css'
 import './mapa.css'
 
@@ -21,6 +28,7 @@ const FUENTES = {
   poblacion: 'Censo 2020 ITER por localidad',
   matricula: 'SEJ / SEP, Estadísticas educativas',
   centros: 'Secretaría de Salud, catálogo CLUES',
+  ubicacionEscuelas: 'SEP, consultado en escuelasmex.com',
 }
 
 const MOSAICOS_OSM = {
@@ -31,6 +39,11 @@ const MOSAICOS_OSM = {
 const ZOOM_MIN = 12
 const ZOOM_MAX = 17
 const MARGEN_GRADOS = 0.05
+
+// Las primarias de Agua Caliente y San Pedro Itzicán están a 44 y 22 m del
+// punto de su localidad: con menos zoom el rombo queda dentro del círculo.
+// Desde 16 se separan (o quedan en su borde), así que antes no se dibujan.
+const ZOOM_ESCUELAS = 16
 
 // Un mosaico que falla suelto no basta para avisar: solo varios seguidos.
 const FALLOS_PARA_AVISO = 3
@@ -53,6 +66,50 @@ const ICONO_CENTRO = divIcon({
   iconSize: [18, 18],
   iconAnchor: [9, 9],
 })
+
+// Escuela: rombo blanco con borde (otra forma que la localidad y el centro).
+// Solo CSS, sin imágenes.
+const ICONO_ESCUELA = divIcon({
+  className: 'mapa__icono-escuela',
+  iconSize: [14, 14],
+  iconAnchor: [7, 7],
+})
+
+// Margen total (px) alrededor de la localidad y sus escuelas al encuadrar.
+const MARGEN_ENCUADRE = point(48, 48)
+
+// Rombos de escuelas, uno por edificio, solo desde ZOOM_ESCUELAS. Sin etiqueta
+// fija: el nombre sale al pasar el mouse y al tocarlo se abre su localidad.
+// `encuadre` ({ limites }) viene del botón "Ver escuelas en el mapa": acerca el
+// mapa a esos límites, nunca por debajo de ZOOM_ESCUELAS ni arriba de ZOOM_MAX.
+function CapaEscuelas({ edificios, onElegir, encuadre }) {
+  const [zoom, setZoom] = useState(null)
+  const mapa = useMapEvents({ zoomend: () => setZoom(mapa.getZoom()) })
+  useEffect(() => {
+    if (!encuadre) return
+    const limites = latLngBounds(encuadre.limites)
+    const ajuste = mapa.getBoundsZoom(limites, false, MARGEN_ENCUADRE)
+    mapa.setView(limites.getCenter(), Math.min(ZOOM_MAX, Math.max(ZOOM_ESCUELAS, ajuste)))
+  }, [encuadre, mapa])
+  if ((zoom ?? mapa.getZoom()) < ZOOM_ESCUELAS) return null
+  return edificios.map((ed) => {
+    const texto = textoEdificio(ed)
+    return (
+      <Marker
+        key={ed.clave}
+        position={ed.coordenadas}
+        icon={ICONO_ESCUELA}
+        title={`Escuela: ${texto}`}
+        alt={`Escuela: ${texto}`}
+        eventHandlers={{ click: () => onElegir(ed.claveInegi) }}
+      >
+        <Tooltip direction="top" offset={[0, -8]} className="mapa__etiqueta-escuela">
+          {texto}
+        </Tooltip>
+      </Marker>
+    )
+  })
+}
 
 // Distancia de la localidad a su centro, con un decimal.
 function textoDistancia(km) {
@@ -124,9 +181,10 @@ function Par({ termino, children }) {
   )
 }
 
-function PanelLocalidad({ panel, prioridadIndisponible }) {
+function PanelLocalidad({ panel, prioridadIndisponible, onVerEscuelas }) {
   const { pendientes, prioridad, agrupacion, centro } = panel
   const aproximada = panel.escuelas.some((e) => e.ubicacionAproximada)
+  const conUbicacion = panel.escuelas.some((e) => !e.ubicacionAproximada)
   return (
     <>
       <h3 id="titulo-panel">{panel.nombre}</h3>
@@ -184,8 +242,14 @@ function PanelLocalidad({ panel, prioridadIndisponible }) {
       )}
       <p className="supervision__nota">
         Matrícula: {FUENTES.matricula}.
+        {conUbicacion && ` Ubicación de las escuelas: ${FUENTES.ubicacionEscuelas}.`}
         {aproximada && ' Ubicación aproximada: las escuelas se muestran en el punto de su localidad.'}
       </p>
+      {conUbicacion && onVerEscuelas && (
+        <button type="button" className="boton boton--secundario mapa__ver-escuelas" onClick={onVerEscuelas}>
+          Ver escuelas en el mapa
+        </button>
+      )}
 
       <h4 className="mapa__subtitulo">Centro de salud que la atiende</h4>
       {centro ? (
@@ -309,7 +373,20 @@ export function MapaPage({ hoyISO, usuario, db, fetchImpl = fetch }) {
   const [seleccion, setSeleccion] = useState(null)
   const { sinMosaicos, eventos: eventosMosaicos } = useSinMosaicos()
   const centros = useMemo(() => centrosEnMapa(catalogos.localidades, catalogos.centros), [catalogos])
+  const edificios = useMemo(() => edificiosEscolares(catalogos.escuelas), [catalogos])
   const panel = paneles.find((p) => p.claveInegi === seleccion) ?? null
+  const [encuadre, setEncuadre] = useState(null)
+  const lienzo = useRef(null)
+
+  // Acerca el mapa a la localidad del panel y sus edificios escolares, y sube
+  // la vista al mapa (a 360 px el panel queda debajo).
+  const verEscuelas = () => {
+    const propios = edificios.filter((ed) => ed.claveInegi === panel.claveInegi).map((ed) => ed.coordenadas)
+    const puntos = panel.coordenadas ? [panel.coordenadas, ...propios] : propios
+    if (puntos.length === 0) return
+    setEncuadre({ limites: limites(puntos) })
+    lienzo.current?.scrollIntoView?.({ block: 'nearest' })
+  }
 
   const conPunto = paneles.filter((p) => p.coordenadas)
   // Los centros entran en el encuadre solo si hay localidades que mostrar.
@@ -355,7 +432,7 @@ export function MapaPage({ hoyISO, usuario, db, fetchImpl = fetch }) {
             </p>
           )}
 
-          <div className="mapa__lienzo">
+          <div className="mapa__lienzo" ref={lienzo}>
             {caja ? (
               <MapContainer
                 bounds={caja}
@@ -412,6 +489,9 @@ export function MapaPage({ hoyISO, usuario, db, fetchImpl = fetch }) {
                     </Tooltip>
                   </Marker>
                 ))}
+                {edificios.length > 0 && (
+                  <CapaEscuelas edificios={edificios} onElegir={setSeleccion} encuadre={encuadre} />
+                )}
               </MapContainer>
             ) : (
               <p className="mapa__vacio">No hay localidades con coordenadas para mostrar.</p>
@@ -427,6 +507,12 @@ export function MapaPage({ hoyISO, usuario, db, fetchImpl = fetch }) {
                   <span className="mapa__simbolo mapa__simbolo--centro" aria-hidden="true" /> Centro de salud
                 </li>
               )}
+              {edificios.length > 0 && (
+                <li>
+                  <span className="mapa__simbolo mapa__simbolo--escuela" aria-hidden="true" /> Escuela (acerca el
+                  mapa para verlas)
+                </li>
+              )}
             </ul>
           )}
 
@@ -437,7 +523,11 @@ export function MapaPage({ hoyISO, usuario, db, fetchImpl = fetch }) {
             aria-label={panel ? undefined : 'Datos de la localidad'}
           >
             {panel ? (
-              <PanelLocalidad panel={panel} prioridadIndisponible={prioridadIndisponible} />
+              <PanelLocalidad
+                panel={panel}
+                prioridadIndisponible={prioridadIndisponible}
+                onVerEscuelas={caja && edificios.length > 0 ? verEscuelas : null}
+              />
             ) : (
               <p>Elige una localidad en la lista o en el mapa.</p>
             )}
