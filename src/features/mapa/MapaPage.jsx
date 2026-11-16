@@ -1,8 +1,9 @@
-// Mapa de la zona (M9: HU09, RF10, RNF03). Un punto por localidad en alcance
-// (las escuelas usan la coordenada de su localidad) y un cuadrado por centro de
-// salud que las atiende, en su coordenada CLUES. Solo cifras agregadas.
+// Mapa de la zona (M9: HU09, RF10, RNF03). Un punto por localidad en alcance,
+// un rombo por edificio escolar con ubicación propia (por CCT) y un cuadrado
+// por centro de salud que las atiende, en su coordenada CLUES. Solo cifras
+// agregadas.
 
-import { divIcon } from 'leaflet'
+import { divIcon, latLngBounds, point } from 'leaflet'
 import 'leaflet/dist/leaflet.css'
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { CircleMarker, MapContainer, Marker, TileLayer, Tooltip, useMapEvents } from 'react-leaflet'
@@ -74,11 +75,22 @@ const ICONO_ESCUELA = divIcon({
   iconAnchor: [7, 7],
 })
 
+// Margen total (px) alrededor de la localidad y sus escuelas al encuadrar.
+const MARGEN_ENCUADRE = point(48, 48)
+
 // Rombos de escuelas, uno por edificio, solo desde ZOOM_ESCUELAS. Sin etiqueta
 // fija: el nombre sale al pasar el mouse y al tocarlo se abre su localidad.
-function CapaEscuelas({ edificios, onElegir }) {
+// `encuadre` ({ limites }) viene del botón "Ver escuelas en el mapa": acerca el
+// mapa a esos límites, nunca por debajo de ZOOM_ESCUELAS ni arriba de ZOOM_MAX.
+function CapaEscuelas({ edificios, onElegir, encuadre }) {
   const [zoom, setZoom] = useState(null)
   const mapa = useMapEvents({ zoomend: () => setZoom(mapa.getZoom()) })
+  useEffect(() => {
+    if (!encuadre) return
+    const limites = latLngBounds(encuadre.limites)
+    const ajuste = mapa.getBoundsZoom(limites, false, MARGEN_ENCUADRE)
+    mapa.setView(limites.getCenter(), Math.min(ZOOM_MAX, Math.max(ZOOM_ESCUELAS, ajuste)))
+  }, [encuadre, mapa])
   if ((zoom ?? mapa.getZoom()) < ZOOM_ESCUELAS) return null
   return edificios.map((ed) => {
     const texto = textoEdificio(ed)
@@ -169,7 +181,7 @@ function Par({ termino, children }) {
   )
 }
 
-function PanelLocalidad({ panel, prioridadIndisponible }) {
+function PanelLocalidad({ panel, prioridadIndisponible, onVerEscuelas }) {
   const { pendientes, prioridad, agrupacion, centro } = panel
   const aproximada = panel.escuelas.some((e) => e.ubicacionAproximada)
   const conUbicacion = panel.escuelas.some((e) => !e.ubicacionAproximada)
@@ -233,6 +245,11 @@ function PanelLocalidad({ panel, prioridadIndisponible }) {
         {conUbicacion && ` Ubicación de las escuelas: ${FUENTES.ubicacionEscuelas}.`}
         {aproximada && ' Ubicación aproximada: las escuelas se muestran en el punto de su localidad.'}
       </p>
+      {conUbicacion && onVerEscuelas && (
+        <button type="button" className="boton boton--secundario mapa__ver-escuelas" onClick={onVerEscuelas}>
+          Ver escuelas en el mapa
+        </button>
+      )}
 
       <h4 className="mapa__subtitulo">Centro de salud que la atiende</h4>
       {centro ? (
@@ -358,6 +375,18 @@ export function MapaPage({ hoyISO, usuario, db, fetchImpl = fetch }) {
   const centros = useMemo(() => centrosEnMapa(catalogos.localidades, catalogos.centros), [catalogos])
   const edificios = useMemo(() => edificiosEscolares(catalogos.escuelas), [catalogos])
   const panel = paneles.find((p) => p.claveInegi === seleccion) ?? null
+  const [encuadre, setEncuadre] = useState(null)
+  const lienzo = useRef(null)
+
+  // Acerca el mapa a la localidad del panel y sus edificios escolares, y sube
+  // la vista al mapa (a 360 px el panel queda debajo).
+  const verEscuelas = () => {
+    const propios = edificios.filter((ed) => ed.claveInegi === panel.claveInegi).map((ed) => ed.coordenadas)
+    const puntos = panel.coordenadas ? [panel.coordenadas, ...propios] : propios
+    if (puntos.length === 0) return
+    setEncuadre({ limites: limites(puntos) })
+    lienzo.current?.scrollIntoView?.({ block: 'nearest' })
+  }
 
   const conPunto = paneles.filter((p) => p.coordenadas)
   // Los centros entran en el encuadre solo si hay localidades que mostrar.
@@ -403,7 +432,7 @@ export function MapaPage({ hoyISO, usuario, db, fetchImpl = fetch }) {
             </p>
           )}
 
-          <div className="mapa__lienzo">
+          <div className="mapa__lienzo" ref={lienzo}>
             {caja ? (
               <MapContainer
                 bounds={caja}
@@ -460,7 +489,9 @@ export function MapaPage({ hoyISO, usuario, db, fetchImpl = fetch }) {
                     </Tooltip>
                   </Marker>
                 ))}
-                {edificios.length > 0 && <CapaEscuelas edificios={edificios} onElegir={setSeleccion} />}
+                {edificios.length > 0 && (
+                  <CapaEscuelas edificios={edificios} onElegir={setSeleccion} encuadre={encuadre} />
+                )}
               </MapContainer>
             ) : (
               <p className="mapa__vacio">No hay localidades con coordenadas para mostrar.</p>
@@ -492,7 +523,11 @@ export function MapaPage({ hoyISO, usuario, db, fetchImpl = fetch }) {
             aria-label={panel ? undefined : 'Datos de la localidad'}
           >
             {panel ? (
-              <PanelLocalidad panel={panel} prioridadIndisponible={prioridadIndisponible} />
+              <PanelLocalidad
+                panel={panel}
+                prioridadIndisponible={prioridadIndisponible}
+                onVerEscuelas={caja && edificios.length > 0 ? verEscuelas : null}
+              />
             ) : (
               <p>Elige una localidad en la lista o en el mapa.</p>
             )}

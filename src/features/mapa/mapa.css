@@ -239,6 +239,10 @@
   transform: rotate(45deg);
 }
 
+.mapa__ver-escuelas {
+  margin-top: 8px;
+}
+
 .mapa__etiqueta-escuela {
   font-weight: 600;
   color: var(--color-escuela);

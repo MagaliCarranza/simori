@@ -6,7 +6,7 @@ import { edificiosEscolares, textoEdificio } from './panelLocalidad.js'
 
 // jsdom no dibuja Leaflet. El mapa falso guarda su zoom y el manejador de
 // zoomend para simular que la persona acerca o aleja el mapa.
-const falso = vi.hoisted(() => ({ zoom: 13, zoomend: null }))
+const falso = vi.hoisted(() => ({ zoom: 13, zoomend: null, zoomAjuste: 16, vista: null }))
 vi.mock('react-leaflet', () => ({
   MapContainer: ({ children }) => <div data-testid="mapa">{children}</div>,
   TileLayer: () => null,
@@ -23,7 +23,15 @@ vi.mock('react-leaflet', () => ({
   ),
   useMapEvents: (manejadores) => {
     falso.zoomend = manejadores.zoomend
-    return { getZoom: () => falso.zoom }
+    return {
+      getZoom: () => falso.zoom,
+      getBoundsZoom: () => falso.zoomAjuste,
+      setView: (centro, zoom) => {
+        falso.vista = { centro: [centro.lat, centro.lng], zoom }
+        falso.zoom = zoom
+        falso.zoomend()
+      },
+    }
   },
 }))
 
@@ -57,6 +65,8 @@ const ESCUELAS = [
 beforeEach(async () => {
   falso.zoom = 13
   falso.zoomend = null
+  falso.zoomAjuste = 16
+  falso.vista = null
   db = crearDb(`test-mapa-escuelas-${n++}`)
   await db.localidades.bulkAdd([
     { claveInegi: '140660002', nombre: 'Agua Caliente', lat: 20.312568, lng: -102.928629, enAlcance: true, cluesOperativo: 'JCSSA004213' },
@@ -147,6 +157,38 @@ describe('MapaPage con escuelas', () => {
     expect(panel.getByText(/Ubicación de las escuelas: SEP, consultado en escuelasmex\.com\./)).toBeInTheDocument()
     expect(panel.queryByText(/Ubicación aproximada: las escuelas/)).not.toBeInTheDocument()
     expect(panel.queryByText(/DENUE/)).not.toBeInTheDocument()
+  })
+
+  it('"Ver escuelas en el mapa" acerca el mapa a la localidad y sus escuelas y muestra los rombos', async () => {
+    await abrir()
+    fireEvent.click(screen.getByRole('button', { name: 'Agua Caliente' }))
+    expect(rombos()).toHaveLength(0)
+    fireEvent.click(screen.getByRole('button', { name: 'Ver escuelas en el mapa' }))
+    expect(falso.vista.zoom).toBe(16)
+    // Centro entre el punto de la localidad y las escuelas de Agua Caliente.
+    const [lat, lng] = falso.vista.centro
+    expect(lat).toBeGreaterThanOrEqual(20.311194)
+    expect(lat).toBeLessThanOrEqual(20.312568)
+    expect(lng).toBeGreaterThanOrEqual(-102.929)
+    expect(lng).toBeLessThanOrEqual(-102.925028)
+    expect(rombos()).toHaveLength(2)
+  })
+
+  it('al encuadrar nunca baja de zoom 16 ni pasa de 17', async () => {
+    await abrir()
+    fireEvent.click(screen.getByRole('button', { name: 'Agua Caliente' }))
+    falso.zoomAjuste = 14
+    fireEvent.click(screen.getByRole('button', { name: 'Ver escuelas en el mapa' }))
+    expect(falso.vista.zoom).toBe(16)
+    falso.zoomAjuste = 18
+    fireEvent.click(screen.getByRole('button', { name: 'Ver escuelas en el mapa' }))
+    expect(falso.vista.zoom).toBe(17)
+  })
+
+  it('el botón no aparece si la localidad solo tiene escuelas con ubicación aproximada', async () => {
+    await abrir()
+    fireEvent.click(screen.getByRole('button', { name: 'Chalpicote' }))
+    expect(screen.queryByRole('button', { name: 'Ver escuelas en el mapa' })).not.toBeInTheDocument()
   })
 
   it('una localidad con escuelas aproximadas conserva su nota', async () => {
