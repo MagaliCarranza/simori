@@ -45,6 +45,7 @@
      turquesa de las localidades). */
   --color-centro: #6b21a8;
   --color-centro-borde: #3b0764;
+  --color-escuela: var(--color-primary-hover); /* borde del rombo de escuela en el mapa */
   --color-localidad-relleno: rgb(14 102 112 / 50%); /* = --color-primary al 50 %, como el marcador */
 
   /* Índice de prioridad en el panel del mapa (escala propia, no es semáforo). */
