@@ -4,10 +4,14 @@
 }
 
 /* Marco: encabezado arriba; contenido; navegación abajo (celular) o a la
-   izquierda (escritorio). */
+   izquierda (escritorio). El encabezado mide lo que su contenido y el
+   contenido toma el resto: sin filas fijas, en una pantalla corta (p. ej.
+   "Aún no hay avisos") el espacio sobrante estiraba el encabezado. La barra
+   inferior es fixed y no cuenta como fila. */
 .marco {
   display: grid;
   grid-template-columns: minmax(0, 1fr);
+  grid-template-rows: auto 1fr;
   min-height: 100dvh;
 }
 
