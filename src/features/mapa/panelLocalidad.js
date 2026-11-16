@@ -54,6 +54,46 @@ export function centrosEnMapa(localidades, centros) {
     .sort((a, b) => a.nombre.localeCompare(b.nombre, 'es'))
 }
 
+const ORDEN_TURNO = { matutino: 0, vespertino: 1 }
+const ordenTurno = (t) => ORDEN_TURNO[t] ?? 2
+
+// Escuelas con ubicación propia (no aproximada), agrupadas por edificio: dos
+// turnos con la misma coordenada salen en un solo punto. Las escuelas con
+// ubicación aproximada no se dibujan (quedarían sobre el punto de la localidad).
+export function edificiosEscolares(escuelas) {
+  const porCoordenada = new Map()
+  for (const e of escuelas) {
+    if (e.ubicacionAproximada || !tieneCoordenadas(e)) continue
+    const clave = `${e.lat.toFixed(6)},${e.lng.toFixed(6)}`
+    if (!porCoordenada.has(clave)) {
+      porCoordenada.set(clave, { clave, claveInegi: e.claveInegi, coordenadas: [e.lat, e.lng], escuelas: [] })
+    }
+    porCoordenada.get(clave).escuelas.push({ cct: e.cct, nombre: e.nombre, turno: e.turno ?? null })
+  }
+  return [...porCoordenada.values()]
+    .map((ed) => ({
+      ...ed,
+      escuelas: ed.escuelas.sort(
+        (a, b) => ordenTurno(a.turno) - ordenTurno(b.turno) || a.nombre.localeCompare(b.nombre, 'es'),
+      ),
+    }))
+    .sort((a, b) => a.clave.localeCompare(b.clave))
+}
+
+// "Emiliano Zapata (matutino y vespertino)" si los turnos son de la misma
+// escuela; si no, "Emiliano Zapata (matutino) y Gonzalo Chapela y Blanco (vespertino)".
+export function textoEdificio({ escuelas }) {
+  const porNombre = new Map()
+  for (const e of escuelas) {
+    if (!porNombre.has(e.nombre)) porNombre.set(e.nombre, [])
+    if (e.turno) porNombre.get(e.nombre).push(e.turno)
+  }
+  const partes = [...porNombre].map(([nombre, turnos]) =>
+    turnos.length ? `${nombre} (${turnos.join(' y ')})` : nombre,
+  )
+  return partes.join(' y ')
+}
+
 // Grupo k-means de la localidad, tomado de grupos_localidades.json (salida de
 // scripts/agrupar_localidades.py). Devuelve null si el JSON no cargó, no
 // tiene la forma esperada o la localidad no quedó en ningún grupo (le faltaba

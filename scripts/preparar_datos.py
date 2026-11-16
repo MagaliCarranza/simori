@@ -56,6 +56,9 @@ RUTA_ITER = RAW / "iter_14_cpv2020" / "conjunto_de_datos" / "conjunto_de_datos_i
 RUTA_CLUES = RAW / "catclues.csv"
 RUTA_DENUE = RAW / "denue_00_62_csv" / "conjunto_de_datos" / "denue_inegi_62_.csv"
 RUTA_MANUAL = MANUAL / "georreferencia_manual.csv"
+# Coordenadas de escuelas por CCT (datos publicos de la SEP, consultados en
+# escuelasmex.com). Columnas: cct,lat,lng,fuente,url,nota.
+RUTA_ESCUELAS_MANUAL = MANUAL / "georreferencia_escuelas.csv"
 RUTA_UNION = PROCESADO / "union_clues_denue.csv"
 
 # ITER agrega 3 filas de resumen por municipio que NO son localidades:
@@ -205,6 +208,43 @@ def leer_manual():
         return list(csv.DictReader(f))
 
 
+def leer_escuelas_manual(ruta=None):
+    """Lee las coordenadas de escuelas por CCT.
+
+    Devuelve dict cct -> (lat, lng). Ignora filas sin CCT o con lat/lng no
+    numericos: esas escuelas se quedan con la coordenada de su localidad.
+    """
+    ruta = Path(ruta) if ruta else RUTA_ESCUELAS_MANUAL
+    if not ruta.exists():
+        return {}
+    coords = {}
+    with ruta.open(encoding="utf-8-sig") as f:
+        for r in csv.DictReader(f):
+            cct = str(r.get("cct") or "").strip()
+            if not cct:
+                continue
+            try:
+                lat = float(r["lat"])
+                lng = float(r["lng"])
+            except (KeyError, TypeError, ValueError):
+                continue
+            coords[cct] = (lat, lng)
+    return coords
+
+
+def aplicar_ubicacion_escuelas(escuelas, coords_por_cct):
+    """Pone lat, lng y ubicacionAproximada=False a las escuelas con CCT en
+    coords_por_cct. No cambia ningun otro campo, ni el orden ni el numero."""
+    salida = []
+    for e in escuelas:
+        nueva = dict(e)
+        if e["cct"] in coords_por_cct:
+            nueva["lat"], nueva["lng"] = coords_por_cct[e["cct"]]
+            nueva["ubicacionAproximada"] = False
+        salida.append(nueva)
+    return salida
+
+
 # --------------------------------- Pipeline ---------------------------------
 
 def construir_centros_y_localidades(alcance, iter_df, conapo_df, sep_df,
@@ -317,7 +357,7 @@ def cluesOperativoEnAlcance_loc(clues_op, centros):
     return -1
 
 
-def construir_escuelas(sep_df, enAlcance, localidades_por_clave):
+def construir_escuelas(sep_df, enAlcance, localidades_por_clave, coords_por_cct=None):
     f = sep_df[sep_df["localidad"].astype(int).apply(lambda x: f"{x:04d}" in enAlcance)].copy()
     f = f.sort_values(["localidad", "nivel", "clave_cct"])
     salida = []
@@ -337,7 +377,7 @@ def construir_escuelas(sep_df, enAlcance, localidades_por_clave):
             "lng": info["lng"] if info else None,
             "ubicacionAproximada": True,
         })
-    return salida
+    return aplicar_ubicacion_escuelas(salida, coords_por_cct or {})
 
 
 def construir_usuarios_demo(clues_operativo):
@@ -379,7 +419,9 @@ def main():
         alcance, iter_df, conapo_df, sep_df, clues_rows, denue_rows, manual_rows,
     )
     localidades_por_clave = {l["claveInegi"]: l for l in localidades}
-    escuelas = construir_escuelas(sep_df, set(alcance["enAlcance"]), localidades_por_clave)
+    escuelas = construir_escuelas(
+        sep_df, set(alcance["enAlcance"]), localidades_por_clave, leer_escuelas_manual(),
+    )
     usuarios_demo = construir_usuarios_demo(clues_operativo="JCSSA004213")
 
     # localidades.json es lo que la app muestra: solo las que estan en alcance.
@@ -426,5 +468,22 @@ def main():
         )
 
 
+def solo_ubicacion_escuelas():
+    """Aplica georreferencia_escuelas.csv al escuelas.json ya generado, sin
+    necesitar los datasets de data/raw. Solo cambia lat, lng y
+    ubicacionAproximada de las escuelas que vienen en el CSV."""
+    ruta = PUBLIC / "escuelas.json"
+    escuelas = json.loads(ruta.read_text(encoding="utf-8"))
+    coords = leer_escuelas_manual()
+    escribir_json(ruta, aplicar_ubicacion_escuelas(escuelas, coords))
+    cambiadas = sum(1 for e in escuelas if e["cct"] in coords)
+    print(f"escuelas.json: {cambiadas} de {len(escuelas)} escuelas con ubicacion por CCT")
+
+
 if __name__ == "__main__":
-    main()
+    import sys
+
+    if "--solo-ubicacion-escuelas" in sys.argv:
+        solo_ubicacion_escuelas()
+    else:
+        main()

@@ -226,6 +226,32 @@
   color: var(--color-centro-borde);
 }
 
+/* Escuela: rombo blanco con borde. Leaflet mueve el div con transform, así
+   que el giro va en ::before. */
+.mapa__icono-escuela::before,
+.mapa__simbolo--escuela::before {
+  content: '';
+  position: absolute;
+  inset: 2px;
+  box-sizing: border-box;
+  border: 2px solid var(--color-escuela);
+  background: var(--color-superficie);
+  transform: rotate(45deg);
+}
+
+.mapa__ver-escuelas {
+  margin-top: 8px;
+}
+
+.mapa__etiqueta-escuela {
+  font-weight: 600;
+  color: var(--color-escuela);
+}
+
+.mapa__simbolo--escuela {
+  position: relative;
+}
+
 .mapa__leyenda {
   display: flex;
   flex-wrap: wrap;

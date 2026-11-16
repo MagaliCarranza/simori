@@ -7,9 +7,9 @@
     "turno": "matutino",
     "claveInegi": "140660002",
     "matricula": 157,
-    "lat": 20.312568,
-    "lng": -102.928629,
-    "ubicacionAproximada": true
+    "lat": 20.312389,
+    "lng": -102.929,
+    "ubicacionAproximada": false
   },
   {
     "cct": "14DPR3931E",
@@ -19,9 +19,9 @@
     "turno": "vespertino",
     "claveInegi": "140660002",
     "matricula": 111,
-    "lat": 20.312568,
-    "lng": -102.928629,
-    "ubicacionAproximada": true
+    "lat": 20.312389,
+    "lng": -102.929,
+    "ubicacionAproximada": false
   },
   {
     "cct": "14DTV0442U",
@@ -31,9 +31,9 @@
     "turno": "matutino",
     "claveInegi": "140660002",
     "matricula": 147,
-    "lat": 20.312568,
-    "lng": -102.928629,
-    "ubicacionAproximada": true
+    "lat": 20.311194,
+    "lng": -102.925028,
+    "ubicacionAproximada": false
   },
   {
     "cct": "14DPR0128E",
@@ -43,9 +43,9 @@
     "turno": "vespertino",
     "claveInegi": "140660031",
     "matricula": 483,
-    "lat": 20.315556,
-    "lng": -102.951944,
-    "ubicacionAproximada": true
+    "lat": 20.315677,
+    "lng": -102.951774,
+    "ubicacionAproximada": false
   },
   {
     "cct": "14DPR1616B",
@@ -55,9 +55,9 @@
     "turno": "matutino",
     "claveInegi": "140660031",
     "matricula": 531,
-    "lat": 20.315556,
-    "lng": -102.951944,
-    "ubicacionAproximada": true
+    "lat": 20.315677,
+    "lng": -102.951774,
+    "ubicacionAproximada": false
   },
   {
     "cct": "14DTV0190G",
@@ -67,9 +67,9 @@
     "turno": "matutino",
     "claveInegi": "140660031",
     "matricula": 438,
-    "lat": 20.315556,
-    "lng": -102.951944,
-    "ubicacionAproximada": true
+    "lat": 20.319709,
+    "lng": -102.955349,
+    "ubicacionAproximada": false
   },
   {
     "cct": "14DPR3594U",
@@ -79,9 +79,9 @@
     "turno": "matutino",
     "claveInegi": "140660043",
     "matricula": 88,
-    "lat": 20.310201,
-    "lng": -102.919552,
-    "ubicacionAproximada": true
+    "lat": 20.310028,
+    "lng": -102.918056,
+    "ubicacionAproximada": false
   },
   {
     "cct": "14DPR3967T",
@@ -91,8 +91,8 @@
     "turno": "vespertino",
     "claveInegi": "140660043",
     "matricula": 85,
-    "lat": 20.310201,
-    "lng": -102.919552,
-    "ubicacionAproximada": true
+    "lat": 20.310028,
+    "lng": -102.918056,
+    "ubicacionAproximada": false
   }
 ]
