@@ -43,7 +43,7 @@ export default defineConfig({
       manifest: {
         name: 'SIMORI',
         short_name: 'SIMORI',
-        description: 'SIMORI: registro de seguimiento de tamizaje renal en Poncitlán, Jalisco.',
+        description: 'SIMORI: sistema de registro, monitoreo y seguimiento de tamizaje renal en Poncitlán, Jalisco.',
         lang: 'es-MX',
         theme_color: '#1a7f8a',
         background_color: '#ffffff',

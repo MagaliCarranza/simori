@@ -2,7 +2,9 @@
 
 Prototipo web (PWA) de **registro de seguimiento** para niñas y niños con **tamizaje renal positivo** en Poncitlán, Jalisco. Acompaña cada caso desde el tamizaje hasta su diagnóstico, alta o referencia, marca con un semáforo a quien se atrasa y muestra en qué etapa se detiene.
 
-Proyecto del **Equipo 17 QUESICODE** (ITO, Ing. en Sistemas) para el **Hackathon Jalisco Internacional 2026**, Reto 02 Salud y Bienestar. 
+Proyecto del **Equipo 17 QUESICODE** (ITO, Ing. en Sistemas) para el **Hackathon Jalisco Internacional 2026**, Reto 02 Salud y Bienestar.
+
+**App:** https://simori.vercel.app/
 
 ## El problema
 
@@ -10,7 +12,7 @@ En Poncitlán, Jalisco, la Secretaría de Salud publica cuántos escolares tamiz
 
 ## La propuesta
 
-SIMORI acompaña a cada niño con tamizaje positivo hasta su diagnóstico, alta o referencia. La ruta clínica sigue el **protocolo aplicado por la UdeG en la zona** y se complementa con la **guía internacional KDIGO 2024**. Usamos cinco datasets del catálogo oficial para describir el problema, priorizar tres localidades (**San Pedro Itzicán, Agua Caliente y Chalpicote**) y diseñar la solución; los casos individuales son **simulados** y se presentan en **tres escenarios de pérdida (11 %, 30 %, 50 %)**.
+SIMORI acompaña a cada niño con tamizaje positivo hasta su diagnóstico, alta o referencia. La ruta clínica sigue el **protocolo aplicado por la UdeG en la zona** y se complementa con la **guía internacional KDIGO 2024**. Usamos seis datasets del catálogo oficial (MIDE, mortalidad, CLUES, DENUE, marginación y estadísticas educativas) para describir el problema, priorizar tres localidades (**San Pedro Itzicán, Agua Caliente y Chalpicote**) y diseñar la solución; los casos individuales son **simulados** y se presentan en **tres escenarios de pérdida (11 %, 30 %, 50 %)**.
 
 Es un prototipo, **funciona sin internet** después de la primera carga, y podría operar con la **Secretaría de Salud Jalisco** como responsable.
 
@@ -29,12 +31,12 @@ Es un prototipo, **funciona sin internet** después de la primera carga, y podr�
 - **Leaflet + OpenStreetMap** para el mapa (mosaicos cacheables).
 - **Chart.js** con `react-chartjs-2` para el embudo de supervisión.
 - **Vitest** + **Testing Library** para pruebas.
-- **Python + pandas** en `scripts/` para preparar datasets y generar casos simulados con semilla fija.
+- **Python + pandas + scikit-learn** (k-means) en `scripts/` para preparar datasets y generar casos simulados con semilla fija.
 - Sin backend. Despliegue en **Vercel**.
 
 ## Requisitos
 
-- **Node.js 20+** y **npm 10+**.
+- **Node.js 22+** y **npm 10+**.
 - **Python 3.11+** (solo si vas a correr los scripts de datos).
 
 ## Instalación
@@ -111,7 +113,7 @@ Todos los generan los scripts de `scripts/`. Son los únicos que la PWA consume 
 |---|---|---|
 | `localidades.json` | ITER + CONAPO | **Solo las localidades `enAlcance`** (hoy San Pedro Itzicán, Agua Caliente y Chalpicote) con lat/lng, población 5-14, IM 2020, grado de marginación, % lengua indígena, matrícula, distancia en km a la unidad SSA operativa, `cluesOperativo` y `enAlcance`. Es lo único que la app muestra. |
 | `localidades_marco.json` | ITER + CONAPO | Todas las localidades reales del municipio (sin las filas de totales del ITER 0000/9998/9999). **No se muestra en ninguna pantalla**: solo lo usa `calcularPrioridad` para que la normalización min–max del índice tenga un marco amplio. |
-| `escuelas.json` | 911 SEP | CCT públicos primaria/secundaria con matrícula de las localidades `enAlcance`; coordenadas aproximadas (de la localidad). |
+| `escuelas.json` | 911 SEP | CCT públicos primaria/secundaria con matrícula de las localidades `enAlcance`; coordenadas reales de cada plantel (`data/manual/georreferencia_escuelas.csv`). |
 | `centros_salud.json` | CLUES + DENUE (o fallback a localidad del ITER) | **Solo el CLUES visible** que atiende a las tres localidades (hoy JCSSA004213, Centro de Salud de San Pedro Itzicán). Las demás unidades del municipio quedan en el preparado interno para calcular `distanciaKm`, pero no se publican. |
 | `usuarios_demo.json` | Definición del equipo | 1 captura, 1 campo (ambos del centro operativo) y 1 supervisión estatal. |
 | `casos_11.json`, `casos_30.json`, `casos_50.json` | `simular_casos.py` | Casos **simulados** para los tres escenarios de pérdida (11 %, 30 %, 50 %). Determinista por semilla. |
