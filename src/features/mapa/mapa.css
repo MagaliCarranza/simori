@@ -137,6 +137,12 @@
   padding-left: 12px;
 }
 
+/* Las tres píldoras del mismo ancho, el de "Amarillo" (la más larga). */
+.mapa__semaforo .semaforo {
+  min-width: 6em;
+  justify-content: center;
+}
+
 /* Prioridad por localidad. Paleta propia (rosa/violeta/pizarra) para no
    confundirla con el semáforo (verde/amarillo/rojo) ni con los puntos del
    mapa (azul). Siempre lleva texto además del color. */

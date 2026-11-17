@@ -38,7 +38,7 @@ export function InicioPage({ rolActual, onElegir }) {
             <span className="inicio__punto" aria-hidden="true" /> Tamizaje y seguimiento renal
           </p>
           <h2 id="titulo-inicio" className="inicio__titulo">
-            Que ninguna niña ni niño se quede <span className="inicio__resaltado">a medio camino</span>
+            ¡Que ningun niño se quede <span className="inicio__resaltado">a medio camino!</span>
           </h2>
           <p className="inicio__texto">
             Registro de seguimiento desde el tamizaje hasta el diagnóstico, alta o referencia. Organiza el seguimiento;

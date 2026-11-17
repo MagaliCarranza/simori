@@ -39,7 +39,8 @@
   font-weight: 600;
   letter-spacing: 0.04em;
   text-transform: uppercase;
-  color: var(--color-secondary);
+  color:rgb(33, 33, 143);
+ /* color: var(--color-secondary);*/
 }
 
 /* Portada: tarjeta blanca con imagen y presentación. */
